@@ -138,4 +138,5 @@ When the user level up the InterestRateMessage shows instead of the debt_message
 
 25. i think is better to move the ico to the public folder and use it from there
 
+26. add the background.png as background of the game board, adjust to fill all the area
 
