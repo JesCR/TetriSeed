@@ -30,7 +30,7 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 [Play TetriSeed Online](#) - [v1 here](http://163.172.111.148:5173/)
 
 <p align="center">
-  <img src="image_resources/game_screenshot.png" alt="TetriSeed Screenshot" width="500"/>
+  <img src="prompts/screenshot.png" alt="TetriSeed Screenshot" width="500"/>
 </p>
 
 ## ✨ Features
