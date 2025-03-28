@@ -133,3 +133,9 @@ When the user level up the InterestRateMessage shows instead of the debt_message
 22. Update the Readme file, made a new one with all the documentation needed to run the server and the game, i want it fully detailed, for newies to be able to run it. Also add links for all the dependencies or related stuff that you think may be usefull. go ahead!
 
 23. Can you summarize all the prompts used in this chat in a file called prompts.md ?
+
+24. i want to use the image_resources/logo.ico as the ico of the proyect, the onw showed in the browser tab, add it
+
+25. i think is better to move the ico to the public folder and use it from there
+
+
