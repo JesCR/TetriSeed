@@ -23,6 +23,7 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 - [License](#-license)
+- [Deployment](#-deployment)
 
 ## 🎮 Demo
 
@@ -206,6 +207,61 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [SuperSeed DeFi Protocol](https://superseed.xyz/) - The DeFi protocol that inspired this game
 - [Optimism Superchain](https://www.optimism.io/) - The Layer 2 solution where SuperSeed operates
+
+## 🚀 Deployment
+
+### Deploying to Netlify
+
+TetriSeed can be easily deployed to Netlify for free hosting:
+
+1. Build the production version:
+   ```bash
+   npm run build
+   ```
+
+2. Deploy using one of these methods:
+
+   **Method 1: Direct upload** (Quick testing)
+   - Go to [Netlify's dashboard](https://app.netlify.com/)
+   - Sign up or log in
+   - Drag and drop the `dist` folder to the upload area
+   - Netlify will deploy your site and provide a URL
+
+   **Method 2: Connect to Git repository** (Continuous deployment)
+   - Create a new site in Netlify
+   - Connect your GitHub repository
+   - Set build command to `npm run build`
+   - Set publish directory to `dist`
+   - Deploy the site
+
+### Setting Up the Backend Server
+
+For the leaderboard functionality to work, you'll need to deploy the server component:
+
+1. Deploy the server to a platform like [Render](https://render.com/), [Railway](https://railway.app/), or [Heroku](https://www.heroku.com/).
+
+2. Update the server URL in the API configuration:
+   - Open `src/utils/apiConfig.js`
+   - Replace the placeholder URL with your actual deployed server URL:
+     ```javascript
+     const API_URL = {
+       development: '', // Empty for development (uses proxy)
+       production: 'https://your-actual-server-url.com' // ← Update this
+     };
+     ```
+
+3. Rebuild and redeploy the frontend after updating the API URL.
+
+### Testing Deployed API Endpoints
+
+After deployment, you can test that your API endpoints are working:
+
+1. Visit your deployed frontend URL
+2. Open the browser's developer tools (F12)
+3. Check the Network tab when the game loads
+4. Verify that requests to `/api/leaderboard` are successfully connecting to your server
+
+If there are issues with CORS, ensure your server is properly configured to accept requests from your Netlify domain.
 
 ---
 

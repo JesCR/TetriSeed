@@ -10,6 +10,7 @@ import { useStage } from '../hooks/useStage';
 import { usePlayer } from '../hooks/usePlayer';
 import { useGameStatus } from '../hooks/useGameStatus';
 import { checkCollision, createStage } from '../utils/tetrisUtils';
+import { getApiUrl } from '../utils/apiConfig';
 
 import logoText from '../assets/images/logo_text.png';
 
@@ -44,7 +45,7 @@ const Tetris = () => {
     console.log('Submitting score:', { playerName, score });
     
     try {
-      const response = await fetch('/api/leaderboard', {
+      const response = await fetch(getApiUrl('/api/leaderboard'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

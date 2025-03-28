@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../utils/apiConfig';
 
 const Leaderboard = () => {
   const [scores, setScores] = useState([]);
@@ -11,7 +12,7 @@ const Leaderboard = () => {
       setIsLoading(true);
       console.log('Fetching leaderboard data...');
       
-      const response = await fetch('/api/leaderboard');
+      const response = await fetch(getApiUrl('/api/leaderboard'));
       
       if (!response.ok) {
         const errorText = await response.text();
