@@ -1,0 +1,575 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Reset and base styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Press Start 2P', cursive;
+  background-color: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* App container */
+.App {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Tetris wrapper */
+.tetris-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  outline: none;
+  background: linear-gradient(to bottom, #000000, #1c1c1c);
+}
+
+/* Main game container */
+.tetris {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+/* Game header with logo and title */
+.game-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.logo {
+  height: 100px;
+  margin-right: 5px;
+}
+
+.game-header h1 {
+  font-size: 1.75rem;
+  margin: 0;
+  background: linear-gradient(to right,#7fb2b3, #fcf8f4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(77, 190, 255, 0.5);
+}
+
+/* Game content layout */
+.game-content {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.game-area {
+  flex: 0 1 auto;
+  min-width: 300px;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar {
+  width: 280px;
+  margin-top: 20px;
+}
+
+/* Stage (game board) styling */
+.stage-container {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* Top debt message */
+.debt-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #ffdd00;
+  font-size: 1.05rem;
+  text-shadow: 0 0 10px rgba(255, 221, 0, 0.7);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 20;
+  animation: flash 0.5s ease-in-out infinite alternate;
+}
+
+/* Interest rate message (centered) */
+.interest-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #ff3333;
+  font-size: 1.05rem;
+  text-shadow: 0 0 15px rgba(255, 51, 51, 0.9);
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 20;
+  animation: pulse-red 0.5s ease-in-out infinite alternate;
+}
+
+/* Bottom message area */
+.message-area {
+  margin-top: 10px;
+  min-height: 30px;
+  position: relative;
+}
+
+.bottom-message {
+  text-align: center;
+  color: #ffdd00;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(255, 221, 0, 0.7);
+  animation: flash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes flash {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-red {
+  from { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+}
+
+.stage {
+  display: grid;
+  grid-template-rows: repeat(20, 25px);
+  grid-template-columns: repeat(12, 25px);
+  grid-gap: 1px;
+  border: 2px solid #333;
+  background: #111;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  margin: 0 auto;
+}
+
+/* Cell styling */
+.cell {
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  text-align: center;
+  line-height: 25px;
+  font-weight: bold;
+  color: #ffdd00;
+  text-shadow: 0 0 5px rgba(255, 221, 0, 0.7);
+}
+
+/* Display component */
+.display {
+  padding: 15px;
+  margin-bottom: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #0ff;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 0.8rem;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.game-over {
+  border-color: #ff0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Game over screen */
+.game-over-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.liquidated {
+  color: #ff0000;
+  font-size: 1.5rem;
+  animation: pulse 1s ease-in-out infinite alternate;
+  margin-bottom: 20px;
+}
+
+@keyframes pulse {
+  from { opacity: 0.7; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Start button */
+.start-button {
+  padding: 15px 30px;
+  margin-top: 20px;
+  background: linear-gradient(to right, #0f0, #0ff);
+  color: #000;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.start-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+}
+
+/* Leaderboard styling */
+.leaderboard-container {
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #0ff;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  position: relative;
+  width: 100%;
+  min-width: 300px;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.leaderboard-container h2 {
+  text-align: center;
+  font-size: 1rem;
+  margin: 0;
+  color: #0ff;
+}
+
+.refresh-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 25px;
+  height: 25px;
+  background: rgba(0, 255, 255, 0.2);
+  border: 1px solid #0ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0ff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.refresh-button:hover {
+  background: rgba(0, 255, 255, 0.4);
+  transform: rotate(180deg);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.65rem;
+  margin-top: 10px;
+  table-layout: fixed;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 4px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.leaderboard-table th {
+  color: #0ff;
+  font-weight: bold;
+  font-size: 0.65rem;
+}
+
+.leaderboard-table th:nth-child(1),
+.leaderboard-table td:nth-child(1) {
+  width: 10%;
+  color: #ffdd00;
+}
+
+.leaderboard-table th:nth-child(2),
+.leaderboard-table td:nth-child(2) {
+  width: 25%;
+  text-align: left;
+}
+
+.leaderboard-table th:nth-child(3),
+.leaderboard-table td:nth-child(3) {
+  width: 25%;
+  color: #0ff;
+}
+
+.leaderboard-table th:nth-child(4),
+.leaderboard-table td:nth-child(4) {
+  width: 40%;
+  white-space: nowrap;
+}
+
+.top-scorer {
+  color: #ffdd00;
+}
+
+.player-info {
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #0ff;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  width: 100%;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.player-name {
+  color: #ffdd00;
+  font-weight: bold;
+}
+
+/* Modal styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(to bottom, #000000, #1c1c1c);
+  border: 3px solid #0ff;
+  border-radius: 10px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+}
+
+.modal-logo {
+  width: 80%;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.name-input {
+  width: 100%;
+  padding: 15px;
+  margin: 15px 0;
+  background: #000;
+  border: 2px solid #0ff;
+  border-radius: 5px;
+  color: #fff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+}
+
+.modal-button {
+  padding: 15px 30px;
+  margin-top: 20px;
+  background: linear-gradient(to right, #0f0, #0ff);
+  color: #000;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modal-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+}
+
+.tweet-button {
+  display: inline-block;
+  padding: 15px 30px;
+  margin-top: 20px;
+  background: #1DA1F2;
+  color: #fff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: all 0.3s;
+}
+
+.tweet-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(29, 161, 242, 0.7);
+}
+
+.error-message {
+  color: #ff0000;
+  font-size: 0.7rem;
+}
+
+/* Game info section */
+.game-info {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .game-content {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .sidebar {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .stage {
+    grid-template-rows: repeat(20, 20px);
+    grid-template-columns: repeat(12, 20px);
+  }
+  
+  .cell {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .game-header h1 {
+    font-size: 1.2rem;
+    margin-top: 10px;
+  }
+  
+  .logo {
+    height: 40px;
+  }
+  
+  .interest-message {
+    font-size: 1rem;
+    padding: 10px;
+  }
+  
+  .debt-message, .bottom-message {
+    font-size: 0.8rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 350px) {
+  .stage {
+    grid-template-rows: repeat(20, 15px);
+    grid-template-columns: repeat(12, 15px);
+  }
+  
+  .cell {
+    font-size: 10px;
+    line-height: 15px;
+  }
+}
+
+/* SuperSeed Facts container */
+.facts-container {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #0ff;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  width: 100%;
+  min-width: 300px;
+  max-width: 400px;
+  overflow-y: auto;
+  max-height: calc(100vh - 450px);
+  line-height: 1.4;
+}
+
+.facts-container h3 {
+  color: #0ff;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.facts-container .fact-title {
+  text-align: center;
+  font-size: 0.65rem;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #ffdd00;
+}
+
+.facts-container .fact-content {
+  text-align: justify;
+  font-size: 0.55rem;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.facts-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(0, 255, 255, 0.2);
+  padding-top: 10px;
+  margin-top: 15px;
+  font-size: 0.6rem;
+}
+
+.facts-footer a {
+  color: #0ff;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.facts-footer a:hover {
+  color: #ffdd00;
+  text-decoration: underline;
+}
+
+.social-icons {
+  display: flex;
+  align-items: center;
+}
+
+.social-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+}
+
+.facts-emoji {
+  font-size: 1.2rem;
+  margin-right: 5px;
+}

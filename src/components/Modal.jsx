@@ -1,0 +1,80 @@
+import { useState } from 'react';
+import logoText from '../assets/images/logo_text.png';
+
+const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (type === 'nameInput' && (!name.trim() || name.length < 2)) {
+      setError('Please enter a valid name (2-5 characters)');
+      return;
+    }
+    
+    onSubmit(name);
+    setName('');
+    setError('');
+  };
+  
+  const handleNameChange = (e) => {
+    // Limit name to 5 characters
+    const input = e.target.value;
+    if (input.length <= 5) {
+      setName(input);
+      // Clear error if present and name is valid
+      if (error && input.trim().length >= 2) {
+        setError('');
+      }
+    }
+  };
+
+  const tweetText = `I just scored ${score} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt`;
+  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <img src={logoText} alt="SuperSeed Logo" className="modal-logo" />
+        
+        {type === 'nameInput' && (
+          <>
+            <h2>Welcome to TetriSeed!</h2>
+            <p>Please enter your name to start playing:</p>
+            <input
+              type="text"
+              value={name}
+              onChange={handleNameChange}
+              placeholder="Your Name (5 chars max)"
+              className="name-input"
+              maxLength={5}
+              autoFocus
+            />
+            {error && <p className="error-message">{error}</p>}
+            <button onClick={handleSubmit} className="modal-button">Start Playing</button>
+          </>
+        )}
+        
+        {type === 'top10' && (
+          <>
+            <h2>Congratulations!</h2>
+            <p>You've made it to the Top 10 with a score of {score}!</p>
+            <p>Share your achievement:</p>
+            <a 
+              href={tweetUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="tweet-button"
+            >
+              Tweet Your Score
+            </a>
+            <button onClick={onClose} className="modal-button">Play Again</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Modal; 

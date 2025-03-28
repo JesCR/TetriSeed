@@ -1,0 +1,45 @@
+/* App.css is now empty as we've moved all styles to index.css */
+
+/* App.css with focus styling for keyboard controls */
+
+.tetris-wrapper:focus {
+  outline: 2px solid #0ff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+/* Controls hint for desktop users */
+.tetris-wrapper::after {
+  content: 'Controls: ← → ↓ ↑ or WASD';
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+
+.tetris-wrapper:focus::after {
+  opacity: 1;
+}
+
+/* Start button container to ensure visibility */
+.start-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Style for start button to make it more prominent */
+.start-button {
+  padding: 15px 30px;
+  font-size: 1rem;
+  animation: pulse-attention 1.5s infinite alternate;
+}
+
+@keyframes pulse-attention {
+  from { transform: scale(1); box-shadow: 0 0 5px rgba(0, 255, 255, 0.5); }
+  to { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 255, 255, 0.8); }
+}
