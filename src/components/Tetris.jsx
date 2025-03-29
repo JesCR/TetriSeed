@@ -216,6 +216,14 @@ const Tetris = () => {
     if (tetrisRef.current) {
       tetrisRef.current.focus();
     }
+    
+    // Scroll to the top of the page to show the game header
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
 
   // Start timer
@@ -277,16 +285,23 @@ const Tetris = () => {
 
   // Handle name submission and focus
   const handleNameSubmit = (name) => {
-    setPlayerName(name);
-    setShowNameModal(false);
-    setDropTime(null); // Ensure dropTime is null so the start button will show
-    
-    // Focus after modal is closed
-    setTimeout(() => {
-      if (tetrisRef.current) {
-        tetrisRef.current.focus();
-      }
-    }, 100);
+    if (name) {
+      setPlayerName(name);
+      setShowNameModal(false);
+      setDropTime(null); // Ensure dropTime is null so the start button will show
+      
+      // Focus and scroll after modal is closed
+      setTimeout(() => {
+        if (tetrisRef.current) {
+          tetrisRef.current.focus();
+        }
+        // Scroll to the top of the page to show the game header
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
   };
 
   // Close top 10 modal and return to main screen
@@ -295,11 +310,16 @@ const Tetris = () => {
     setGameOver(true); // Keep game over state
     setDropTime(null); // Ensure button is visible
     
-    // Focus after modal is closed
+    // Focus and scroll after modal is closed
     setTimeout(() => {
       if (tetrisRef.current) {
         tetrisRef.current.focus();
       }
+      // Scroll to the top of the page to show the game header
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     }, 100);
   };
 

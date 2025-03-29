@@ -13,9 +13,18 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
       return;
     }
     
+    // Submit the name
     onSubmit(name);
     setName('');
     setError('');
+    
+    // Scroll to the top of the page to show the game header
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
   };
   
   const handleNameChange = (e) => {
