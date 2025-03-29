@@ -554,6 +554,22 @@ body {
   font-size: 1.3rem;
 }
 
+/* Mobile sidebar adjustments */
+.mobile-sidebar {
+  margin-top: 40px;
+  order: 3;
+}
+
+/* Facts container smaller on mobile - global styles */
+.facts-container {
+  max-height: 200px;
+  font-size: 0.6rem;
+}
+
+.facts-container h3 {
+  font-size: 0.75rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .game-content {
@@ -564,8 +580,53 @@ body {
   .sidebar {
     width: 100%;
     max-width: 350px;
+    margin-top: 20px;
   }
   
+  /* SuperSeed Facts container for mobile */
+  .facts-container {
+    max-height: 160px;
+    font-size: 0.6rem;
+    margin-bottom: 15px;
+    margin-top: 5px;
+    width: 100%;
+    max-width: 350px;
+    order: 1;
+  }
+  
+  /* Set game area as second element */
+  .game-area {
+    width: 100%;
+    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    order: 2;
+  }
+  
+  .facts-container h3 {
+    font-size: 0.75rem;
+    margin-bottom: 5px;
+  }
+  
+  .facts-container .fact-title {
+    font-size: 0.6rem;
+    margin-bottom: 5px;
+  }
+  
+  .facts-container .fact-content {
+    font-size: 0.55rem;
+    margin-bottom: 5px;
+    max-height: 70px;
+    overflow-y: auto;
+  }
+  
+  .facts-footer {
+    padding-top: 5px;
+    margin-top: 5px;
+  }
+  
+  /* Smaller stage for mobile */
   .stage {
     grid-template-rows: repeat(20, 17px);
     grid-template-columns: repeat(12, 17px);
@@ -574,6 +635,11 @@ body {
   .cell {
     font-size: 12px;
     line-height: 17px;
+  }
+  
+  /* More compact header */
+  .game-header {
+    margin-bottom: 5px;
   }
   
   .game-header h1 {
@@ -585,6 +651,7 @@ body {
     height: 40px;
   }
   
+  /* More compact game messages */
   .interest-message {
     font-size: 0.8rem;
     padding: 8px;
@@ -621,15 +688,6 @@ body {
     box-sizing: border-box;
   }
   
-  /* Game area for mobile */
-  .game-area {
-    width: 100%;
-    max-width: 350px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
   /* Mobile controls should match game width */
   .mobile-controls {
     width: 100%;
@@ -637,6 +695,7 @@ body {
     justify-content: space-between;
     margin: 10px auto;
     padding: 0;
+    max-width: 350px;
   }
   
   /* Adjust leaderboard sizing for mobile */
@@ -781,14 +840,4 @@ body {
 
 .flash-effect {
   animation: flash-white 0.7s ease-out;
-}
-
-/* Facts container smaller on mobile */
-.facts-container {
-  max-height: 200px;
-  font-size: 0.6rem;
-}
-
-.facts-container h3 {
-  font-size: 0.75rem;
 }

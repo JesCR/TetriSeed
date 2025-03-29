@@ -389,51 +389,105 @@ const Tetris = () => {
         </div>
         
         <div className="game-content">
-          <div className="game-area">
-            <Stage 
-              stage={stage} 
-              message={message} 
-              showMessage={showMessage} 
-              interestMessage={interestMessage}
-              showInterestMessage={showInterestMessage}
-              onRotate={handleStageRotate}
-            />
-            <div className="game-info">
-              {gameOver ? (
-                <div className="game-over-container">
-                  <h2 className="liquidated">LIQUIDATED!</h2>
-                  <p>Your final score: {score}</p>
-                  <StartButton callback={startGame} />
-                </div>
-              ) : (
-                <div className="game-info-displays">
-                  <Display text={`Score: ${score}`} />
-                  <Display text={isMobile ? `Rows: ${rows}` : `Rows Cleared: ${rows}`} />
-                  <Display text={`Level: ${level}`} />
-                  
-                  {/* Only show start button at game initialization */}
-                  {!dropTime && !gameOver && (
-                    <div className="start-container">
+          {/* Conditional rendering based on mobile or desktop */}
+          {isMobile ? (
+            // Mobile layout with SuperSeed Facts on top
+            <>
+              {/* Mobile: Show SuperSeed Facts first */}
+              <SuperSeedFacts />
+              
+              {/* Mobile: Game area */}
+              <div className="game-area">
+                <Stage 
+                  stage={stage} 
+                  message={message} 
+                  showMessage={showMessage} 
+                  interestMessage={interestMessage}
+                  showInterestMessage={showInterestMessage}
+                  onRotate={handleStageRotate}
+                />
+                <div className="game-info">
+                  {gameOver ? (
+                    <div className="game-over-container">
+                      <h2 className="liquidated">LIQUIDATED!</h2>
+                      <p>Your final score: {score}</p>
                       <StartButton callback={startGame} />
+                    </div>
+                  ) : (
+                    <div className="game-info-displays">
+                      <Display text={`Score: ${score}`} />
+                      <Display text={isMobile ? `Rows: ${rows}` : `Rows Cleared: ${rows}`} />
+                      <Display text={`Level: ${level}`} />
+                      
+                      {/* Only show start button at game initialization */}
+                      {!dropTime && !gameOver && (
+                        <div className="start-container">
+                          <StartButton callback={startGame} />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-            
-            {/* Mobile controls */}
-            {isMobile && !gameOver && dropTime && (
-              <MobileControls onControlClick={handleMobileControl} />
-            )}
-          </div>
-          
-          <div className="sidebar">
-            <Leaderboard />
-            <div className="player-info">
-              <p>Current Player: <span className="player-name">{playerName}</span></p>
-            </div>
-            <SuperSeedFacts />
-          </div>
+                
+                {/* Mobile controls */}
+                {!gameOver && dropTime && (
+                  <MobileControls onControlClick={handleMobileControl} />
+                )}
+              </div>
+              
+              {/* Mobile: Leaderboard and player info below */}
+              <div className="sidebar mobile-sidebar">
+                <Leaderboard />
+                <div className="player-info">
+                  <p>Current Player: <span className="player-name">{playerName}</span></p>
+                </div>
+              </div>
+            </>
+          ) : (
+            // Desktop layout (unchanged)
+            <>
+              <div className="game-area">
+                <Stage 
+                  stage={stage} 
+                  message={message} 
+                  showMessage={showMessage} 
+                  interestMessage={interestMessage}
+                  showInterestMessage={showInterestMessage}
+                  onRotate={handleStageRotate}
+                />
+                <div className="game-info">
+                  {gameOver ? (
+                    <div className="game-over-container">
+                      <h2 className="liquidated">LIQUIDATED!</h2>
+                      <p>Your final score: {score}</p>
+                      <StartButton callback={startGame} />
+                    </div>
+                  ) : (
+                    <div className="game-info-displays">
+                      <Display text={`Score: ${score}`} />
+                      <Display text={`Rows Cleared: ${rows}`} />
+                      <Display text={`Level: ${level}`} />
+                      
+                      {/* Only show start button at game initialization */}
+                      {!dropTime && !gameOver && (
+                        <div className="start-container">
+                          <StartButton callback={startGame} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="sidebar">
+                <Leaderboard />
+                <div className="player-info">
+                  <p>Current Player: <span className="player-name">{playerName}</span></p>
+                </div>
+                <SuperSeedFacts />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
