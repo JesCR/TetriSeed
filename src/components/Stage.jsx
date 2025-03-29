@@ -9,13 +9,25 @@ const Stage = ({ stage, message, showMessage, interestMessage, showInterestMessa
     backgroundRepeat: 'no-repeat'
   };
 
+  // Track if we've already handled a tap to prevent doubles
+  let tapHandled = false;
+
   const handleTapRotate = (e) => {
-    // Prevent default behavior to avoid zooming and other unwanted actions
+    // Prevent default behavior and stop propagation
     e.preventDefault();
+    e.stopPropagation();
     
-    // Call the rotation function
-    if (onRotate) {
+    // Only handle the tap if it hasn't been handled yet
+    if (!tapHandled && onRotate) {
+      tapHandled = true;
+      
+      // Call the rotation function
       onRotate();
+      
+      // Reset the handled flag after a short delay
+      setTimeout(() => {
+        tapHandled = false;
+      }, 300); // Add a small debounce time
     }
   };
 
@@ -28,7 +40,8 @@ const Stage = ({ stage, message, showMessage, interestMessage, showInterestMessa
         className="stage" 
         style={stageStyle}
         onClick={handleTapRotate}
-        onTouchStart={handleTapRotate}
+        // Use only one event handler for tap to avoid duplication
+        // and remove onTouchStart to avoid double triggering
       >
         {stage.map((row, y) => 
           row.map((cell, x) => (

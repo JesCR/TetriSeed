@@ -323,14 +323,19 @@ const Tetris = () => {
   const handleMobileControl = useCallback((direction) => {
     if (gameOver) return;
     
+    console.log('Mobile control clicked:', direction);
+    
     switch (direction) {
       case 'left':
+        console.log('Moving piece left');
         movePlayer(-1);
         break;
       case 'right':
+        console.log('Moving piece right');
         movePlayer(1);
         break;
       case 'down':
+        console.log('Moving piece down');
         // We need to make sure the dropTime doesn't get set to null here
         // to prevent the "Ask for a loan" button from showing up
         if (dropTime !== null) {
@@ -339,6 +344,7 @@ const Tetris = () => {
         }
         break;
       case 'rotate':
+        console.log('Rotating piece');
         playerRotate(stage, 1);
         break;
       default:
@@ -346,9 +352,10 @@ const Tetris = () => {
     }
   }, [gameOver, movePlayer, drop, playerRotate, stage, dropTime]);
 
-  // Add a tap-to-rotate handler
+  // Add a tap-to-rotate handler specifically for the stage
   const handleStageRotate = useCallback(() => {
     if (!gameOver && dropTime) {
+      console.log('Stage tap rotation');
       playerRotate(stage, 1);
     }
   }, [gameOver, playerRotate, stage, dropTime]);
@@ -360,9 +367,6 @@ const Tetris = () => {
       tabIndex="0" 
       onKeyDown={move} 
       onKeyUp={keyUp}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       ref={tetrisRef}
     >
       <Modal 

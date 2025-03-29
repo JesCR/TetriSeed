@@ -476,8 +476,8 @@ body {
   justify-content: space-around;
   width: 100%;
   max-width: 300px;
-  margin: 10px auto;
-  padding: 5px 0;
+  margin: 15px auto;
+  padding: 8px 0;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -486,9 +486,9 @@ body {
 }
 
 .mobile-btn {
-  width: 50px;
-  height: 50px;
-  background: rgba(0, 0, 0, 0.7);
+  width: 52px;
+  height: 52px;
+  background: rgba(0, 0, 0, 0.85);
   border: 2px solid #0ff;
   border-radius: 50%;
   color: #0ff;
@@ -497,18 +497,39 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  position: relative;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
 }
 
 .mobile-btn:active {
-  background: rgba(0, 255, 255, 0.2);
-  transform: scale(0.9);
+  background: rgba(0, 255, 255, 0.3);
+  transform: scale(0.92);
+  color: #000;
+}
+
+/* Distinct colors for each button */
+.mobile-btn.left {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgb(0, 200, 255);
+}
+
+.mobile-btn.right {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgb(0, 255, 180);
+}
+
+.mobile-btn.down {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgb(255, 230, 0);
 }
 
 .mobile-btn.rotate {
-  font-size: 1.2rem;
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgb(255, 100, 255);
+  font-size: 1.3rem;
 }
 
 /* Responsive adjustments */
@@ -587,8 +608,8 @@ body {
   .mobile-controls {
     width: 100%;
     max-width: 300px;
-    margin: 10px auto;
-    padding: 5px 0;
+    margin: 15px auto;
+    padding: 8px 0;
   }
   
   /* Adjust leaderboard sizing for mobile */
@@ -608,15 +629,19 @@ body {
   
   /* Make controls more prominent */
   .mobile-btn {
-    width: 55px;
-    height: 55px;
-    font-size: 1.6rem;
-    background: rgba(0, 0, 0, 0.85);
+    width: 60px;
+    height: 60px;
+    font-size: 1.7rem;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+  }
+  
+  .mobile-btn.rotate {
+    font-size: 1.5rem;
   }
   
   .mobile-btn:active {
-    transform: scale(0.85);
-    background: rgba(0, 255, 255, 0.3);
+    transform: scale(0.9);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
   }
 }
 
