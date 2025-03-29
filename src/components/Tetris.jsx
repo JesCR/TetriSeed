@@ -6,12 +6,14 @@ import Leaderboard from './Leaderboard';
 import Modal from './Modal';
 import SuperSeedFacts from './SuperSeedFacts';
 import MobileControls from './MobileControls';
+import MusicToggle from './MusicToggle';
 
 import { useStage } from '../hooks/useStage';
 import { usePlayer } from '../hooks/usePlayer';
 import { useGameStatus } from '../hooks/useGameStatus';
 import { checkCollision, createStage } from '../utils/tetrisUtils';
 import { getApiUrl } from '../utils/apiConfig';
+import { initAudio, playBackgroundMusic, pauseBackgroundMusic } from '../utils/audioUtils';
 
 import logoText from '../assets/images/logo_text.png';
 
@@ -37,6 +39,17 @@ const Tetris = () => {
   
   // Add a state to track if we're on mobile
   const [isMobile, setIsMobile] = useState(false);
+
+  // Initialize audio when component mounts
+  useEffect(() => {
+    // Initialize music
+    initAudio();
+    
+    return () => {
+      // Clean up by pausing music if component unmounts
+      pauseBackgroundMusic();
+    };
+  }, []);
 
   // Submit score to the leaderboard
   const submitScore = async (score) => {
@@ -212,6 +225,9 @@ const Tetris = () => {
     setRows(0);
     setLevel(1);
     
+    // Start playing background music
+    playBackgroundMusic();
+    
     // Focus the tetris container for keyboard controls
     if (tetrisRef.current) {
       tetrisRef.current.focus();
@@ -298,6 +314,9 @@ const Tetris = () => {
       setPlayerName(name);
       setShowNameModal(false);
       setDropTime(null); // Ensure dropTime is null so the start button will show
+      
+      // Start playing background music after user interaction
+      playBackgroundMusic();
       
       // Immediate force scroll using various methods
       window.scrollTo(0, 0);
@@ -446,6 +465,9 @@ const Tetris = () => {
         score={score} 
         onClose={handleTop10Close} 
       />
+      
+      {/* Music toggle button */}
+      <MusicToggle />
       
       <div className="tetris">
         <div className="game-header">
