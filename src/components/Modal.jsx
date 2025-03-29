@@ -18,12 +18,31 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
     setName('');
     setError('');
     
-    // Scroll to the top of the page to show the game header
+    // Actively blur any active element (hide keyboard on mobile)
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    
+    // First scroll attempt - immediate
+    window.scrollTo({
+      top: 0,
+      behavior: 'auto' // Use 'auto' for immediate scroll
+    });
+    
+    // Second scroll attempt after short delay to handle modal closing
     setTimeout(() => {
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
+      
+      // Third scroll attempt after keyboard is fully hidden
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'auto'
+        });
+      }, 500);
     }, 100);
   };
   

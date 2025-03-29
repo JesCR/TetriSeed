@@ -290,16 +290,31 @@ const Tetris = () => {
       setShowNameModal(false);
       setDropTime(null); // Ensure dropTime is null so the start button will show
       
-      // Focus and scroll after modal is closed
+      // First immediate scroll attempt
+      window.scrollTo({
+        top: 0,
+        behavior: 'auto'
+      });
+      
+      // Focus and multiple scroll attempts after modal is closed
       setTimeout(() => {
         if (tetrisRef.current) {
           tetrisRef.current.focus();
         }
-        // Scroll to the top of the page to show the game header
+        
+        // Second scroll attempt
         window.scrollTo({
           top: 0,
           behavior: 'smooth'
         });
+        
+        // Third scroll attempt after keyboard animation is complete
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'auto'
+          });
+        }, 500);
       }, 100);
     }
   };
@@ -323,7 +338,7 @@ const Tetris = () => {
     }, 100);
   };
 
-  // Check if we're on a mobile device
+  // Check if we're on a mobile device and handle resize events
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -332,12 +347,28 @@ const Tetris = () => {
     // Check on mount
     checkMobile();
     
+    // Handle resize, including when mobile keyboard appears/disappears
+    const handleResize = () => {
+      checkMobile();
+      
+      // If not in a modal, try to keep the view at the top of the page
+      if (!showNameModal && !showTop10Modal) {
+        // Wait a bit for the resize to complete
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'auto'
+          });
+        }, 50);
+      }
+    };
+    
     // Check on resize
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener('resize', handleResize);
     
     // Clean up
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showNameModal, showTop10Modal]);
 
   // Handle mobile control button clicks
   const handleMobileControl = useCallback((direction) => {
