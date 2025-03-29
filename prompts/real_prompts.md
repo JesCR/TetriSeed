@@ -140,3 +140,24 @@ When the user level up the InterestRateMessage shows instead of the debt_message
 
 26. add the background.png as background of the game board, adjust to fill all the area
 
+27. 1. Mobile: I need to fix/improve the movements of the pieces (and overall behaviour of the screen) in mobile devices. Maybe adding a touching cursor <-,v,-> under the screen, with move right, left, and down keys to tap will be better. 
+2. Mobile: Also i need to be sure that least the score, rows cleare4d, level boxes are displayed in the movile while playing, ensure that maybe you need to reduce the "game area" on mobile and reduce the text size and space used by the text boxes.
+3. Mobile: Check that all works as expected in a mobile device like an iphone / samsung galaxy   
+4. General: talking about the general game, i want the initial speed to increas 20%, the base speed qhen a new game starts, and then increase when the level up over this base speed.
+5. General: i want to add a white flash efect to catch attention of the super seed facto container when the content changes.
+
+28. On mobile the screen still looks weird, textboxes with score etc are not centered below the game area. controls are in position but don't works as expected. 1 Left arrow only moves piece 1 space and them don't do nothing. 2 down control mades the button "Ask for a loan" to shows up, and in the same place of controls and that mades you click it an the game starts again. Check carefully that the buttons do what they must do, avoid to show the "ask for a loan" button if there is a game in play (somehow is connected to the down button / key, this also happens in desktop game). Also be sure that a tap in the game are is like a tap in the rotate control. No other action must occour if the user taps in the game area. Also when the user activates te username textbox the screen does a zoom in the control. Be ser that when te game starts the zooms are out and all the game area / controls are visible
+
+29. right arrow still don't works. taping in game area causes a double rotation and a left movement. right arrow must move the piece one position to the right (only do that when the piece is in the left border of the screen) . tap in the screen (in the game area) must trigger a piece rotation, onlye one rotation and no movement right or left
+
+30. Mobile game issues: 1. Now the right arrow works fine, also the tap on game area screen works fine, but the rotate button makes the piece to do a double rotation. Ensure that the rotate button only rotate the piece one time. 2. Check the image and you see that the score, rows cleared and level textboxes are not taking the same width as the game area, i want that in the mobile version  you change the text "Rows Cleared" to "Rows" and put the 3 textboxes in the same row, taking the same width as the direction buttons.
+
+31. 1. In the desktop version, check the 3 score - rows cleared - level textboxes to have the same width as the game area. 2. in the Mobile version, the "Ask for a loan" button should be center-aligned, now it is aligned to the left 3. The SuperSeed Facts change the message too slow, change the message every 10 seconds. 4. in the mobile version, now the left and right buttons some times mades double moves, i want to move the piece 1 position left, click left and the piece moves twices, like you did fixing the double rotation issue, fix this double movements when pressing left or right.
+
+32. in the mobile verision, i want the container "superSeed Facts" on top of the game area, we must be sured that in the mobile dysplay the user always sees the next sections without the need to scroll down: the logo/title (as it is now), next the superseed facts, next the game area with the textboxes (as they are now, in a centered single line), next the "Ask for a loan" button before the game starts and the game controls when the game is running. Then the user can scroll down to see the rest.
+
+33. in mobile: 1. Reduce the gap between Supep¡rseed facts container and game area to 1/3 of the one we have now. 2. Remove the controls message at the botton :" Controls: ← → ↓ ↑ or WASD" 
+
+34. After enter the username, when the modal dismiss and the keyboard disappear, i still need to scroll up to see the logo / title and top of the superseed container.
+
+35. in my iphone, still don't work, the screen don't move to top after enter the user name...
