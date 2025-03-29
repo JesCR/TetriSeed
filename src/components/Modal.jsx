@@ -29,6 +29,18 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
       }
     }
   };
+  
+  // Prevent zooming when input receives focus
+  const handleInputFocus = (e) => {
+    // Prevent zoom-in behavior on iOS by setting font size to 16px temporarily
+    e.target.style.fontSize = '16px';
+    // And restore original font size after a short delay
+    setTimeout(() => {
+      if (e.target) {
+        e.target.style.fontSize = '';
+      }
+    }, 100);
+  };
 
   const tweetText = `I just scored ${score} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt`;
   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
@@ -46,10 +58,13 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
               type="text"
               value={name}
               onChange={handleNameChange}
+              onFocus={handleInputFocus}
               placeholder="Your Name (5 chars max)"
               className="name-input"
               maxLength={5}
               autoFocus
+              inputMode="text"
+              pattern="[A-Za-z0-9]+"
             />
             {error && <p className="error-message">{error}</p>}
             <button onClick={handleSubmit} className="modal-button">Start Playing</button>

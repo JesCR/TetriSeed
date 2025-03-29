@@ -28,6 +28,7 @@ body {
   overflow: auto;
   outline: none;
   background: linear-gradient(to bottom, #000000, #1c1c1c);
+  touch-action: manipulation;
 }
 
 /* Main game container */
@@ -82,6 +83,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: manipulation;
 }
 
 .sidebar {
@@ -163,6 +169,11 @@ body {
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
   margin: 0 auto;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: manipulation;
 }
 
 .stage::before {
@@ -463,9 +474,15 @@ body {
 .mobile-controls {
   display: flex;
   justify-content: space-around;
-  margin-top: 15px;
   width: 100%;
-  max-width: 350px;
+  max-width: 300px;
+  margin: 10px auto;
+  padding: 5px 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  touch-action: manipulation;
 }
 
 .mobile-btn {
@@ -535,37 +552,71 @@ body {
     padding: 8px;
   }
   
-  /* Smaller display boxes on mobile */
-  .display {
-    padding: 8px;
-    margin-bottom: 8px;
-    font-size: 0.65rem;
-  }
-  
-  /* Game info for mobile */
+  /* Game info container for mobile */
   .game-info {
+    width: 100%;
     display: flex;
+    flex-direction: row;
+    justify-content: center;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 5px;
-    margin-top: 5px;
+    margin: 10px auto;
+    max-width: 100%;
   }
   
+  /* Game info displays for mobile */
   .game-info .display {
-    flex: 1;
-    min-width: 30%;
+    flex: 1 1 30%;
+    min-width: 90px;
+    max-width: 33%;
+    padding: 6px;
+    margin: 3px;
     text-align: center;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
   }
   
-  /* Facts container smaller on mobile */
-  .facts-container {
-    max-height: 200px;
-    font-size: 0.6rem;
+  /* Game area for mobile */
+  .game-area {
+    width: 100%;
+    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
-  .facts-container h3 {
-    font-size: 0.75rem;
+  /* Mobile controls */
+  .mobile-controls {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px auto;
+    padding: 5px 0;
+  }
+  
+  /* Adjust leaderboard sizing for mobile */
+  .leaderboard-container {
+    max-width: 340px;
+    padding: 10px;
+  }
+  
+  .leaderboard-table {
+    font-size: 0.58rem;
+  }
+  
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 3px 1px;
+  }
+  
+  /* Make controls more prominent */
+  .mobile-btn {
+    width: 55px;
+    height: 55px;
+    font-size: 1.6rem;
+    background: rgba(0, 0, 0, 0.85);
+  }
+  
+  .mobile-btn:active {
+    transform: scale(0.85);
+    background: rgba(0, 255, 255, 0.3);
   }
 }
 
@@ -678,4 +729,14 @@ body {
 
 .flash-effect {
   animation: flash-white 0.7s ease-out;
+}
+
+/* Facts container smaller on mobile */
+.facts-container {
+  max-height: 200px;
+  font-size: 0.6rem;
+}
+
+.facts-container h3 {
+  font-size: 0.75rem;
 }

@@ -239,17 +239,16 @@ const Tetris = () => {
       } else if (keyCode === 39 || keyCode === 68) { // Right arrow or D
         movePlayer(1);
       } else if (keyCode === 40 || keyCode === 83) { // Down arrow or S
-        // Store current drop time before setting to null for fast drop
+        // Don't set dropTime to null - this prevents "Ask for a loan" button from appearing
+        // Just call drop to move the piece down faster
         if (dropTime !== null) {
-          savedDropTimeRef.current = dropTime;
+          drop();
         }
-        setDropTime(null);
-        drop();
       } else if (keyCode === 38 || keyCode === 87) { // Up arrow or W
         playerRotate(stage, 1);
       }
     }
-  }, [gameOver, movePlayer, drop, playerRotate, stage, dropTime, setDropTime]);
+  }, [gameOver, movePlayer, drop, playerRotate, stage, dropTime]);
 
   // Focus tetris area on mount and when modals are closed
   useEffect(() => {
@@ -332,11 +331,12 @@ const Tetris = () => {
         movePlayer(1);
         break;
       case 'down':
+        // We need to make sure the dropTime doesn't get set to null here
+        // to prevent the "Ask for a loan" button from showing up
         if (dropTime !== null) {
-          savedDropTimeRef.current = dropTime;
+          // Just speed up the drop without changing dropTime
+          drop();
         }
-        setDropTime(null);
-        drop();
         break;
       case 'rotate':
         playerRotate(stage, 1);
@@ -344,7 +344,14 @@ const Tetris = () => {
       default:
         break;
     }
-  }, [gameOver, movePlayer, dropTime, drop, playerRotate, stage]);
+  }, [gameOver, movePlayer, drop, playerRotate, stage, dropTime]);
+
+  // Add a tap-to-rotate handler
+  const handleStageRotate = useCallback(() => {
+    if (!gameOver && dropTime) {
+      playerRotate(stage, 1);
+    }
+  }, [gameOver, playerRotate, stage, dropTime]);
 
   return (
     <div 
@@ -385,6 +392,7 @@ const Tetris = () => {
               showMessage={showMessage} 
               interestMessage={interestMessage}
               showInterestMessage={showInterestMessage}
+              onRotate={handleStageRotate}
             />
             <div className="game-info">
               {gameOver ? (
