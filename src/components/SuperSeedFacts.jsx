@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // X.com logo as SVG in base64 format for inline usage
 const xLogoBase64 = "../src/assets/images/x.png";
@@ -47,6 +47,8 @@ const FACTS = [
 
 const SuperSeedFacts = () => {
   const [currentFact, setCurrentFact] = useState("");
+  const [isFlashing, setIsFlashing] = useState(false);
+  const factsContainerRef = useRef(null);
   
   // Get a random fact
   const getRandomFact = () => {
@@ -59,7 +61,16 @@ const SuperSeedFacts = () => {
     setCurrentFact(getRandomFact());
     
     const intervalId = setInterval(() => {
+      // Trigger flash effect
+      setIsFlashing(true);
+      
+      // Set new fact
       setCurrentFact(getRandomFact());
+      
+      // Remove flash effect after animation completes
+      setTimeout(() => {
+        setIsFlashing(false);
+      }, 700); // Animation duration
     }, 30000);
     
     return () => clearInterval(intervalId);
@@ -79,7 +90,10 @@ const SuperSeedFacts = () => {
   const formattedFact = formatFact(currentFact);
   
   return (
-    <div className="facts-container">
+    <div 
+      className={`facts-container ${isFlashing ? 'flash-effect' : ''}`}
+      ref={factsContainerRef}
+    >
       <h3>SuperSeed Facts</h3>
       <div>
         <p className="fact-title">{formattedFact.title}</p>

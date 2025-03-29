@@ -5,6 +5,7 @@ import StartButton from './StartButton';
 import Leaderboard from './Leaderboard';
 import Modal from './Modal';
 import SuperSeedFacts from './SuperSeedFacts';
+import MobileControls from './MobileControls';
 
 import { useStage } from '../hooks/useStage';
 import { usePlayer } from '../hooks/usePlayer';
@@ -34,6 +35,9 @@ const Tetris = () => {
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
   const [touchEnd, setTouchEnd] = useState({ x: 0, y: 0 });
   
+  // Add a state to track if we're on mobile
+  const [isMobile, setIsMobile] = useState(false);
+
   // Submit score to the leaderboard
   const submitScore = async (score) => {
     // Only submit if player has a name and a positive score
@@ -88,9 +92,10 @@ const Tetris = () => {
       setLevel(prev => prev + 1);
       
       // Calculate new speed that keeps getting faster at each level
-      // Use a progressive speed formula that ensures continued speed-up past level 4
+      // Base speed is now 800ms instead of 1000ms, and speed increases faster
       const newLevel = level + 1;
-      const newDropTime = Math.max(1000 / (1 + (newLevel * 0.25)), 50); // Minimum 50ms to keep game playable
+      // Progressive speed formula with faster increments
+      const newDropTime = Math.max(800 / (1 + (newLevel * 0.3)), 50); // Minimum 50ms to keep game playable
       setDropTime(newDropTime);
       savedDropTimeRef.current = newDropTime;
       
@@ -197,7 +202,8 @@ const Tetris = () => {
   const startGame = () => {
     // Reset everything
     setStage(createStage());
-    const initialDropTime = 1000;
+    // Initial speed 20% faster than before (1000ms -> 800ms)
+    const initialDropTime = 800;
     setDropTime(initialDropTime);
     savedDropTimeRef.current = initialDropTime;
     resetPlayer();
@@ -298,6 +304,48 @@ const Tetris = () => {
     }, 100);
   };
 
+  // Check if we're on a mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // Check on mount
+    checkMobile();
+    
+    // Check on resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Handle mobile control button clicks
+  const handleMobileControl = useCallback((direction) => {
+    if (gameOver) return;
+    
+    switch (direction) {
+      case 'left':
+        movePlayer(-1);
+        break;
+      case 'right':
+        movePlayer(1);
+        break;
+      case 'down':
+        if (dropTime !== null) {
+          savedDropTimeRef.current = dropTime;
+        }
+        setDropTime(null);
+        drop();
+        break;
+      case 'rotate':
+        playerRotate(stage, 1);
+        break;
+      default:
+        break;
+    }
+  }, [gameOver, movePlayer, dropTime, drop, playerRotate, stage]);
+
   return (
     <div 
       className="tetris-wrapper" 
@@ -360,6 +408,11 @@ const Tetris = () => {
                 </div>
               )}
             </div>
+            
+            {/* Mobile controls */}
+            {isMobile && !gameOver && dropTime && (
+              <MobileControls onControlClick={handleMobileControl} />
+            )}
           </div>
           
           <div className="sidebar">
