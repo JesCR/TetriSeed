@@ -841,3 +841,25 @@ body {
 .flash-effect {
   animation: flash-white 0.7s ease-out;
 }
+
+/* iOS-specific fixes */
+html, body {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.ios-keyboard-open {
+  position: relative;
+  height: calc(100% + 60px); /* Add extra space for keyboard */
+}
+
+/* Main container */
+#root {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

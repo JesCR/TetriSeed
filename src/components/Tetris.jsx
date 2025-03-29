@@ -286,36 +286,50 @@ const Tetris = () => {
   // Handle name submission and focus
   const handleNameSubmit = (name) => {
     if (name) {
+      // iOS detection
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        console.log('iOS device detected, using special scroll handling');
+      }
+      
+      // Update state and force focus
       setPlayerName(name);
       setShowNameModal(false);
       setDropTime(null); // Ensure dropTime is null so the start button will show
       
-      // First immediate scroll attempt
-      window.scrollTo({
-        top: 0,
-        behavior: 'auto'
-      });
+      // Immediate force scroll using various methods
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
       
-      // Focus and multiple scroll attempts after modal is closed
-      setTimeout(() => {
-        if (tetrisRef.current) {
-          tetrisRef.current.focus();
-        }
+      // For iOS, use a special technique to handle keyboard dismissal
+      if (isIOS) {
+        // Temporarily fix the body position to prevent content jump
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = '0';
         
-        // Second scroll attempt
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-        
-        // Third scroll attempt after keyboard animation is complete
         setTimeout(() => {
-          window.scrollTo({
-            top: 0,
-            behavior: 'auto'
-          });
-        }, 500);
-      }, 100);
+          // Reset the body position and force scroll again
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.top = '';
+          window.scrollTo(0, 0);
+        }, 300);
+      }
+      
+      // Multiple aggressive scroll attempts with increasing delays
+      [50, 300, 500, 800, 1200, 1500].forEach(delay => {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          // Focus the tetris container
+          if (tetrisRef.current) {
+            tetrisRef.current.focus();
+          }
+        }, delay);
+      });
     }
   };
 

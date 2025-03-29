@@ -13,36 +13,53 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
       return;
     }
     
-    // Submit the name
-    onSubmit(name);
-    setName('');
-    setError('');
-    
     // Actively blur any active element (hide keyboard on mobile)
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
     
-    // First scroll attempt - immediate
-    window.scrollTo({
-      top: 0,
-      behavior: 'auto' // Use 'auto' for immediate scroll
-    });
+    // First, force scroll to top immediately
+    window.scrollTo(0, 0);
     
-    // Second scroll attempt after short delay to handle modal closing
+    // iOS needs special handling
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                 
+    // Submit the name after a short delay to let keyboard hide
     setTimeout(() => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      // iOS-specific: set position fixed to prevent content shift when keyboard hides
+      if (isIOS) {
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = '0px';
+        
+        // Reset these properties after keyboard animation completes
+        setTimeout(() => {
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.top = '';
+          
+          // Force scroll again
+          window.scrollTo(0, 0);
+        }, 300);
+      }
       
-      // Third scroll attempt after keyboard is fully hidden
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'auto'
-        });
-      }, 500);
+      // Force scroll again with various methods
+      window.scrollTo(0, 0);
+      window.scrollTo({top: 0, behavior: 'auto'});
+      
+      // Submit the name
+      onSubmit(name);
+      setName('');
+      setError('');
+      
+      // Repeated scroll attempts with increasing delays
+      const scrollAttempts = [50, 300, 500, 800, 1200];
+      scrollAttempts.forEach(delay => {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, delay);
+      });
     }, 100);
   };
   
