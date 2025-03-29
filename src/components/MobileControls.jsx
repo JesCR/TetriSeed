@@ -1,26 +1,51 @@
 import React, { useRef } from 'react';
 
 const MobileControls = ({ onControlClick }) => {
-  // Track if rotate button was recently clicked to prevent double rotations
+  // Track if buttons were recently clicked to prevent double actions
   const rotateDebounceRef = useRef(false);
+  const leftDebounceRef = useRef(false);
+  const rightDebounceRef = useRef(false);
   
   const handleButtonClick = (e, direction) => {
     // Prevent any default browser behavior
     e.preventDefault();
     e.stopPropagation();
     
-    // For rotate button, add a debounce
+    // Check debounce for each direction
+    if (direction === 'rotate' && rotateDebounceRef.current) {
+      return; // Ignore if already rotating
+    }
+    
+    if (direction === 'left' && leftDebounceRef.current) {
+      return; // Ignore if already moving left
+    }
+    
+    if (direction === 'right' && rightDebounceRef.current) {
+      return; // Ignore if already moving right
+    }
+    
+    // Set appropriate debounce flag
     if (direction === 'rotate') {
-      if (rotateDebounceRef.current) {
-        return; // Ignore if already rotating
-      }
-      
       rotateDebounceRef.current = true;
       
       // Reset debounce after animation completes
       setTimeout(() => {
         rotateDebounceRef.current = false;
       }, 200);
+    } else if (direction === 'left') {
+      leftDebounceRef.current = true;
+      
+      // Reset debounce after animation completes
+      setTimeout(() => {
+        leftDebounceRef.current = false;
+      }, 150); // Slightly faster than rotate
+    } else if (direction === 'right') {
+      rightDebounceRef.current = true;
+      
+      // Reset debounce after animation completes
+      setTimeout(() => {
+        rightDebounceRef.current = false;
+      }, 150); // Slightly faster than rotate
     }
     
     // Call the control function with the direction

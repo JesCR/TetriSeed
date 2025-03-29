@@ -56,7 +56,7 @@ const SuperSeedFacts = () => {
     return FACTS[randomIndex];
   };
   
-  // Change fact every 30 seconds
+  // Change fact every 10 seconds (reduced from 30 seconds)
   useEffect(() => {
     setCurrentFact(getRandomFact());
     
@@ -71,7 +71,7 @@ const SuperSeedFacts = () => {
       setTimeout(() => {
         setIsFlashing(false);
       }, 700); // Animation duration
-    }, 30000);
+    }, 10000); // Update every 10 seconds
     
     return () => clearInterval(intervalId);
   }, []);

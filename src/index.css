@@ -204,6 +204,24 @@ body {
   text-shadow: 0 0 5px rgba(255, 221, 0, 0.7);
 }
 
+/* Game info section */
+.game-info {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-info-displays {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 302px; /* Match the game width - 12 cells at 25px each + 2px border */
+}
+
 /* Display component */
 .display {
   padding: 15px;
@@ -214,6 +232,8 @@ body {
   color: #fff;
   font-size: 0.8rem;
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  text-align: center;
+  width: 100%;
 }
 
 .game-over {
@@ -239,10 +259,18 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* Start container */
+.start-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
 /* Start button */
 .start-button {
   padding: 15px 30px;
-  margin-top: 20px;
+  margin-top: 10px;
   background: linear-gradient(to right, #0f0, #0ff);
   color: #000;
   font-family: 'Press Start 2P', cursive;
@@ -251,6 +279,7 @@ body {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
+  text-align: center;
 }
 
 .start-button:hover {
@@ -461,20 +490,6 @@ body {
 .error-message {
   color: #ff0000;
   font-size: 0.7rem;
-}
-
-/* Game info section */
-.game-info {
-  margin-top: 10px;
-  width: 100%;
-  max-width: 300px;
-}
-
-.game-info-displays {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  width: 100%;
 }
 
 /* Mobile controls */
