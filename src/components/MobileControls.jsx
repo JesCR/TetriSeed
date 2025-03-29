@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 const MobileControls = ({ onControlClick }) => {
+  // Track if rotate button was recently clicked to prevent double rotations
+  const rotateDebounceRef = useRef(false);
+  
   const handleButtonClick = (e, direction) => {
     // Prevent any default browser behavior
     e.preventDefault();
     e.stopPropagation();
+    
+    // For rotate button, add a debounce
+    if (direction === 'rotate') {
+      if (rotateDebounceRef.current) {
+        return; // Ignore if already rotating
+      }
+      
+      rotateDebounceRef.current = true;
+      
+      // Reset debounce after animation completes
+      setTimeout(() => {
+        rotateDebounceRef.current = false;
+      }, 200);
+    }
     
     // Call the control function with the direction
     onControlClick(direction);

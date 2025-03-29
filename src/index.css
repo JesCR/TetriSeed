@@ -470,14 +470,21 @@ body {
   max-width: 300px;
 }
 
+.game-info-displays {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+}
+
 /* Mobile controls */
 .mobile-controls {
-  display: flex;
-  justify-content: space-around;
   width: 100%;
-  max-width: 300px;
-  margin: 15px auto;
-  padding: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  margin: 10px auto;
+  padding: 0;
+  max-width: 350px; /* Match the game area width */
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -576,23 +583,27 @@ body {
   /* Game info container for mobile */
   .game-info {
     width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
     margin: 10px auto;
     max-width: 100%;
   }
   
+  .game-info-displays {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
   /* Game info displays for mobile */
   .game-info .display {
-    flex: 1 1 30%;
-    min-width: 90px;
-    max-width: 33%;
-    padding: 6px;
+    flex: 1;
+    min-width: calc(33.3% - 6px);
+    max-width: calc(33.3% - 6px);
     margin: 3px;
+    padding: 6px 0;
     text-align: center;
     font-size: 0.55rem;
+    box-sizing: border-box;
   }
   
   /* Game area for mobile */
@@ -604,12 +615,13 @@ body {
     align-items: center;
   }
   
-  /* Mobile controls */
+  /* Mobile controls should match game width */
   .mobile-controls {
     width: 100%;
-    max-width: 300px;
-    margin: 15px auto;
-    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px auto;
+    padding: 0;
   }
   
   /* Adjust leaderboard sizing for mobile */

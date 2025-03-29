@@ -406,9 +406,9 @@ const Tetris = () => {
                   <StartButton callback={startGame} />
                 </div>
               ) : (
-                <div>
+                <div className="game-info-displays">
                   <Display text={`Score: ${score}`} />
-                  <Display text={`Rows Cleared: ${rows}`} />
+                  <Display text={isMobile ? `Rows: ${rows}` : `Rows Cleared: ${rows}`} />
                   <Display text={`Level: ${level}`} />
                   
                   {/* Only show start button at game initialization */}
