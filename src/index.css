@@ -205,6 +205,7 @@ body {
   font-weight: bold;
   color: #ffdd00;
   text-shadow: 0 0 5px rgba(255, 221, 0, 0.7);
+  font-family: Arial, sans-serif;
 }
 
 /* Game info section */
@@ -307,6 +308,9 @@ body {
   min-width: 300px;
   max-width: 400px;
   overflow: hidden;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  box-sizing: border-box;
 }
 
 .leaderboard-header {
@@ -412,6 +416,10 @@ body {
   width: 100%;
   min-width: 300px;
   max-width: 400px;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .player-name {
@@ -578,6 +586,11 @@ body {
 .facts-container {
   max-height: 200px;
   font-size: 0.6rem;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: 100%;
 }
 
 .facts-container h3 {
@@ -850,7 +863,7 @@ body {
   margin-right: 5px;
 }
 
-/* Flash effect animation */
+/* Optimize flash effect animation */
 @keyframes flash-white {
   0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
   50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.9); }
@@ -859,6 +872,8 @@ body {
 
 .flash-effect {
   animation: flash-white 0.7s ease-out;
+  transform: translate3d(0, 0, 0);
+  will-change: box-shadow;
 }
 
 /* iOS-specific fixes */
@@ -930,6 +945,57 @@ html.ios-keyboard-open {
   margin-top: 10px;
   width: 100%;
   text-align: center;
+}
+
+.game-mode-display {
+  margin-bottom: 10px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.game-mode-display p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.competitive-mode-active {
+  color: #a2e05a;
+  font-weight: bold;
+}
+
+.casual-mode {
+  color: #0ff;
+  font-weight: bold;
+}
+
+.wallet-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.wallet-button {
+  background: linear-gradient(to right, #3694a7, #54c5d6);
+  color: #000;
+  font-family: 'Lacquer', cursive;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: all 0.3s;
+  width: 100%;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(84, 197, 214, 0.5);
+}
+
+.wallet-button:hover {
+  background: linear-gradient(to right, #44b2ca, #65d6e7);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(84, 197, 214, 0.7);
 }
 
 .competitive-button {
@@ -1042,83 +1108,205 @@ html.ios-keyboard-open {
   font-weight: bold;
 }
 
-/* Season Info Styles */
+/* Season Info Styles - Optimized for better display and less height */
 .season-info {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid #a55c1b;
   border-radius: 4px;
   padding: 10px;
-  margin: 15px 0;
+  margin: 10px 0;
+  box-shadow: 0 0 10px rgba(252, 186, 33, 0.3);
+  overflow: visible;
+  min-height: 140px;
+}
+
+.player-info .season-info {
+  margin: 5px 0;
+  padding: 8px;
+  border-radius: 4px;
 }
 
 .season-info h3 {
   margin-top: 0;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   color: #fcba21;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 5px rgba(252, 186, 33, 0.5);
+}
+
+.player-info .season-info h3 {
+  font-size: 0.8rem;
+  margin-bottom: 6px;
 }
 
 .season-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
+}
+
+.season-info.detailed .season-stats {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.player-info .season-stats {
+  gap: 4px;
 }
 
 .season-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px;
   border-radius: 4px;
+  border: 1px solid rgba(252, 186, 33, 0.2);
 }
 
-.season-stat-value {
-  font-size: 1.1rem;
+.season-stat.time-remaining {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(252, 186, 33, 0.4);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.player-info .season-stat {
+  padding: 4px;
+}
+
+.stat-value {
+  font-size: 0.9rem;
   font-weight: bold;
   color: #fff;
+  margin-top: 2px;
 }
 
-.season-stat-label {
+.stat-value.countdown {
+  color: #fcba21;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.player-info .stat-value {
   font-size: 0.8rem;
+}
+
+.stat-label {
+  font-size: 0.7rem;
   color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.player-info .stat-label {
+  font-size: 0.65rem;
 }
 
 .season-dates {
   text-align: center;
   margin-top: 8px;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: #aaa;
+  border-top: 1px solid rgba(252, 186, 33, 0.2);
+  padding-top: 8px;
 }
 
-/* Competitive Leaderboard Styles */
+.date-label {
+  color: #fcba21;
+  margin-right: 5px;
+}
+
+.player-info .season-dates {
+  font-size: 0.65rem;
+  margin-top: 4px;
+}
+
+/* Competitive leaderboard container */
 .leaderboard-container.competitive {
   border-color: #a55c1b;
+  box-shadow: 0 0 15px rgba(252, 186, 33, 0.3);
+  padding: 10px;
 }
 
 .leaderboard-container.competitive h2 {
   color: #fcba21;
   text-shadow: 0 0 10px rgba(252, 186, 33, 0.5);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
 }
 
-.leaderboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
+/* History toggle button */
 .history-button {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 25px;
+  height: 25px;
+  background: rgba(252, 186, 33, 0.2);
+  border: 1px solid #fcba21;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fcba21;
+  font-size: 14px;
+  cursor: pointer;
   transition: all 0.3s;
 }
 
 .history-button:hover {
-  transform: scale(1.2);
+  background: rgba(252, 186, 33, 0.4);
+  transform: rotate(180deg);
+}
+
+/* Vertical competition info layout for tighter display */
+.season-info-vertical .season-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.season-info-vertical .season-stat {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+}
+
+.season-info-vertical .stat-label {
+  margin-right: 8px;
+}
+
+/* Current player highlighting */
+.current-player {
+  background: rgba(252, 186, 33, 0.2);
+  font-weight: bold;
+}
+
+.current-player td {
+  color: #fcba21 !important;
+}
+
+/* Top scorers highlighting */
+.top-scorer td {
+  color: #ffdd00;
+}
+
+.top-scorer:nth-child(1) td {
+  color: #ffd700; /* Gold */
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.top-scorer:nth-child(2) td {
+  color: #c0c0c0; /* Silver */
+  text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
+}
+
+.top-scorer:nth-child(3) td {
+  color: #cd7f32; /* Bronze */
+  text-shadow: 0 0 5px rgba(205, 127, 50, 0.5);
 }
 
 /* Season History Styles */
@@ -1229,4 +1417,166 @@ html.ios-keyboard-open {
   background-color: #111;
   border: 2px solid #a55c1b;
   box-shadow: 0 0 20px rgba(252, 186, 33, 0.3);
+}
+
+/* Season stats vertical layout */
+.season-info-vertical {
+  min-height: 120px;
+}
+
+.season-stats.vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.season-info-vertical .season-stat {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid rgba(252, 186, 33, 0.2);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  margin-bottom: 2px;
+}
+
+.season-info-vertical .stat-label {
+  color: #aaa;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.season-info-vertical .stat-value {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.season-info-vertical .stat-value.countdown {
+  color: #fcba21;
+}
+
+/* Leaderboard scrollable container */
+.leaderboard-scrollable {
+  max-height: 160px;
+  overflow-y: auto;
+  margin: 8px 0;
+  /* Smoother scrolling */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.leaderboard-footer {
+  border-top: 1px solid rgba(0, 255, 255, 0.1);
+  padding-top: 5px;
+  margin-top: 5px;
+}
+
+.small-text {
+  font-size: 0.65rem;
+  color: #999;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Competitive container - reduced height with scrolling */
+.leaderboard-container.competitive {
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Season info optimization */
+.season-info {
+  margin: 5px 0 8px 0;
+  min-height: initial;
+}
+
+/* Customize scrollbar */
+.leaderboard-scrollable::-webkit-scrollbar {
+  width: 5px;
+}
+
+.leaderboard-scrollable::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.leaderboard-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(252, 186, 33, 0.3);
+  border-radius: 10px;
+}
+
+.leaderboard-scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(252, 186, 33, 0.5);
+}
+
+/* Prize distribution styles */
+.prize-distribution {
+  margin: 8px 0;
+  border-top: 1px solid rgba(252, 186, 33, 0.3);
+  padding-top: 4px;
+}
+
+.prize-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 8px;
+  margin-bottom: 1px;
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.prize-item:nth-child(1) {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.prize-item:nth-child(2) {
+  background: rgba(192, 192, 192, 0.1);
+}
+
+.prize-item:nth-child(3) {
+  background: rgba(205, 127, 50, 0.1);
+}
+
+.prize-rank {
+  font-weight: bold;
+  color: #fcba21;
+}
+
+.prize-value {
+  color: #fff;
+}
+
+/* Competitive container - adjusted height */
+.leaderboard-container.competitive {
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Leaderboard scrollable container - adjusted height */
+.leaderboard-scrollable {
+  max-height: 120px;
+  overflow-y: auto;
+  margin: 8px 0;
+  /* Smoother scrolling */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Season info optimization for competitive mode */
+.season-info {
+  margin: 5px 0 8px 0;
+  min-height: initial;
+  overflow: visible;
+}
+
+.season-info-vertical {
+  min-height: auto;
+  padding-bottom: 5px;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 
 // X.com logo as SVG in base64 format for inline usage
 const xLogoBase64 = "../src/assets/images/x.png";
@@ -51,12 +51,12 @@ const SuperSeedFacts = () => {
   const factsContainerRef = useRef(null);
   
   // Get a random fact
-  const getRandomFact = () => {
+  const getRandomFact = useCallback(() => {
     const randomIndex = Math.floor(Math.random() * FACTS.length);
     return FACTS[randomIndex];
-  };
+  }, []);
   
-  // Change fact every 10 seconds (reduced from 30 seconds)
+  // Change fact every 30 seconds (increased from 10 seconds)
   useEffect(() => {
     setCurrentFact(getRandomFact());
     
@@ -71,13 +71,13 @@ const SuperSeedFacts = () => {
       setTimeout(() => {
         setIsFlashing(false);
       }, 700); // Animation duration
-    }, 10000); // Update every 10 seconds
+    }, 30000); // Update every 30 seconds
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [getRandomFact]);
   
   // Format fact text by separating emoji and splitting into paragraphs
-  const formatFact = (fact) => {
+  const formatFact = useCallback((fact) => {
     const lines = fact.split('\n');
     if (lines.length < 2) return { title: fact, content: "" };
     
@@ -85,7 +85,7 @@ const SuperSeedFacts = () => {
       title: lines[0],
       content: lines.slice(1).join('\n')
     };
-  };
+  }, []);
   
   const formattedFact = formatFact(currentFact);
   
@@ -113,4 +113,4 @@ const SuperSeedFacts = () => {
   );
 };
 
-export default SuperSeedFacts; 
+export default memo(SuperSeedFacts); 

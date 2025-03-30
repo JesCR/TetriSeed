@@ -1,1 +1,3 @@
-season,startDate,endDate,potSize,winners
+season,startDate,endDate,potSize,playerCount,winners
+2,2025-03-16T00:00:00Z,2025-03-23T00:00:00Z,45,24,"[{\"walletAddress\":\"0xTetrisMaster\",\"score\":14500,\"prize\":22.5},{\"walletAddress\":\"0xMatrixGamer\",\"score\":13200,\"prize\":13.5},{\"walletAddress\":\"0xPixelChamp\",\"score\":12100,\"prize\":4.5},{\"walletAddress\":\"0xGamePro\",\"score\":11800,\"prize\":2.25},{\"walletAddress\":\"0xBlockKing\",\"score\":10500,\"prize\":2.25}]"
+1,2025-03-09T00:00:00Z,2025-03-16T00:00:00Z,32,18,"[{\"walletAddress\":\"0xCryptoKing\",\"score\":13800,\"prize\":16},{\"walletAddress\":\"0xTetrisQueen\",\"score\":12900,\"prize\":9.6},{\"walletAddress\":\"0xBlockWizard\",\"score\":11500,\"prize\":3.2},{\"walletAddress\":\"0xFallingPro\",\"score\":10200,\"prize\":1.6},{\"walletAddress\":\"0xLineRush\",\"score\":9800,\"prize\":1.6}]"

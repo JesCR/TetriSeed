@@ -9,6 +9,7 @@ import Modal from './Modal';
 import SuperSeedFacts from './SuperSeedFacts';
 import MobileControls from './MobileControls';
 import MusicToggle from './MusicToggle';
+import SeasonInfo from './SeasonInfo';
 
 import { useStage } from '../hooks/useStage';
 import { usePlayer } from '../hooks/usePlayer';
@@ -45,6 +46,9 @@ const Tetris = () => {
   // Add competitive mode and wallet address
   const [isCompetitiveMode, setIsCompetitiveMode] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
+
+  // Extra state for showing the competitive rules modal
+  const [showModal, setShowModal] = useState(false);
 
   // Initialize audio when component mounts
   useEffect(() => {
@@ -228,6 +232,17 @@ const Tetris = () => {
     setTouchStart({ x: 0, y: 0 });
     setTouchEnd({ x: 0, y: 0 });
   }, [gameOver, touchStart, touchEnd, movePlayer, dropPlayer, playerRotate, stage]);
+
+  // Handle start button click
+  const handleStartButtonClick = () => {
+    if (isCompetitiveMode) {
+      // Show competitive rules modal
+      setShowModal(true);
+    } else {
+      // Start the game directly
+      startGame();
+    }
+  };
 
   // Start the game
   const startGame = () => {
@@ -469,6 +484,17 @@ const Tetris = () => {
     console.log(`Competitive mode ${status ? 'activated' : 'deactivated'} with address: ${address}`);
   };
 
+  // Handle close of the competitive rules modal
+  const handleCompetitiveRulesClose = () => {
+    setShowModal(false);
+  };
+
+  // Handle confirmation of the competitive rules
+  const handleCompetitiveRulesConfirm = () => {
+    setShowModal(false);
+    startGame();
+  };
+
   return (
     <div 
       className="tetris-wrapper" 
@@ -489,6 +515,43 @@ const Tetris = () => {
         type="top10" 
         score={score} 
         onClose={handleTop10Close} 
+      />
+
+      <Modal
+        isOpen={showModal}
+        type="custom"
+        onClose={handleCompetitiveRulesClose}
+        customContent={
+          <div className="competitive-modal-content">
+            <h2>Competitive Mode Rules</h2>
+            <div className="rules-list">
+              <p>1. Every player pays 1 $SUPR per game</p>
+              <p>2. All $SUPR are collected in a smart contract</p>
+              <p>3. Every season lasts 1 week (Monday to Sunday)</p>
+              <p>4. At the end of each season, the top 5 competitive players get prizes:</p>
+              <ul>
+                <li>1st place: 50% of the pot</li>
+                <li>2nd place: 30% of the pot</li>
+                <li>3rd place: 10% of the pot</li>
+                <li>4th place: 5% of the pot</li>
+                <li>5th place: 5% of the pot</li>
+              </ul>
+              <p>5. After that, a new season starts and the leaderboard is cleared</p>
+            </div>
+            
+            <div className="competitive-modal-buttons">
+              <button 
+                className="modal-button" 
+                onClick={handleCompetitiveRulesConfirm}
+              >
+                Pay 1 $SUPR & Start
+              </button>
+              <button className="modal-button secondary" onClick={handleCompetitiveRulesClose}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        }
       />
       
       {/* Music toggle button */}
@@ -523,7 +586,7 @@ const Tetris = () => {
                     <div className="game-over-container">
                       <h2 className="liquidated">LIQUIDATED!</h2>
                       <p>Your final score: {score}</p>
-                      <StartButton callback={startGame} />
+                      <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                     </div>
                   ) : (
                     <div className="game-info-displays">
@@ -534,7 +597,7 @@ const Tetris = () => {
                       {/* Only show start button at game initialization */}
                       {!dropTime && !gameOver && (
                         <div className="start-container">
-                          <StartButton callback={startGame} />
+                          <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                         </div>
                       )}
                     </div>
@@ -552,6 +615,10 @@ const Tetris = () => {
                 {isCompetitiveMode ? <CompetitiveLeaderboard /> : <Leaderboard />}
                 <div className="player-info">
                   <p>Current Player: <span className="player-name">{playerName}</span></p>
+                  <p>Mode: <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
+                    {isCompetitiveMode ? "Competitive" : "Casual"}
+                  </span></p>
+                  {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
               </div>
@@ -573,7 +640,7 @@ const Tetris = () => {
                     <div className="game-over-container">
                       <h2 className="liquidated">LIQUIDATED!</h2>
                       <p>Your final score: {score}</p>
-                      <StartButton callback={startGame} />
+                      <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                     </div>
                   ) : (
                     <div className="game-info-displays">
@@ -584,7 +651,7 @@ const Tetris = () => {
                       {/* Only show start button at game initialization */}
                       {!dropTime && !gameOver && (
                         <div className="start-container">
-                          <StartButton callback={startGame} />
+                          <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                         </div>
                       )}
                     </div>
@@ -596,6 +663,10 @@ const Tetris = () => {
                 {isCompetitiveMode ? <CompetitiveLeaderboard /> : <Leaderboard />}
                 <div className="player-info">
                   <p>Current Player: <span className="player-name">{playerName}</span></p>
+                  <p>Mode: <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
+                    {isCompetitiveMode ? "Competitive" : "Casual"}
+                  </span></p>
+                  {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
                 <SuperSeedFacts />

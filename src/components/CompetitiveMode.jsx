@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { 
   isMetaMaskInstalled, 
   getMetaMaskDownloadLink, 
-  connectWallet, 
+  connectWallet,
+  disconnectWallet,
   switchToSuperSeedNetwork, 
   mockPayCompetitiveFee 
 } from '../utils/web3Utils';
@@ -29,55 +30,71 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
     checkConnection();
   }, []);
   
-  // Handle click on competitive mode button
-  const handleCompetitiveClick = async () => {
-    // If already in competitive mode, do nothing
-    if (isActive) return;
-    
-    // If MetaMask is not installed, show install modal
-    if (!isMetaMaskInstalled()) {
-      setModalType('metamask');
-      setShowModal(true);
-      return;
-    }
-    
-    // If wallet is not connected, try to connect
-    if (!walletConnected) {
-      setIsLoading(true);
-      setError('');
-      
+  // Handle wallet connection
+  const handleConnectWallet = async () => {
+    if (walletConnected) {
+      // Disconnect wallet
       try {
-        const result = await connectWallet();
-        if (result.success) {
-          setWalletConnected(true);
-          setWalletAddress(result.account);
-          
-          // After connecting wallet, verify network
-          const networkResult = await switchToSuperSeedNetwork();
-          if (networkResult.success) {
-            // Show rules modal
-            setModalType('rules');
-            setShowModal(true);
-          } else {
-            setError(networkResult.error || 'Failed to switch to SuperSeed network');
-          }
-        } else {
-          setError(result.error || 'Failed to connect wallet');
+        await disconnectWallet();
+        setWalletConnected(false);
+        setWalletAddress('');
+        // If in competitive mode, deactivate it
+        if (isActive) {
+          onActivation(false, '');
         }
       } catch (error) {
-        setError(error.message || 'An error occurred');
-      } finally {
-        setIsLoading(false);
+        console.error('Error disconnecting wallet:', error);
       }
-      
       return;
     }
     
-    // If wallet is connected but rules not shown, show rules
-    if (walletConnected && !isActive) {
-      setModalType('rules');
-      setShowModal(true);
+    // Connect wallet
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      if (!isMetaMaskInstalled()) {
+        setModalType('metamask');
+        setShowModal(true);
+        return;
+      }
+      
+      const result = await connectWallet();
+      if (result.success) {
+        setWalletConnected(true);
+        setWalletAddress(result.account);
+        
+        // After connecting wallet, verify network
+        const networkResult = await switchToSuperSeedNetwork();
+        if (!networkResult.success) {
+          setError(networkResult.error || 'Failed to switch to SuperSeed network');
+        }
+      } else {
+        setError(result.error || 'Failed to connect wallet');
+      }
+    } catch (error) {
+      setError(error.message || 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
+  };
+  
+  // Handle competitive mode toggle
+  const handleCompetitiveModeToggle = async () => {
+    if (!walletConnected) {
+      setError('Please connect your wallet first');
+      return;
+    }
+    
+    if (isActive) {
+      // Leave competitive mode
+      onActivation(false, walletAddress);
+      return;
+    }
+    
+    // Enter competitive mode
+    setModalType('rules');
+    setShowModal(true);
   };
   
   // Handle confirmation of competitive mode
@@ -135,6 +152,7 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
             </div>
           </div>
         );
+      
       case 'rules':
         return (
           <div className="competitive-modal-content">
@@ -179,13 +197,35 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
   
   return (
     <div className="competitive-mode">
-      <button 
-        className={`competitive-button ${isActive ? 'active' : ''}`}
-        onClick={handleCompetitiveClick}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Connecting...' : (isActive ? 'Competitive Mode Active' : 'Enter Competitive Mode')}
-      </button>
+      <div className="game-mode-display">
+        <p>Mode: <span className={isActive ? "competitive-mode-active" : "casual-mode"}>
+          {isActive ? "Competitive" : "Casual"}
+        </span></p>
+      </div>
+      
+      <div className="wallet-buttons">
+        {/* FIRST: Connect/Disconnect button */}
+        <button 
+          className="wallet-button"
+          onClick={handleConnectWallet}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Processing...' : (walletConnected ? 'Disconnect Wallet' : 'Connect Wallet')}
+        </button>
+        
+        {/* SECOND: Competitive mode button (only visible when connected) */}
+        {walletConnected && (
+          <button 
+            className={`competitive-button ${isActive ? 'active' : ''}`}
+            onClick={handleCompetitiveModeToggle}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Processing...' : (isActive ? 'Leave Competitive' : 'Enter Competitive')}
+          </button>
+        )}
+      </div>
+      
+      {error && <p className="error-message">{error}</p>}
       
       <Modal
         isOpen={showModal}

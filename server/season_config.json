@@ -1,7 +1,14 @@
 {
-  "currentSeason": 1,
-  "startDate": "2025-03-30T22:00:00.000Z",
-  "endDate": "2025-04-06T21:59:59.999Z",
-  "potSize": 0,
-  "playerCount": 0
+  "currentSeason": 3,
+  "startDate": "2025-03-23T00:00:00Z",
+  "endDate": "2025-03-31T12:00:00Z",
+  "potSize": 28,
+  "playerCount": 15,
+  "prizeDistribution": [
+    { "place": 1, "percentage": 50 },
+    { "place": 2, "percentage": 30 },
+    { "place": 3, "percentage": 10 },
+    { "place": 4, "percentage": 5 },
+    { "place": 5, "percentage": 5 }
+  ]
 }

@@ -1,6 +1,6 @@
-const StartButton = ({ callback }) => (
+const StartButton = ({ callback, isCompetitive = false }) => (
   <button className="start-button" onClick={callback}>
-    Ask for a loan
+    {isCompetitive ? "Ask for a loan" : "Ask for a loan"}
   </button>
 );
 

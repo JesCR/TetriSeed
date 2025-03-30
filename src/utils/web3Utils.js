@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 // Network configuration for SuperSeed
 const SUPERSEED_NETWORK = {
-  chainId: '0xD026', // 53302 in hex
+  chainId: '0xd036', // 53302 in hex
   chainName: 'Superseed Sepolia Testnet',
   nativeCurrency: {
     name: 'Ethereum',
@@ -37,6 +37,14 @@ export const connectWallet = async () => {
     console.error('Error connecting to MetaMask:', error);
     return { success: false, error: error.message };
   }
+};
+
+// Disconnect wallet (for UI purposes only - MetaMask doesn't actually disconnect)
+export const disconnectWallet = async () => {
+  // This doesn't actually disconnect the wallet as MetaMask doesn't support this
+  // It's just for the UI state to represent a disconnected state
+  console.log('Wallet "disconnected" (UI state only)');
+  return { success: true };
 };
 
 // Check if SuperSeed network is added to MetaMask

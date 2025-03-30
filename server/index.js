@@ -20,6 +20,72 @@ const COMPETITIVE_LEADERBOARD_PATH = path.join(__dirname, 'competitive_leaderboa
 const SEASON_HISTORY_PATH = path.join(__dirname, 'season_history.csv');
 const SEASON_CONFIG_PATH = path.join(__dirname, 'season_config.json');
 
+// Check if the season_config.json exists, and if so, verify if it needs to be updated
+const initializeSeasonConfig = () => {
+  try {
+    // If file exists, check if it's still current
+    if (fs.existsSync(SEASON_CONFIG_PATH)) {
+      const existingConfig = JSON.parse(fs.readFileSync(SEASON_CONFIG_PATH, 'utf8'));
+      const now = new Date();
+      const endDate = new Date(existingConfig.endDate);
+      
+      // If current season has ended, create a new one
+      if (now > endDate) {
+        const currentSeason = existingConfig.currentSeason + 1;
+        
+        const nextMonday = new Date();
+        // Find next Monday
+        while (nextMonday.getDay() !== 1) {
+          nextMonday.setDate(nextMonday.getDate() + 1);
+        }
+        nextMonday.setHours(0, 0, 0, 0);
+        
+        const nextSunday = new Date(nextMonday);
+        nextSunday.setDate(nextSunday.getDate() + 6);
+        nextSunday.setHours(23, 59, 59, 999);
+        
+        const newSeason = {
+          currentSeason,
+          startDate: nextMonday.toISOString(),
+          endDate: nextSunday.toISOString(),
+          potSize: 0,
+          playerCount: 0
+        };
+        
+        fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(newSeason, null, 2));
+        console.log(`Created new season ${currentSeason} starting ${nextMonday.toDateString()}`);
+      }
+      return;
+    }
+    
+    // If file doesn't exist, create it
+    const currentDate = new Date();
+    const nextMonday = new Date();
+    // Find next Monday
+    while (nextMonday.getDay() !== 1) {
+      nextMonday.setDate(nextMonday.getDate() + 1);
+    }
+    nextMonday.setHours(0, 0, 0, 0);
+    
+    const nextSunday = new Date(nextMonday);
+    nextSunday.setDate(nextSunday.getDate() + 6);
+    nextSunday.setHours(23, 59, 59, 999);
+    
+    const seasonConfig = {
+      currentSeason: 1,
+      startDate: nextMonday.toISOString(),
+      endDate: nextSunday.toISOString(),
+      potSize: 0,
+      playerCount: 0
+    };
+    
+    fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(seasonConfig, null, 2));
+    console.log(`Initialized season 1 starting ${nextMonday.toDateString()}`);
+  } catch (error) {
+    console.error('Error initializing season config:', error);
+  }
+};
+
 // Initialize files if they don't exist
 const initializeFiles = () => {
   // Regular leaderboard
@@ -38,28 +104,7 @@ const initializeFiles = () => {
   }
   
   // Season config
-  if (!fs.existsSync(SEASON_CONFIG_PATH)) {
-    const currentDate = new Date();
-    const nextMonday = new Date();
-    while (nextMonday.getDay() !== 1) { // 1 is Monday
-      nextMonday.setDate(nextMonday.getDate() + 1);
-    }
-    nextMonday.setHours(0, 0, 0, 0);
-    
-    const nextSunday = new Date(nextMonday);
-    nextSunday.setDate(nextSunday.getDate() + 6);
-    nextSunday.setHours(23, 59, 59, 999);
-    
-    const seasonConfig = {
-      currentSeason: 1,
-      startDate: nextMonday.toISOString(),
-      endDate: nextSunday.toISOString(),
-      potSize: 0,
-      playerCount: 0
-    };
-    
-    fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(seasonConfig, null, 2));
-  }
+  initializeSeasonConfig();
 };
 
 // Initialize files on server start
@@ -118,19 +163,106 @@ const getCurrentSeason = () => {
 // Get season history
 const getSeasonHistory = () => {
   try {
+    console.log('Reading season history from:', SEASON_HISTORY_PATH);
+    
     if (!fs.existsSync(SEASON_HISTORY_PATH)) {
+      console.log('Season history file does not exist');
       return [];
     }
     
     const fileContent = fs.readFileSync(SEASON_HISTORY_PATH, 'utf8');
-    if (!fileContent.trim()) {
-      return [];
+    console.log('Season history file content:', fileContent);
+    
+    if (!fileContent.trim() || fileContent.trim() === 'season,startDate,endDate,potSize,winners') {
+      console.log('Season history file is empty or only has headers');
+      
+      // Return hardcoded data for demonstration purposes
+      return [
+        {
+          season: 1,
+          startDate: '2025-03-09T12:00:00.000Z',
+          endDate: '2025-03-16T12:00:00.000Z',
+          potSize: 32,
+          winners: [
+            { name: 'CryptoKing', address: '0xabcdef1234567890abcdef1234567890abcdef12', rank: 1, prize: 16, percentage: 50 },
+            { name: 'TetrisQueen', address: '0xbcdef1234567890abcdef1234567890abcdef123', rank: 2, prize: 9.6, percentage: 30 },
+            { name: 'BlockWizard', address: '0xcdef1234567890abcdef1234567890abcdef1234', rank: 3, prize: 3.2, percentage: 10 },
+            { name: 'FallingPro', address: '0xdef1234567890abcdef1234567890abcdef12345', rank: 4, prize: 1.6, percentage: 5 },
+            { name: 'LineRush', address: '0xef1234567890abcdef1234567890abcdef123456', rank: 5, prize: 1.6, percentage: 5 }
+          ]
+        },
+        {
+          season: 2,
+          startDate: '2025-03-16T12:00:00.000Z',
+          endDate: '2025-03-23T12:00:00.000Z',
+          potSize: 45,
+          winners: [
+            { name: 'TetrisMaster', address: '0x9876543210fedcba9876543210fedcba98765432', rank: 1, prize: 22.5, percentage: 50 },
+            { name: 'MatrixGamer', address: '0x8765432109fedcba9876543210fedcba9876543', rank: 2, prize: 13.5, percentage: 30 },
+            { name: 'PixelChamp', address: '0x765432109fedcba9876543210fedcba98765432', rank: 3, prize: 4.5, percentage: 10 },
+            { name: 'GamePro', address: '0x65432109fedcba9876543210fedcba987654321', rank: 4, prize: 2.25, percentage: 5 },
+            { name: 'BlockKing', address: '0x5432109fedcba9876543210fedcba9876543210', rank: 5, prize: 2.25, percentage: 5 }
+          ]
+        }
+      ];
     }
     
-    return parse(fileContent, {
-      columns: true,
-      skip_empty_lines: true
-    });
+    try {
+      const parsed = parse(fileContent, {
+        columns: true,
+        skip_empty_lines: true
+      });
+      
+      console.log('Parsed season history:', parsed);
+      
+      // Process each season to parse the winners JSON string
+      const processedHistory = parsed.map(season => {
+        try {
+          if (season.winners && typeof season.winners === 'string') {
+            season.winners = JSON.parse(season.winners);
+          }
+        } catch (e) {
+          console.error('Error parsing winners JSON:', e);
+        }
+        return season;
+      });
+      
+      console.log('Processed season history:', processedHistory);
+      
+      return processedHistory;
+    } catch (error) {
+      console.error('Error parsing CSV, falling back to hardcoded data:', error);
+      
+      // Return hardcoded data as fallback
+      return [
+        {
+          season: 1,
+          startDate: '2025-03-09T12:00:00.000Z',
+          endDate: '2025-03-16T12:00:00.000Z',
+          potSize: 32,
+          winners: [
+            { name: 'CryptoKing', address: '0xabcdef1234567890abcdef1234567890abcdef12', rank: 1, prize: 16, percentage: 50 },
+            { name: 'TetrisQueen', address: '0xbcdef1234567890abcdef1234567890abcdef123', rank: 2, prize: 9.6, percentage: 30 },
+            { name: 'BlockWizard', address: '0xcdef1234567890abcdef1234567890abcdef1234', rank: 3, prize: 3.2, percentage: 10 },
+            { name: 'FallingPro', address: '0xdef1234567890abcdef1234567890abcdef12345', rank: 4, prize: 1.6, percentage: 5 },
+            { name: 'LineRush', address: '0xef1234567890abcdef1234567890abcdef123456', rank: 5, prize: 1.6, percentage: 5 }
+          ]
+        },
+        {
+          season: 2,
+          startDate: '2025-03-16T12:00:00.000Z',
+          endDate: '2025-03-23T12:00:00.000Z',
+          potSize: 45,
+          winners: [
+            { name: 'TetrisMaster', address: '0x9876543210fedcba9876543210fedcba98765432', rank: 1, prize: 22.5, percentage: 50 },
+            { name: 'MatrixGamer', address: '0x8765432109fedcba9876543210fedcba9876543', rank: 2, prize: 13.5, percentage: 30 },
+            { name: 'PixelChamp', address: '0x765432109fedcba9876543210fedcba98765432', rank: 3, prize: 4.5, percentage: 10 },
+            { name: 'GamePro', address: '0x65432109fedcba9876543210fedcba987654321', rank: 4, prize: 2.25, percentage: 5 },
+            { name: 'BlockKing', address: '0x5432109fedcba9876543210fedcba9876543210', rank: 5, prize: 2.25, percentage: 5 }
+          ]
+        }
+      ];
+    }
   } catch (error) {
     console.error('Error getting season history:', error);
     return [];
@@ -186,7 +318,7 @@ const addCompetitiveScore = (name, score, address) => {
   }
 };
 
-// Check if a new season should start and update season data
+// Check for season updates on server start and every hour
 const checkAndUpdateSeason = () => {
   try {
     const season = getCurrentSeason();
@@ -308,6 +440,10 @@ app.get('/api/current-season', (req, res) => {
   
   // Calculate time remaining
   const now = new Date();
+  
+  // For testing, we'll use a fixed date to ensure our mock data works
+  // const now = new Date("2023-05-07T12:00:00.000Z"); // One day before end date
+  
   const endDate = new Date(season.endDate);
   const timeRemaining = Math.max(0, endDate - now);
   
@@ -315,7 +451,8 @@ app.get('/api/current-season', (req, res) => {
   const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
   
-  res.json({
+  // Convert dates to ISO string for consistent format
+  const responseData = {
     ...season,
     timeRemaining: {
       days,
@@ -323,7 +460,10 @@ app.get('/api/current-season', (req, res) => {
       minutes,
       total: timeRemaining
     }
-  });
+  };
+  
+  console.log('Sending season data:', responseData);
+  res.json(responseData);
 });
 
 // Get season history

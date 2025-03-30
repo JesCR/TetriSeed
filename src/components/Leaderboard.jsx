@@ -1,78 +1,50 @@
-import { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiConfig';
+import { useState, useEffect, useCallback, memo } from 'react';
+import { getLeaderboard } from '../utils/apiConfig';
 
-const Leaderboard = () => {
-  const [scores, setScores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+const Leaderboard = ({ currentPlayer = 'BlockMaster' }) => {
+  const [leaderboard, setLeaderboard] = useState([]);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Simpler implementation for the fetchLeaderboard function
-  const fetchLeaderboard = async () => {
+  // Fetch leaderboard data
+  const fetchLeaderboard = useCallback(async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching leaderboard data...');
-      
-      const response = await fetch(getApiUrl('/api/leaderboard'));
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Leaderboard API error:', errorText);
-        throw new Error('Failed to fetch leaderboard');
-      }
-      
-      const data = await response.json();
-      console.log('Raw leaderboard data:', data);
-      
-      // Add fallback for empty or malformed data
-      if (!Array.isArray(data) || data.length === 0) {
-        console.log('No leaderboard data found');
-        setScores([]);
-      } else {
-        // Ensure data has proper types and format
-        const formattedData = data.map(entry => ({
-          name: String(entry.name || 'Unknown'),
-          score: parseInt(entry.score || '0', 10),
-          date: entry.date || new Date().toISOString().split('T')[0]
-        }));
-        
-        console.log('Formatted leaderboard data:', formattedData);
-        
-        // Sort by score (highest first)
-        formattedData.sort((a, b) => b.score - a.score);
-        
-        setScores(formattedData);
-      }
+      const data = await getLeaderboard();
+      setLeaderboard(data);
+      setError(null);
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
-      setError('Failed to load leaderboard');
-      setScores([]); // Clear scores on error
+      setError('Failed to load leaderboard data');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  // Load leaderboard on mount and set up regular refresh
   useEffect(() => {
     fetchLeaderboard();
     
-    // Poll for updates every 3 seconds
-    const intervalId = setInterval(fetchLeaderboard, 3000);
+    // Update leaderboard every 30 seconds (increased from 3 seconds)
+    const intervalId = setInterval(fetchLeaderboard, 30000);
     
-    // Clean up the interval when unmounting
     return () => clearInterval(intervalId);
+  }, [fetchLeaderboard]);
+
+  // Format date
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   }, []);
 
-  if (isLoading && scores.length === 0) {
-    return <div className="leaderboard-container">Loading top borrowers...</div>;
-  }
-
   if (error) {
-    return (
-      <div className="leaderboard-container error">
-        {error}
-        <button onClick={fetchLeaderboard} className="refresh-button">↻</button>
+    return <div className="leaderboard-container">
+      <div className="leaderboard-header">
+        <h2>Top Borrowers</h2>
       </div>
-    );
+      <p className="error-message">{error}</p>
+      <button className="refresh-button" onClick={fetchLeaderboard}>Try Again</button>
+    </div>;
   }
 
   return (
@@ -88,30 +60,37 @@ const Leaderboard = () => {
         </button>
       </div>
       
-      {scores.length === 0 ? (
-        <p>No loans approved yet. Be the first!</p>
+      {isLoading ? (
+        <p className="loading-text">Loading leaderboard...</p>
+      ) : leaderboard.length === 0 ? (
+        <p className="empty-text">No loans approved yet. Be the first!</p>
       ) : (
         <table className="leaderboard-table">
           <thead>
             <tr>
-              <th>R</th>
+              <th>Rank</th>
               <th>Name</th>
               <th>Score</th>
               <th>Date</th>
             </tr>
           </thead>
           <tbody>
-            {scores.map((score, index) => (
-              <tr 
-                key={`${score.name}-${score.score}-${index}`} 
-                className={index < 3 ? 'top-scorer' : ''}
-              >
-                <td>{index + 1}</td>
-                <td>{score.name || 'Unknown'}</td>
-                <td>{score.score || '0'}</td>
-                <td>{score.date || 'Today'}</td>
-              </tr>
-            ))}
+            {leaderboard.map((entry, index) => {
+              const isCurrentPlayer = currentPlayer && 
+                entry.name.toLowerCase() === currentPlayer.toLowerCase();
+              
+              return (
+                <tr 
+                  key={index} 
+                  className={isCurrentPlayer ? 'current-player' : (index < 3 ? 'top-scorer' : '')}
+                >
+                  <td>{index + 1}</td>
+                  <td>{entry.name}</td>
+                  <td>{entry.score.toLocaleString()}</td>
+                  <td>{formatDate(entry.date)}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
@@ -119,4 +98,4 @@ const Leaderboard = () => {
   );
 };
 
-export default Leaderboard; 
+export default memo(Leaderboard); 

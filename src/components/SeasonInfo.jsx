@@ -1,96 +1,180 @@
-import { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiConfig';
+import { useState, useEffect, useCallback, memo } from 'react';
+import { getCurrentSeason } from '../utils/apiConfig';
 
-const SeasonInfo = ({ isDetailed = false }) => {
+const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
   const [seasonData, setSeasonData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
+  // Fetch current season data
+  const fetchSeasonData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getCurrentSeason();
+      setSeasonData(data);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching season data:', err);
+      setError('Failed to load season data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchSeasonData = async () => {
-      try {
-        setLoading(true);
-        const apiUrl = getApiUrl();
-        const response = await fetch(`${apiUrl}/current-season`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch season data');
-        }
-        
-        const data = await response.json();
-        setSeasonData(data);
-      } catch (error) {
-        console.error('Error fetching season data:', error);
-        setError('Could not load season info');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchSeasonData();
     
-    // Refresh season data every minute
-    const intervalId = setInterval(fetchSeasonData, 60 * 1000);
+    // Update season data every 30 seconds
+    const intervalId = setInterval(fetchSeasonData, 30000);
     
     return () => clearInterval(intervalId);
-  }, []);
-  
-  if (loading) {
-    return <div className="season-info-loading">Loading season info...</div>;
-  }
-  
-  if (error) {
-    return <div className="season-info-error">{error}</div>;
-  }
-  
-  if (!seasonData) {
-    return <div className="season-info-error">No season data available</div>;
-  }
-  
-  // Format dates
-  const formatDate = (dateString) => {
+  }, [fetchSeasonData]);
+
+  // Format date in readable format
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString(undefined, { 
+      year: 'numeric', 
       month: 'short', 
-      day: 'numeric',
-      year: 'numeric' 
+      day: 'numeric'
     });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="season-info loading">
+        <p>Loading season information...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="season-info error">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!seasonData) {
+    return (
+      <div className="season-info no-data">
+        <p>No active season found</p>
+      </div>
+    );
+  }
+
+  // Display time remaining in a readable format
+  const formatTimeRemaining = () => {
+    if (!seasonData.timeRemaining) return 'Calculating...';
+    
+    const { days, hours, minutes } = seasonData.timeRemaining;
+    
+    if (days === 0 && hours === 0 && minutes === 0) {
+      return 'Season ended';
+    }
+    
+    return `${days}d ${hours}h ${minutes}m`;
   };
-  
-  const startDate = formatDate(seasonData.startDate);
-  const endDate = formatDate(seasonData.endDate);
-  
-  return (
-    <div className={`season-info ${isDetailed ? 'detailed' : ''}`}>
-      <h3>Current Season #{seasonData.currentSeason}</h3>
-      
-      <div className="season-stats">
-        <div className="season-stat">
-          <div className="stat-label">Current Pot</div>
-          <div className="stat-value">{seasonData.potSize} $SUPR</div>
-        </div>
-        
-        <div className="season-stat">
-          <div className="stat-label">Players</div>
-          <div className="stat-value">{seasonData.playerCount}</div>
-        </div>
-        
-        <div className="season-stat">
-          <div className="stat-label">Time Remaining</div>
-          <div className="stat-value countdown">
-            {seasonData.timeRemaining.days}d {seasonData.timeRemaining.hours}h {seasonData.timeRemaining.minutes}m
-          </div>
-        </div>
+
+  // Grid layout (horizontal)
+  const renderGridLayout = () => (
+    <div className="season-stats">
+      <div className="season-stat">
+        <div className="stat-label">Prize Pool</div>
+        <div className="stat-value">{seasonData.potSize} $SUPR</div>
       </div>
       
+      <div className="season-stat">
+        <div className="stat-label">Players</div>
+        <div className="stat-value">{seasonData.playerCount}</div>
+      </div>
+      
+      <div className="season-stat time-remaining">
+        <div className="stat-label">Time Left</div>
+        <div className="stat-value countdown">{formatTimeRemaining()}</div>
+      </div>
+    </div>
+  );
+
+  // Show prize distribution - compact format
+  const renderPrizeDistribution = () => (
+    <div className="prize-distribution">
+      <div className="prize-item">
+        <span className="prize-rank">1st PLACE:</span>
+        <span className="prize-value">50% OF THE POT</span>
+      </div>
+      <div className="prize-item">
+        <span className="prize-rank">2nd PLACE:</span>
+        <span className="prize-value">30% OF THE POT</span>
+      </div>
+      <div className="prize-item">
+        <span className="prize-rank">3rd PLACE:</span>
+        <span className="prize-value">10% OF THE POT</span>
+      </div>
+      <div className="prize-item">
+        <span className="prize-rank">4th PLACE:</span>
+        <span className="prize-value">5% OF THE POT</span>
+      </div>
+      <div className="prize-item">
+        <span className="prize-rank">5th PLACE:</span>
+        <span className="prize-value">5% OF THE POT</span>
+      </div>
+    </div>
+  );
+
+  // Vertical layout (more compact)
+  const renderVerticalLayout = () => (
+    <div className="season-stats vertical">
+      <div className="season-stat">
+        <div className="stat-label">Prize Pool:</div>
+        <div className="stat-value">{seasonData.potSize} $SUPR</div>
+      </div>
+      
+      <div className="season-stat">
+        <div className="stat-label">Players:</div>
+        <div className="stat-value">{seasonData.playerCount}</div>
+      </div>
+      
+      <div className="season-stat">
+        <div className="stat-label">Time Left:</div>
+        <div className="stat-value countdown">{formatTimeRemaining()}</div>
+      </div>
+
+      {renderPrizeDistribution()}
+
       {isDetailed && (
+        <>
+          <div className="season-stat">
+            <div className="stat-label">Started:</div>
+            <div className="stat-value">{formatDate(seasonData.startDate)}</div>
+          </div>
+          
+          <div className="season-stat">
+            <div className="stat-label">Ends:</div>
+            <div className="stat-value">{formatDate(seasonData.endDate)}</div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <div className={`season-info ${isDetailed ? 'detailed' : ''} ${isVertical ? 'season-info-vertical' : ''}`}>
+      <h3>Current Season #{seasonData.seasonNumber}</h3>
+      
+      {isVertical ? renderVerticalLayout() : renderGridLayout()}
+      
+      {isDetailed && !isVertical && (
         <div className="season-dates">
-          <div>Season Start: {startDate}</div>
-          <div>Season End: {endDate}</div>
+          <div><span className="date-label">Started:</span> {formatDate(seasonData.startDate)}</div>
+          <div><span className="date-label">Ends:</span> {formatDate(seasonData.endDate)}</div>
+          {renderPrizeDistribution()}
         </div>
       )}
     </div>
   );
 };
 
-export default SeasonInfo; 
+export default memo(SeasonInfo); 
