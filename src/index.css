@@ -924,3 +924,309 @@ html.ios-keyboard-open {
     font-size: 1rem;
   }
 }
+
+/* Competitive Mode Styles */
+.competitive-mode {
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.competitive-button {
+  background: linear-gradient(to right, #a55c1b, #fcba21);
+  color: #000;
+  font-family: 'Lacquer', cursive;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: all 0.3s;
+  width: 100%;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(252, 186, 33, 0.5);
+}
+
+.competitive-button:hover {
+  background: linear-gradient(to right, #c46b1f, #fdcc45);
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(252, 186, 33, 0.7);
+}
+
+.competitive-button.active {
+  background: linear-gradient(to right, #64a338, #a2e05a);
+}
+
+.competitive-button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Competitive Modal Styles */
+.competitive-modal-content {
+  padding: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.competitive-modal-content h2 {
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #fcba21;
+  text-align: center;
+}
+
+.rules-list {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.rules-list p {
+  margin: 8px 0;
+}
+
+.rules-list ul {
+  margin: 10px 0;
+  padding-left: 30px;
+}
+
+.rules-list li {
+  margin: 5px 0;
+}
+
+.competitive-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-button {
+  background: linear-gradient(to right, #a55c1b, #fcba21);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s;
+  font-family: 'Lacquer', cursive;
+}
+
+.modal-button:hover {
+  background: linear-gradient(to right, #c46b1f, #fdcc45);
+  transform: translateY(-2px);
+}
+
+.modal-button.secondary {
+  background: #333;
+  color: #fff;
+}
+
+.modal-button.secondary:hover {
+  background: #555;
+}
+
+.error-message {
+  color: #ff3333;
+  text-align: center;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+/* Season Info Styles */
+.season-info {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #a55c1b;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 15px 0;
+}
+
+.season-info h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #fcba21;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.season-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.season-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.season-stat-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.season-stat-label {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.season-dates {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+/* Competitive Leaderboard Styles */
+.leaderboard-container.competitive {
+  border-color: #a55c1b;
+}
+
+.leaderboard-container.competitive h2 {
+  color: #fcba21;
+  text-shadow: 0 0 10px rgba(252, 186, 33, 0.5);
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #fcba21;
+  transition: all 0.3s;
+}
+
+.history-button:hover {
+  transform: scale(1.2);
+}
+
+/* Season History Styles */
+.season-history {
+  padding: 10px;
+}
+
+.season-history h3 {
+  margin-top: 0;
+  color: #fcba21;
+  text-align: center;
+}
+
+.season-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.season-selector button {
+  background: #333;
+  border: none;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s;
+}
+
+.season-selector button.active {
+  background: #a55c1b;
+  color: #fff;
+}
+
+.season-details {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #a55c1b;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.season-summary {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.season-summary p {
+  margin: 5px 0;
+}
+
+.season-summary span {
+  color: #fcba21;
+  font-weight: bold;
+}
+
+.season-winners h4 {
+  text-align: center;
+  margin-top: 0;
+  color: #fcba21;
+}
+
+.winners-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.winners-table th,
+.winners-table td {
+  padding: 5px;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+.winners-table th {
+  background: rgba(0, 0, 0, 0.3);
+  color: #aaa;
+}
+
+.loading-text, 
+.error-text, 
+.empty-text {
+  text-align: center;
+  padding: 10px;
+}
+
+.loading-text {
+  color: #aaa;
+}
+
+.error-text {
+  color: #ff3333;
+}
+
+.empty-text {
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Custom Modal Styles */
+.modal-content.custom-modal {
+  max-width: 500px;
+  padding: 0;
+  background-color: #111;
+  border: 2px solid #a55c1b;
+  box-shadow: 0 0 20px rgba(252, 186, 33, 0.3);
+}

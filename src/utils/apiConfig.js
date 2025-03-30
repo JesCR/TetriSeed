@@ -11,7 +11,7 @@ const env = import.meta.env.MODE || 'development';
 export const API_BASE_URL = API_URL[env];
 
 // Helper function to get the full API URL
-export const getApiUrl = (endpoint) => {
+export const getApiUrl = (endpoint = '') => {
   // In development, just use the endpoint (proxy will handle it)
   // In production, prefix with the full server URL
   return env === 'development' ? endpoint : `${API_BASE_URL}${endpoint}`;

@@ -161,3 +161,33 @@ When the user level up the InterestRateMessage shows instead of the debt_message
 34. After enter the username, when the modal dismiss and the keyboard disappear, i still need to scroll up to see the logo / title and top of the superseed container.
 
 35. in my iphone, still don't work, the screen don't move to top after enter the user name...
+
+36. <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lacquer&display=swap" rel="stylesheet"> /// I want to use this as the font for my app
+
+37. I want to offer the possibility to the players to enter in a "competitive" mode, with a button in the "current player" container. 
+The idea is that if the user wants to go to competitive mode, then he can win prices. When he clicks the button we need to connect with metamask to the superseeed network:
+Network Name	Superseed Sepolia Testnet
+Description	The public testnet for Superseed.
+RPC Endpoint	https://sepolia.superseed.xyz
+Chain ID	53302
+Currency Symbol	ETH
+Block Explorer	https://sepolia-explorer.superseed.xyz
+note: if the user don't have metamask we should point him to the right place to install it
+note: This will we for testnet, and will be updated when mainnet comes live.
+note: if the user don't have this network registerd in his metamask we should ask him for permission to add it
+After connected, right to the "Ask for a loan" we should have a new button "PRO"
+First is for casual game, "pro" is for competitive.  When the user clicks pro a warning with the rules : 
+"1 Every player pays 1 $SUPR  per game"
+"all the $supr are collected in a smart contract"
+"Every season longs 1 week monday to sunday"
+"at the end of each season the top 5 competitive players gets the price 50%, 30%, 10%, 5%, 5% in the registered wallet"
+"after that a new season starts and the leaderboard is cleared"
+note: we must save the score and the address of the player when the game ends. If the player enters in the top 5 he goes to leaderboard. From now on leaderboard only shows "competitive" scores.
+note: this payment will be mocked for now, until we have the mainnet of SuperSeed, so no metamask interaction for now in this button, just add the 1 $SUPR to the mocked pot and save the address.
+note: We should save a historical record of seasons, scores in the season and players/prices, and statistics of all of them,  that will be showed as a modal when the user clicks on a button in the leaderboard container"
+note: The backend also must mock the seasons, so we show in a new container the pot accumulated, the time until the end of the season, the number of players that enters in the season etc.
+Be sure that all works perfectly and also take care of the UI/UX.
+
+38. Check the terminal error...

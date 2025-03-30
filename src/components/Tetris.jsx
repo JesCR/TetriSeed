@@ -3,6 +3,8 @@ import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
 import Leaderboard from './Leaderboard';
+import CompetitiveLeaderboard from './CompetitiveLeaderboard';
+import CompetitiveMode from './CompetitiveMode';
 import Modal from './Modal';
 import SuperSeedFacts from './SuperSeedFacts';
 import MobileControls from './MobileControls';
@@ -40,6 +42,10 @@ const Tetris = () => {
   // Add a state to track if we're on mobile
   const [isMobile, setIsMobile] = useState(false);
 
+  // Add competitive mode and wallet address
+  const [isCompetitiveMode, setIsCompetitiveMode] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
+
   // Initialize audio when component mounts
   useEffect(() => {
     // Initialize music
@@ -59,18 +65,30 @@ const Tetris = () => {
       return;
     }
     
-    console.log('Submitting score:', { playerName, score });
+    console.log('Submitting score:', { playerName, score, isCompetitive: isCompetitiveMode });
     
     try {
-      const response = await fetch(getApiUrl('/api/leaderboard'), {
+      // Choose the API endpoint based on competitive mode
+      const endpoint = isCompetitiveMode ? 
+        getApiUrl('/api/competitive-score') : 
+        getApiUrl('/api/leaderboard');
+      
+      const scoreData = {
+        name: playerName.trim(),
+        score: score
+      };
+      
+      // Add wallet address for competitive mode
+      if (isCompetitiveMode && walletAddress) {
+        scoreData.address = walletAddress;
+      }
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: playerName.trim(),
-          score: score
-        }),
+        body: JSON.stringify(scoreData),
       });
       
       if (!response.ok) {
@@ -444,6 +462,13 @@ const Tetris = () => {
     }
   }, [gameOver, playerRotate, stage, dropTime]);
 
+  // Update competitive mode status and wallet address
+  const handleCompetitiveModeActivation = (status, address) => {
+    setIsCompetitiveMode(status);
+    setWalletAddress(address);
+    console.log(`Competitive mode ${status ? 'activated' : 'deactivated'} with address: ${address}`);
+  };
+
   return (
     <div 
       className="tetris-wrapper" 
@@ -524,9 +549,10 @@ const Tetris = () => {
               
               {/* Mobile: Leaderboard and player info below */}
               <div className="sidebar mobile-sidebar">
-                <Leaderboard />
+                {isCompetitiveMode ? <CompetitiveLeaderboard /> : <Leaderboard />}
                 <div className="player-info">
                   <p>Current Player: <span className="player-name">{playerName}</span></p>
+                  <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
               </div>
             </>
@@ -567,9 +593,10 @@ const Tetris = () => {
               </div>
               
               <div className="sidebar">
-                <Leaderboard />
+                {isCompetitiveMode ? <CompetitiveLeaderboard /> : <Leaderboard />}
                 <div className="player-info">
                   <p>Current Player: <span className="player-name">{playerName}</span></p>
+                  <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
                 <SuperSeedFacts />
               </div>

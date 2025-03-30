@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import logoText from '../assets/images/logo_text.png';
 
-const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
+const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
 
@@ -92,8 +92,10 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
-        <img src={logoText} alt="SuperSeed Logo" className="modal-logo" />
+      <div className={`modal-content ${type === 'custom' ? 'custom-modal' : ''}`}>
+        {type !== 'custom' && (
+          <img src={logoText} alt="SuperSeed Logo" className="modal-logo" />
+        )}
         
         {type === 'nameInput' && (
           <>
@@ -132,6 +134,8 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit }) => {
             <button onClick={onClose} className="modal-button">Play Again</button>
           </>
         )}
+        
+        {type === 'custom' && customContent}
       </div>
     </div>
   );
