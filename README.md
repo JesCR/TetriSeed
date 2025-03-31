@@ -10,6 +10,11 @@
 
 A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing rows and climb the leaderboard!
 
+Prompts used:
+- [MVP] (https://share.specstory.com/stories/8adc6ede-fd57-448b-81e6-c633aea82180)
+- [Competitive mode] (soon)
+
+
 ## 📋 Table of Contents
 
 - [Demo](#-demo)
