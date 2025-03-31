@@ -86,7 +86,7 @@ const Leaderboard = ({ currentPlayer = 'BlockMaster' }) => {
                 >
                   <td>{index + 1}</td>
                   <td>{entry.name}</td>
-                  <td>{entry.score.toLocaleString()}</td>
+                  <td><span className="crypto-amount">{entry.score.toLocaleString()}</span></td>
                   <td>{formatDate(entry.date)}</td>
                 </tr>
               );

@@ -100,6 +100,7 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
         {type === 'nameInput' && (
           <>
             <h2>Welcome to TetriSeed!</h2>
+            <p>Play on desktop for best experience</p>
             <p>Please enter your name to start playing:</p>
             <input
               type="text"

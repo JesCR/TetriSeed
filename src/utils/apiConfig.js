@@ -20,11 +20,11 @@ const MOCK_LEADERBOARD = [
 ];
 
 const MOCK_COMPETITIVE_LEADERBOARD = [
-  { walletAddress: "0x1a2b3c4d5e6f7g8h9i0j", score: 15800, date: "2025-03-28" },
-  { walletAddress: "0x9i8h7g6f5e4d3c2b1a0", score: 14300, date: "2025-03-27" },
-  { walletAddress: "0x2b3c4d5e6f7g8h9i0j1a", score: 13900, date: "2025-03-26" },
-  { walletAddress: "0x8h9i0j1a2b3c4d5e6f7g", score: 12700, date: "2025-03-29" },
-  { walletAddress: "0x3c4d5e6f7g8h9i0j1a2b", score: 11500, date: "2025-03-25" }
+  { name: "SatoshiPlayer", walletAddress: "0x1a2b3c4d5e6f7g8h9i0j", score: 15800, date: "2025-03-28" },
+  { name: "BlockMaster", walletAddress: "0x9i8h7g6f5e4d3c2b1a0", score: 14300, date: "2025-03-27" },
+  { name: "CryptoQueen", walletAddress: "0x2b3c4d5e6f7g8h9i0j1a", score: 13900, date: "2025-03-26" },
+  { name: "TetrisWizard", walletAddress: "0x8h9i0j1a2b3c4d5e6f7g", score: 12700, date: "2025-03-29" },
+  { name: "ChainBreaker", walletAddress: "0x3c4d5e6f7g8h9i0j1a2b", score: 11500, date: "2025-03-25" }
 ];
 
 const MOCK_CURRENT_SEASON = {
@@ -144,7 +144,8 @@ export const getCompetitiveLeaderboard = async () => {
     
     // Ensure data has proper types and format
     const formattedData = data.map(entry => ({
-      walletAddress: String(entry.walletAddress || ''),
+      name: String(entry.name || 'Player'),
+      walletAddress: String(entry.walletAddress || entry.address || ''),
       score: parseInt(entry.score || '0', 10),
       date: entry.date || new Date().toISOString().split('T')[0]
     }));

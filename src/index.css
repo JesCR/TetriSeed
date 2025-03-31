@@ -407,7 +407,7 @@ body {
 
 .player-info {
   margin-top: 20px;
-  padding: 10px;
+  padding: 15px;
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid #0ff;
   border-radius: 5px;
@@ -416,10 +416,12 @@ body {
   width: 100%;
   min-width: 300px;
   max-width: 400px;
+  min-height: 250px;
+  max-height: 400px;
+  overflow-y: auto;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .player-name {
@@ -1032,11 +1034,19 @@ html.ios-keyboard-open {
 
 /* Competitive Modal Styles */
 .competitive-modal-content {
-  padding: 20px;
+  padding: 30px;
   max-width: 500px;
   width: 100%;
-  max-height: 80vh;
+  max-height: 90vh; /* Increased from 70vh to 90vh */
   overflow-y: auto;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #0ff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .competitive-modal-content h2 {
@@ -1067,9 +1077,10 @@ html.ios-keyboard-open {
 
 .competitive-modal-buttons {
   display: flex;
+  gap: 15px;
   justify-content: center;
-  gap: 10px;
   margin-top: 20px;
+  padding: 10px 0;
 }
 
 .modal-button {
@@ -1156,12 +1167,12 @@ html.ios-keyboard-open {
 
 .season-stat {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(252, 186, 33, 0.2);
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 255, 255, 0.1);
 }
 
 .season-stat.time-remaining {
@@ -1175,10 +1186,9 @@ html.ios-keyboard-open {
 }
 
 .stat-value {
-  font-size: 0.9rem;
-  font-weight: bold;
+  font-size: 1rem;
   color: #fff;
-  margin-top: 2px;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 .stat-value.countdown {
@@ -1192,10 +1202,9 @@ html.ios-keyboard-open {
 }
 
 .stat-label {
-  font-size: 0.7rem;
-  color: #aaa;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 1rem;
+  color: #0ff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
 }
 
 .player-info .stat-label {
@@ -1427,7 +1436,11 @@ html.ios-keyboard-open {
 .season-stats.vertical {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 15px; /* Increased gap between stats */
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 255, 0.2);
 }
 
 .season-info-vertical .season-stat {
@@ -1579,4 +1592,71 @@ html.ios-keyboard-open {
 .season-info-vertical {
   min-height: auto;
   padding-bottom: 5px;
+}
+
+.player-info .season-stats.vertical {
+  gap: 10px;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.player-info .season-info h3 {
+  font-size: 1rem;
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
+.player-info .season-stat {
+  padding: 8px 12px;
+}
+
+.player-info .stat-label {
+  font-size: 0.85rem;
+}
+
+.player-info .stat-value {
+  font-size: 0.9rem;
+}
+
+.competitive-intro {
+  text-align: center;
+  margin: 0 0 15px 0;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.player-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.player-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #0ff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+.player-name {
+  font-size: 0.9rem;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  font-weight: bold;
+}
+
+.crypto-amount {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 0.5px;
 }

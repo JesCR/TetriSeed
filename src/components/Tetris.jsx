@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
-import Leaderboard from './Leaderboard';
 import CompetitiveLeaderboard from './CompetitiveLeaderboard';
 import CompetitiveMode from './CompetitiveMode';
 import Modal from './Modal';
@@ -17,6 +16,7 @@ import { useGameStatus } from '../hooks/useGameStatus';
 import { checkCollision, createStage } from '../utils/tetrisUtils';
 import { getApiUrl } from '../utils/apiConfig';
 import { initAudio, playBackgroundMusic, pauseBackgroundMusic } from '../utils/audioUtils';
+import { mockPayCompetitiveFee } from '../utils/web3Utils';
 
 import logoText from '../assets/images/logo_text.png';
 
@@ -49,6 +49,10 @@ const Tetris = () => {
 
   // Extra state for showing the competitive rules modal
   const [showModal, setShowModal] = useState(false);
+  
+  // Add loading and error states for competitive mode payment
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Initialize audio when component mounts
   useEffect(() => {
@@ -107,6 +111,14 @@ const Tetris = () => {
       // If in top 5, show tweet modal
       if (data.isTop5) {
         setShowTop10Modal(true);
+      }
+      
+      // Trigger a refresh of the competitive leaderboard data
+      if (typeof window.refreshCompetitiveLeaderboard === 'function') {
+        // Small delay to ensure the server has processed the new entry
+        setTimeout(() => {
+          window.refreshCompetitiveLeaderboard();
+        }, 500);
       }
     } catch (error) {
       console.error('Error submitting score:', error);
@@ -490,9 +502,30 @@ const Tetris = () => {
   };
 
   // Handle confirmation of the competitive rules
-  const handleCompetitiveRulesConfirm = () => {
-    setShowModal(false);
-    startGame();
+  const handleCompetitiveRulesConfirm = async () => {
+    if (isCompetitiveMode) {
+      setIsLoading(true);
+      
+      try {
+        // Mock payment for competitive mode
+        const paymentResult = await mockPayCompetitiveFee(walletAddress);
+        
+        if (paymentResult.success) {
+          setShowModal(false);
+          startGame();
+        } else {
+          setError(paymentResult.error || 'Payment failed');
+        }
+      } catch (error) {
+        setError(error.message || 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Just start the game in casual mode
+      setShowModal(false);
+      startGame();
+    }
   };
 
   return (
@@ -525,26 +558,34 @@ const Tetris = () => {
           <div className="competitive-modal-content">
             <h2>Competitive Mode Rules</h2>
             <div className="rules-list">
-              <p>1. Every player pays 1 $SUPR per game</p>
-              <p>2. All $SUPR are collected in a smart contract</p>
-              <p>3. Every season lasts 1 week (Monday to Sunday)</p>
-              <p>4. At the end of each season, the top 5 competitive players get prizes:</p>
+              <p>0. Still in testnet, no real money is used!</p>
+              <p>1. All <span className="crypto-amount">$SUPR</span> are collected in a smart contract</p>
+              <p>2. Every season lasts 1 week (Monday to Sunday)</p>
+              <p>3. At the end of each season, the top 5 competitive players get prizes:</p>
               <ul>
-                <li>1st place: 50% of the pot</li>
-                <li>2nd place: 30% of the pot</li>
-                <li>3rd place: 10% of the pot</li>
-                <li>4th place: 5% of the pot</li>
-                <li>5th place: 5% of the pot</li>
+                <li>1st place: <span className="crypto-amount">50%</span> of the pot</li>
+                <li>2nd place: <span className="crypto-amount">30%</span> of the pot</li>
+                <li>3rd place: <span className="crypto-amount">10%</span> of the pot</li>
+                <li>4th place: <span className="crypto-amount">5%</span> of the pot</li>
+                <li>5th place: <span className="crypto-amount">5%</span> of the pot</li>
               </ul>
               <p>5. After that, a new season starts and the leaderboard is cleared</p>
             </div>
+            
+            {error && <p className="error-message">{error}</p>}
             
             <div className="competitive-modal-buttons">
               <button 
                 className="modal-button" 
                 onClick={handleCompetitiveRulesConfirm}
+                disabled={isLoading}
               >
-                Pay 1 $SUPR & Start
+                {isCompetitiveMode 
+                  ? (isLoading 
+                    ? 'Processing Payment...' 
+                    : <span>Pay <span className="crypto-amount">1 $SUPR</span> & Start Game</span>
+                    ) 
+                  : 'Start Game'}
               </button>
               <button className="modal-button secondary" onClick={handleCompetitiveRulesClose}>
                 Cancel
@@ -612,12 +653,20 @@ const Tetris = () => {
               
               {/* Mobile: Leaderboard and player info below */}
               <div className="sidebar mobile-sidebar">
-                {isCompetitiveMode ? <CompetitiveLeaderboard /> : <Leaderboard />}
+                <CompetitiveLeaderboard /> {/* Always show competitive leaderboard */}
                 <div className="player-info">
-                  <p>Current Player: <span className="player-name">{playerName}</span></p>
-                  <p>Mode: <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
-                    {isCompetitiveMode ? "Competitive" : "Casual"}
-                  </span></p>
+                  <div className="player-info-row">
+                    <div className="player-detail">
+                      <span className="detail-label">Player:</span>
+                      <span className="player-name">{playerName}</span>
+                    </div>
+                    <div className="player-detail">
+                      <span className="detail-label">Mode:</span>
+                      <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
+                        {isCompetitiveMode ? "Competitive" : "Casual"}
+                      </span>
+                    </div>
+                  </div>
                   {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
@@ -660,12 +709,20 @@ const Tetris = () => {
               </div>
               
               <div className="sidebar">
-                {isCompetitiveMode ? <CompetitiveLeaderboard /> : <Leaderboard />}
+                <CompetitiveLeaderboard /> {/* Always show competitive leaderboard */}
                 <div className="player-info">
-                  <p>Current Player: <span className="player-name">{playerName}</span></p>
-                  <p>Mode: <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
-                    {isCompetitiveMode ? "Competitive" : "Casual"}
-                  </span></p>
+                  <div className="player-info-row">
+                    <div className="player-detail">
+                      <span className="detail-label">Player:</span>
+                      <span className="player-name">{playerName}</span>
+                    </div>
+                    <div className="player-detail">
+                      <span className="detail-label">Mode:</span>
+                      <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
+                        {isCompetitiveMode ? "Competitive" : "Casual"}
+                      </span>
+                    </div>
+                  </div>
                   {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
@@ -679,4 +736,4 @@ const Tetris = () => {
   );
 };
 
-export default Tetris; 
+export default Tetris;

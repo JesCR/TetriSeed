@@ -13,6 +13,7 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
     try {
       setLoading(true);
       const data = await getCompetitiveLeaderboard();
+      console.log('Leaderboard data received:', data);
       setLeaderboard(data);
       setError(null);
     } catch (err) {
@@ -22,6 +23,16 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
       setLoading(false);
     }
   }, []);
+  
+  // Expose the fetchLeaderboard function globally
+  useEffect(() => {
+    window.refreshCompetitiveLeaderboard = fetchLeaderboard;
+    
+    return () => {
+      // Clean up when component unmounts
+      delete window.refreshCompetitiveLeaderboard;
+    };
+  }, [fetchLeaderboard]);
   
   useEffect(() => {
     fetchLeaderboard();
@@ -36,10 +47,26 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
     setShowHistory(!showHistory);
   }, [showHistory]);
   
-  // Format wallet address to show only first and last 4 characters
-  const formatAddress = useCallback((address) => {
-    if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  // Format player name with wallet address
+  const formatPlayerInfo = useCallback((entry) => {
+    
+    if (!entry) return 'Unknown';
+    
+    // Check different possible property names for player name and address
+    const name = entry.name || entry.playerName || '';
+    const address = entry.walletAddress || entry.address || '';
+    
+    // Get first 5 characters of wallet address
+    const shortWallet = address ? address.slice(0, 5) : '';
+    
+    // Combine player name and wallet address
+    if (name) {
+      return `${name} (${shortWallet})`;
+    } else if (shortWallet) {
+      return shortWallet;
+    } else {
+      return 'Unknown Player';
+    }
   }, []);
   
   // Format date
@@ -52,7 +79,7 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
   if (error) {
     return <div className="leaderboard-container competitive">
       <div className="leaderboard-header">
-        <h2>Top Borrowers (Competitive)</h2>
+        <h2>Top Borrowers</h2>
       </div>
       <p className="error-message">{error}</p>
       <button className="refresh-button" onClick={fetchLeaderboard}>Try Again</button>
@@ -62,7 +89,7 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
   return (
     <div className="leaderboard-container competitive">
       <div className="leaderboard-header">
-        <h2>Top Borrowers (Competitive)</h2>
+        <h2>Top Borrowers</h2>
         <button 
           className="history-button" 
           onClick={toggleHistory}
@@ -75,9 +102,7 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
       {showHistory ? (
         <SeasonHistory />
       ) : (
-        <>
-          <SeasonInfo isDetailed={false} isVertical={true} />
-          
+        <>        
           {loading ? (
             <p className="loading-text">Loading leaderboard...</p>
           ) : leaderboard.length === 0 ? (
@@ -89,15 +114,17 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
                   <thead>
                     <tr>
                       <th>Rank</th>
-                      <th>Wallet</th>
+                      <th>Player</th>
                       <th>Score</th>
                       <th>Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {leaderboard.map((entry, index) => {
+                      // Check for different possible property names for address
+                      const entryAddress = entry.walletAddress || entry.address || '';
                       const isCurrentPlayer = walletAddress && 
-                        entry.walletAddress.toLowerCase() === walletAddress.toLowerCase();
+                        entryAddress && entryAddress.toLowerCase() === walletAddress.toLowerCase();
                       
                       return (
                         <tr 
@@ -105,8 +132,8 @@ const CompetitiveLeaderboard = ({ walletAddress = '0x9i8h7g6f5e4d3c2b1a0' }) => 
                           className={isCurrentPlayer ? 'current-player' : (index < 3 ? 'top-scorer' : '')}
                         >
                           <td>{index + 1}</td>
-                          <td title={entry.walletAddress}>{formatAddress(entry.walletAddress)}</td>
-                          <td>{entry.score.toLocaleString()}</td>
+                          <td title={entryAddress}>{formatPlayerInfo(entry)}</td>
+                          <td><span className="crypto-amount">{entry.score ? entry.score.toLocaleString() : '0'}</span></td>
                           <td>{formatDate(entry.date)}</td>
                         </tr>
                       );

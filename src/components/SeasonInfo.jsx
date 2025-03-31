@@ -83,7 +83,9 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
     <div className="season-stats">
       <div className="season-stat">
         <div className="stat-label">Prize Pool</div>
-        <div className="stat-value">{seasonData.potSize} $SUPR</div>
+        <div className="stat-value">
+          <span className="crypto-amount">{seasonData.potSize} $SUPR</span>
+        </div>
       </div>
       
       <div className="season-stat">
@@ -103,23 +105,23 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
     <div className="prize-distribution">
       <div className="prize-item">
         <span className="prize-rank">1st PLACE:</span>
-        <span className="prize-value">50% OF THE POT</span>
+        <span className="prize-value"><span className="crypto-amount">50%</span> OF THE POT</span>
       </div>
       <div className="prize-item">
         <span className="prize-rank">2nd PLACE:</span>
-        <span className="prize-value">30% OF THE POT</span>
+        <span className="prize-value"><span className="crypto-amount">30%</span> OF THE POT</span>
       </div>
       <div className="prize-item">
         <span className="prize-rank">3rd PLACE:</span>
-        <span className="prize-value">10% OF THE POT</span>
+        <span className="prize-value"><span className="crypto-amount">10%</span> OF THE POT</span>
       </div>
       <div className="prize-item">
         <span className="prize-rank">4th PLACE:</span>
-        <span className="prize-value">5% OF THE POT</span>
+        <span className="prize-value"><span className="crypto-amount">5%</span> OF THE POT</span>
       </div>
       <div className="prize-item">
         <span className="prize-rank">5th PLACE:</span>
-        <span className="prize-value">5% OF THE POT</span>
+        <span className="prize-value"><span className="crypto-amount">5%</span> OF THE POT</span>
       </div>
     </div>
   );
@@ -129,7 +131,9 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
     <div className="season-stats vertical">
       <div className="season-stat">
         <div className="stat-label">Prize Pool:</div>
-        <div className="stat-value">{seasonData.potSize} $SUPR</div>
+        <div className="stat-value">
+          <span className="crypto-amount">{seasonData.potSize} $SUPR</span>
+        </div>
       </div>
       
       <div className="season-stat">
@@ -141,8 +145,6 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
         <div className="stat-label">Time Left:</div>
         <div className="stat-value countdown">{formatTimeRemaining()}</div>
       </div>
-
-      {renderPrizeDistribution()}
 
       {isDetailed && (
         <>

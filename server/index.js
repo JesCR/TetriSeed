@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5173;
+const PORT = process.env.PORT || 5172;
 
 // Path to leaderboard and competitive data files
 const LEADERBOARD_PATH = path.join(__dirname, 'leaderboard.csv');

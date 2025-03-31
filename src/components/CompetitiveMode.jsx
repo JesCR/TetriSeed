@@ -4,17 +4,15 @@ import {
   getMetaMaskDownloadLink, 
   connectWallet,
   disconnectWallet,
-  switchToSuperSeedNetwork, 
-  mockPayCompetitiveFee 
+  switchToSuperSeedNetwork
 } from '../utils/web3Utils';
 import Modal from './Modal';
-import SeasonInfo from './SeasonInfo';
 
 const CompetitiveMode = ({ onActivation, isActive = false }) => {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(''); // 'metamask', 'rules', 'network'
+  const [modalType, setModalType] = useState(''); // 'metamask' only now
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -79,7 +77,7 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
     }
   };
   
-  // Handle competitive mode toggle
+  // Handle competitive mode toggle - now directly activates/deactivates
   const handleCompetitiveModeToggle = async () => {
     if (!walletConnected) {
       setError('Please connect your wallet first');
@@ -92,34 +90,9 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
       return;
     }
     
-    // Enter competitive mode
-    setModalType('rules');
-    setShowModal(true);
-  };
-  
-  // Handle confirmation of competitive mode
-  const handleConfirmCompetitive = async () => {
-    setIsLoading(true);
-    setError('');
-    
-    try {
-      // Mock payment for now
-      const paymentResult = await mockPayCompetitiveFee(walletAddress);
-      
-      if (paymentResult.success) {
-        setShowModal(false);
-        
-        // Notify parent component
-        if (onActivation) {
-          onActivation(true, walletAddress);
-        }
-      } else {
-        setError(paymentResult.error || 'Payment failed');
-      }
-    } catch (error) {
-      setError(error.message || 'An error occurred');
-    } finally {
-      setIsLoading(false);
+    // Directly activate competitive mode
+    if (onActivation) {
+      onActivation(true, walletAddress);
     }
   };
   
@@ -152,44 +125,6 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
             </div>
           </div>
         );
-      
-      case 'rules':
-        return (
-          <div className="competitive-modal-content">
-            <h2>Competitive Mode Rules</h2>
-            <div className="rules-list">
-              <p>1. Every player pays 1 $SUPR per game</p>
-              <p>2. All $SUPR are collected in a smart contract</p>
-              <p>3. Every season lasts 1 week (Monday to Sunday)</p>
-              <p>4. At the end of each season, the top 5 competitive players get prizes:</p>
-              <ul>
-                <li>1st place: 50% of the pot</li>
-                <li>2nd place: 30% of the pot</li>
-                <li>3rd place: 10% of the pot</li>
-                <li>4th place: 5% of the pot</li>
-                <li>5th place: 5% of the pot</li>
-              </ul>
-              <p>5. After that, a new season starts and the leaderboard is cleared</p>
-            </div>
-            
-            <SeasonInfo isDetailed={true} />
-            
-            {error && <p className="error-message">{error}</p>}
-            
-            <div className="competitive-modal-buttons">
-              <button 
-                className="modal-button" 
-                onClick={handleConfirmCompetitive}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Processing...' : 'Pay 1 $SUPR & Start'}
-              </button>
-              <button className="modal-button secondary" onClick={handleCloseModal}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        );
       default:
         return null;
     }
@@ -197,12 +132,6 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
   
   return (
     <div className="competitive-mode">
-      <div className="game-mode-display">
-        <p>Mode: <span className={isActive ? "competitive-mode-active" : "casual-mode"}>
-          {isActive ? "Competitive" : "Casual"}
-        </span></p>
-      </div>
-      
       <div className="wallet-buttons">
         {/* FIRST: Connect/Disconnect button */}
         <button 

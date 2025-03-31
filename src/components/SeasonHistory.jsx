@@ -86,7 +86,7 @@ const SeasonHistory = () => {
             <div className="season-details">
               <div className="pot-size">
                 <span className="label">Prize Pool:</span>
-                <span className="value">{season.potSize} SEED</span>
+                <span className="value"><span className="crypto-amount">{season.potSize} $SUPR</span></span>
               </div>
               
               <div className="player-count">
@@ -101,8 +101,8 @@ const SeasonHistory = () => {
                 {season.winners && season.winners.map((winner, index) => (
                   <li key={index}>
                     <span className="winner-address">{formatAddress(winner.walletAddress)}</span>
-                    <span className="winner-score">{winner.score}</span>
-                    <span className="winner-prize">{winner.prize} SEED</span>
+                    <span className="winner-score"><span className="crypto-amount">{winner.score}</span></span>
+                    <span className="winner-prize"><span className="crypto-amount">{winner.prize} $SUPR</span></span>
                   </li>
                 ))}
               </ol>
