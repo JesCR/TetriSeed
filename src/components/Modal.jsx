@@ -87,12 +87,33 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
     }, 100);
   };
 
-  const tweetText = `I just scored ${score} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt`;
+  // Handle score object or plain number
+  const getScoreValue = () => {
+    if (score === null || score === undefined) return 0;
+    if (typeof score === 'object') {
+      return score.score || 0;
+    }
+    return score;
+  };
+
+  const getRank = () => {
+    if (score && typeof score === 'object') {
+      return score.rank;
+    }
+    return null;
+  };
+
+  const tweetText = getRank() 
+    ? `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! Ranked #${getRank()} on the leaderboard! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt` 
+    : `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt`;
   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
 
   return (
     <div className="modal-overlay">
-      <div className={`modal-content ${type === 'custom' ? 'custom-modal' : ''}`}>
+      <div className={`modal-content ${type === 'custom' ? 
+        (customContent && customContent.props && customContent.props.className && 
+         customContent.props.className.includes('mobile-warning-modal') ? 
+         'custom-modal mobile-modal' : 'custom-modal') : ''}`}>
         {type !== 'custom' && (
           <img src={logoText} alt="SuperSeed Logo" className="modal-logo" />
         )}
@@ -121,8 +142,15 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
         
         {type === 'top10' && (
           <>
-            <h2>Congratulations!</h2>
-            <p>You've made it to the Top 10 with a score of {score}!</p>
+            <h2>{getRank() && getRank() <= 10 ? 'Congratulations!' : 'Game Over!'}</h2>
+            <p>Your final score: <span className="score-value">{getScoreValue()}</span></p>
+            
+            {getRank() && getRank() <= 10 ? (
+              <p>You've made it to rank #{getRank()} on the leaderboard!</p>
+            ) : getRank() ? (
+              <p>Your current rank: #{getRank()}</p>
+            ) : null}
+            
             <p>Share your achievement:</p>
             <a 
               href={tweetUrl} 

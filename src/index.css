@@ -5,14 +5,19 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Lacquer', cursive;
-  background-color: #000;
+  background: #000;
   color: #fff;
+  font-family: 'Lacquer', sans-serif;
   overflow-x: hidden;
+  max-width: 100vw;
+  min-height: 100vh;
+  display: block;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 /* App container */
@@ -406,8 +411,8 @@ body {
 }
 
 .player-info {
-  margin-top: 20px;
-  padding: 15px;
+  margin-top: 10px;
+  padding: 12px;
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid #0ff;
   border-radius: 5px;
@@ -416,16 +421,43 @@ body {
   width: 100%;
   min-width: 300px;
   max-width: 400px;
-  min-height: 250px;
+  min-height: auto;
   max-height: 400px;
   overflow-y: auto;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.player-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #0ff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
 }
 
 .player-name {
-  color: #ffdd00;
+  font-size: 0.9rem;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
   font-weight: bold;
 }
 
@@ -604,6 +636,7 @@ body {
   .game-content {
     flex-direction: column;
     align-items: center;
+    gap: 0;
   }
   
   .sidebar {
@@ -631,6 +664,7 @@ body {
     flex-direction: column;
     align-items: center;
     order: 2;
+    margin-bottom: 0;
   }
   
   .facts-container h3 {
@@ -724,6 +758,7 @@ body {
     margin: 10px auto;
     padding: 0;
     max-width: 350px;
+    margin-bottom: 0;
   }
   
   /* Adjust leaderboard sizing for mobile */
@@ -757,6 +792,90 @@ body {
     transform: scale(0.9);
     box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
   }
+  
+  /* Adjust order of elements on mobile */
+  .mobile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 0;
+  }
+  
+  /* Mobile player info styles - reduced space */
+  .mobile-player-info {
+    width: 100%;
+    max-width: 350px;
+    order: 0;
+    min-height: auto;
+    padding: 10px;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .mobile-player-info .player-info-row {
+    margin-bottom: 8px;
+    padding: 5px;
+  }
+  
+  .mobile-player-info .wallet-buttons {
+    margin-bottom: 8px;
+  }
+  
+  .mobile-player-info .season-info {
+    margin: 0;
+    padding: 5px;
+  }
+  
+  .mobile-sidebar {
+    gap: 8px;
+  }
+  
+  /* Adjust leaderboard size for mobile */
+  .leaderboard-container.competitive {
+    width: 100%;
+    max-width: 350px;
+    order: 1; /* Make leaderboard come second */
+  }
+  
+  .leaderboard-container h2 {
+    font-size: 0.85rem;
+  }
+  
+  /* Adjust game container spacing */
+  .game-content {
+    gap: 0;
+  }
+  
+  /* Ensure mobile warning modal text is fully visible */
+  .mobile-warning-modal {
+    height: auto;
+    min-height: auto; 
+    overflow: visible;
+    padding: 15px 10px;
+  }
+  
+  .mobile-warning-modal .warning-icon {
+    font-size: 20px;
+    margin: 3px 0;
+  }
+  
+  .mobile-warning-modal h3 {
+    font-size: 1rem;
+    margin: 3px 0;
+  }
+  
+  .mobile-warning-modal .mobile-warning-info {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    line-height: 1.2;
+  }
+  
+  .mobile-warning-modal .modal-button {
+    padding: 8px 15px;
+    margin-top: 5px;
+  }
 }
 
 /* Very small screens */
@@ -786,46 +905,60 @@ body {
 .facts-container {
   margin-top: 20px;
   padding: 15px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid #0ff;
-  border-radius: 5px;
-  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #00ffff;
+  border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   width: 100%;
   min-width: 300px;
   max-width: 400px;
   overflow-y: auto;
   max-height: calc(100vh - 450px);
-  line-height: 1.4;
+  color: white;
+  margin-bottom: 20px;
+  transition: background-color 0.15s ease;
 }
 
 .facts-container h3 {
-  color: #0ff;
-  font-size: 0.9rem;
+  color: #00ffff;
   text-align: center;
   margin-top: 0;
-  margin-bottom: 10px;
-  font-family: 'Lacquer', cursive;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  text-transform: uppercase;
   letter-spacing: 1px;
+  font-family: 'Lacquer', cursive;
 }
 
-.facts-container .fact-title {
+.fact-title {
   text-align: center;
-  font-size: 0.7rem;
-  margin-bottom: 5px;
   font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1.1rem; /* Same size as the title */
   color: #ffdd00;
   letter-spacing: 0.5px;
 }
 
-.facts-container .fact-content {
+.fact-content {
   text-align: justify;
-  font-size: 0.65rem;
-  line-height: 1.5;
-  margin-bottom: 5px;
-  max-height: 70px;
-  overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  line-height: 1.4;
   letter-spacing: 0.5px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Enhanced flash effect for triple-flash */
+@keyframes tripleFlash {
+  0%, 100% { background-color: rgba(0, 0, 0, 0.8); }
+  50% { background-color: rgba(0, 255, 255, 0.15); }
+}
+
+.flash-effect {
+  animation: tripleFlash 0.15s ease;
+  transform: translate3d(0, 0, 0);
+  will-change: background-color;
 }
 
 .facts-footer {
@@ -863,19 +996,6 @@ body {
 .facts-emoji {
   font-size: 1.2rem;
   margin-right: 5px;
-}
-
-/* Optimize flash effect animation */
-@keyframes flash-white {
-  0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.9); }
-  100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
-}
-
-.flash-effect {
-  animation: flash-white 0.7s ease-out;
-  transform: translate3d(0, 0, 0);
-  will-change: box-shadow;
 }
 
 /* iOS-specific fixes */
@@ -971,11 +1091,28 @@ html.ios-keyboard-open {
   font-weight: bold;
 }
 
+/* Wallet buttons layout */
 .wallet-buttons {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
   margin-bottom: 10px;
+  justify-content: center;
+}
+
+/* Connected wallet buttons style */
+.wallet-buttons.wallet-connected {
+  margin-bottom: 10px;
+}
+
+.wallet-button, .competitive-button {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  padding: 8px 10px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .wallet-button {
@@ -1034,107 +1171,135 @@ html.ios-keyboard-open {
 
 /* Competitive Modal Styles */
 .competitive-modal-content {
-  padding: 30px;
-  max-width: 500px;
   width: 100%;
-  max-height: 90vh; /* Increased from 70vh to 90vh */
+  max-width: 100%;
+  box-sizing: border-box;
   overflow-y: auto;
-  background: rgba(0, 0, 0, 0.9);
-  border: 2px solid #0ff;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  max-height: 80vh;
+  padding: 20px 15px;
+}
+
+.metamask-modal {
+  padding: 15px;
+}
+
+.metamask-modal h3 {
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #0ff;
+}
+
+.metamask-info {
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
 }
 
 .competitive-modal-content h2 {
-  font-size: 1.5rem;
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #fcba21;
   text-align: center;
+  color: #fcba21;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
 }
 
 .rules-list {
+  text-align: left;
+  padding: 0 10px;
   margin-bottom: 20px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
   text-align: left;
 }
 
-.rules-list p {
-  margin: 8px 0;
+.rule-number {
+  flex: 0 0 25px;
+  font-weight: bold;
+  color: #fcba21;
 }
 
-.rules-list ul {
-  margin: 10px 0;
-  padding-left: 30px;
+.rule-text {
+  flex: 1;
 }
 
-.rules-list li {
-  margin: 5px 0;
+.prizes-list {
+  margin-left: 25px;
+  margin-bottom: 15px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  border-left: 2px solid #fcba21;
+}
+
+.prize-item-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  padding: 2px 0;
+}
+
+.prize-rank {
+  color: #fcba21;
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.prize-value {
+  color: #fff;
 }
 
 .competitive-modal-buttons {
   display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 20px;
-  padding: 10px 0;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
 }
 
-.modal-button {
-  background: linear-gradient(to right, #a55c1b, #fcba21);
+.competitive-modal-buttons .modal-button {
+  width: 100%;
+  font-size: 0.8rem;
+  padding: 12px;
+  margin: 0;
+}
+
+.primary-button {
+  background: linear-gradient(to right, #0f0, #0ff);
   color: #000;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  text-decoration: none;
-  display: inline-block;
-  transition: all 0.3s;
-  font-family: 'Lacquer', cursive;
 }
 
-.modal-button:hover {
-  background: linear-gradient(to right, #c46b1f, #fdcc45);
-  transform: translateY(-2px);
-}
-
-.modal-button.secondary {
-  background: #333;
+.secondary-button {
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
+  border: 1px solid rgba(0, 255, 255, 0.3);
 }
 
-.modal-button.secondary:hover {
-  background: #555;
-}
-
-.error-message {
-  color: #ff3333;
-  text-align: center;
-  margin: 10px 0;
-  font-weight: bold;
+@media (min-width: 480px) {
+  .competitive-modal-buttons {
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .competitive-modal-buttons .modal-button {
+    width: auto;
+    min-width: 120px;
+  }
 }
 
 /* Season Info Styles - Optimized for better display and less height */
 .season-info {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #a55c1b;
-  border-radius: 4px;
-  padding: 10px;
-  margin: 10px 0;
-  box-shadow: 0 0 10px rgba(252, 186, 33, 0.3);
-  overflow: visible;
-  min-height: 140px;
+  padding: 8px;
+  margin: 0;
+  min-height: auto;
 }
 
 .player-info .season-info {
-  margin: 5px 0;
-  padding: 8px;
-  border-radius: 4px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .season-info h3 {
@@ -1626,37 +1791,418 @@ html.ios-keyboard-open {
 }
 
 .player-info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 8px 10px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
-  border: 1px solid rgba(0, 255, 255, 0.2);
+  margin-bottom: 8px;
 }
 
-.player-detail {
+.wallet-buttons {
+  margin-bottom: 8px;
+}
+
+/* Mobile warning modal styles */
+.mobile-warning-modal {
+  padding: 10px;
+  text-align: center;
+  height: auto;
+  max-height: none;
+  overflow: visible;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+}
+
+.mobile-warning-modal h3 {
+  font-size: 1.2rem;
+  margin-top: 5px;
+  margin-bottom: 8px;
+  color: #ff8c00;
+}
+
+.warning-icon {
+  font-size: 24px;
+  margin: 5px 0;
+}
+
+.mobile-warning-info {
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+/* Mobile player info optimizations */
+.mobile-player-info {
+  width: 100%;
+  max-width: 350px;
+  order: 0;
+  min-height: auto;
+  padding: 10px;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.detail-label {
+.mobile-player-info .player-info-row {
+  margin-bottom: 8px;
+  padding: 5px;
+}
+
+.mobile-player-info .wallet-buttons {
+  margin-bottom: 8px;
+}
+
+.mobile-player-info .season-info {
+  margin: 0;
+  padding: 5px;
+}
+
+/* Mobile warning modal styles - more compact */
+.mobile-warning-modal {
+  padding: 15px;
+  text-align: center;
+  max-height: 95vh;
+  overflow-y: auto;
+}
+
+.mobile-warning-modal h3 {
+  font-size: 1.1rem;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.warning-icon {
+  font-size: 2rem;
+  margin: 8px 0 10px;
+}
+
+.mobile-warning-info {
   font-size: 0.8rem;
-  color: #0ff;
-  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+  margin-bottom: 8px;
+  line-height: 1.3;
 }
 
-.player-name {
+.mobile-warning-modal .competitive-modal-buttons {
+  margin-top: 10px;
+}
+
+.mobile-warning-modal .modal-button {
+  padding: 10px 15px;
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    width: 90%;
+    padding: 15px;
+    font-size: 14px;
+    max-height: none;
+    overflow: visible;
+  }
+  
+  .modal-content h2, 
+  .modal-content h3 {
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .mobile-warning-modal {
+    padding: 12px;
+  }
+}
+
+/* Special modal class for mobile warning modals */
+.modal-content.mobile-modal {
+  padding: 8px;
+  max-width: 300px;
+  height: auto;
+  min-height: auto;
+}
+
+@media (max-width: 480px) {
+  .modal-content.mobile-modal {
+    min-height: auto;
+    max-height: none;
+    height: auto;
+    width: 90%;
+    padding: 8px;
+  }
+  
+  /* Further optimize for very small screens */
+  .competitive-modal-content.mobile-warning-modal {
+    padding: 8px;
+  }
+  
+  /* Fix button spacing on very small screens */
+  .start-container {
+    margin-top: 5px;
+  }
+  
+  .start-button {
+    margin-top: 0;
+    margin-bottom: 0; 
+  }
+}
+
+/* Full-screen mobile overlay for desktop-only features */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.mobile-overlay-content {
+  width: 85%;
+  max-width: 330px;
+  background: linear-gradient(to bottom, #1c1c1c, #000);
+  border: 2px solid #ff8c00;
+  border-radius: 10px;
+  padding: 20px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+  animation: slideUp 0.4s ease-out;
+}
+
+.mobile-overlay-content h3 {
+  font-size: 1.2rem;
+  margin-top: 5px;
+  margin-bottom: 12px;
+  color: #ff8c00;
+}
+
+.mobile-overlay-content .warning-icon {
+  font-size: 2rem;
+  margin: 10px 0;
+  color: #ff8c00;
+}
+
+.mobile-overlay-content p {
   font-size: 0.9rem;
+  margin-bottom: 15px;
+  line-height: 1.4;
   color: #fff;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
-  font-weight: bold;
 }
 
-.crypto-amount {
-  font-family: 'Courier New', monospace;
+.mobile-overlay-content p:last-of-type {
+  margin-bottom: 20px;
+}
+
+.mobile-overlay-content .highlight {
+  color: #ff8c00;
   font-weight: bold;
   letter-spacing: 0.5px;
+}
+
+.mobile-overlay-content .close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mobile-overlay-content .dismiss-button {
+  background: linear-gradient(to right, #ff8c00, #ff6b00);
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 25px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: 'Lacquer', cursive;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+}
+
+/* Animation for the mobile overlay */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Hover effects for mobile overlay buttons */
+.mobile-overlay-content .close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.mobile-overlay-content .dismiss-button:hover {
+  background: linear-gradient(to right, #ff9d24, #ff7c20);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+}
+
+.mobile-overlay-content .close-button:active,
+.mobile-overlay-content .dismiss-button:active {
+  transform: scale(0.95);
+}
+
+/* Mobile overlay responsive adjustments */
+@media (max-width: 480px) {
+  .mobile-overlay-content {
+    width: 90%;
+    padding: 15px;
+  }
+  
+  .mobile-overlay-content h3 {
+    font-size: 1.1rem;
+  }
+  
+  .mobile-overlay-content .warning-icon {
+    font-size: 1.8rem;
+    margin: 8px 0;
+  }
+  
+  .mobile-overlay-content p {
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+  
+  .mobile-overlay-content .dismiss-button {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .mobile-overlay-content {
+    width: 95%;
+    padding: 12px;
+  }
+  
+  .mobile-overlay-content h3 {
+    font-size: 1rem;
+  }
+  
+  .mobile-overlay-content .warning-icon {
+    font-size: 1.5rem;
+    margin: 5px 0;
+  }
+  
+  .mobile-overlay-content p {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+  
+  .mobile-overlay-content .dismiss-button {
+    padding: 8px 15px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Row layout for connected wallet buttons */
+.wallet-buttons.wallet-connected {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 5px;
+  justify-content: center;
+  width: 100%;
+}
+
+.wallet-buttons.wallet-connected .wallet-button,
+.wallet-buttons.wallet-connected .competitive-button {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  padding: 8px 5px;
+  font-size: 0.85rem;
+}
+
+/* Make sure mobile still stacks buttons */
+@media (max-width: 768px) {
+  .mobile-player-info .wallet-buttons.wallet-connected {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .wallet-buttons.wallet-connected {
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Fix desktop button layout to ensure single row */
+@media (min-width: 769px) {
+  .wallet-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .wallet-button, .competitive-button {
+    flex: 1 1 auto;
+    max-width: calc(50% - 5px);
+  }
+  
+  /* Restore button padding */
+  .wallet-button, .competitive-button {
+    padding: 8px 5px;
+    font-size: 0.9rem;
+  }
+}
+
+.player-info .wallet-buttons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.player-info .wallet-button, 
+.player-info .competitive-button {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+}
+
+/* Override for mobile displays */
+@media (max-width: 768px) {
+  .mobile-player-info .wallet-buttons {
+    flex-direction: column;
+  }
+}
+
+.player-info > *:last-child,
+.mobile-player-info > *:last-child {
+  margin-bottom: 0;
+}
+
+.season-info {
+  margin-bottom: 0;
 }

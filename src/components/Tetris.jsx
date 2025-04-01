@@ -33,6 +33,7 @@ const Tetris = () => {
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
+  const [scoreInfo, setScoreInfo] = useState({ score: 0, rank: null });
 
   const tetrisRef = useRef(null);
 
@@ -64,6 +65,13 @@ const Tetris = () => {
       pauseBackgroundMusic();
     };
   }, []);
+
+  // Make scoreInfo state track the actual score during the game
+  useEffect(() => {
+    if (score !== undefined && score !== null) {
+      setScoreInfo(prev => ({ ...prev, score }));
+    }
+  }, [score]);
 
   // Submit score to the leaderboard
   const submitScore = async (score) => {
@@ -108,10 +116,14 @@ const Tetris = () => {
       const data = await response.json();
       console.log('Score submission response:', data);
       
-      // If in top 5, show tweet modal
-      if (data.isTop5) {
-        setShowTop10Modal(true);
-      }
+      // Always show tweet modal, regardless of ranking
+      // Update only the rank in scoreInfo, keeping the current score
+      setScoreInfo(prevInfo => ({
+        ...prevInfo,
+        rank: data.rank || null
+      }));
+      
+      setShowTop10Modal(true);
       
       // Trigger a refresh of the competitive leaderboard data
       if (typeof window.refreshCompetitiveLeaderboard === 'function') {
@@ -507,12 +519,23 @@ const Tetris = () => {
       setIsLoading(true);
       
       try {
-        // Mock payment for competitive mode
+        // Process payment for competitive mode
         const paymentResult = await mockPayCompetitiveFee(walletAddress);
         
         if (paymentResult.success) {
+          // Payment successful, close modal and start game
           setShowModal(false);
-          startGame();
+          
+          // Immediately refresh season info to update pot size and player count
+          if (typeof window.refreshSeasonInfo === 'function') {
+            console.log('Refreshing season info after payment');
+            window.refreshSeasonInfo();
+          }
+          
+          // Start the game after a short delay to allow refresh
+          setTimeout(() => {
+            startGame();
+          }, 300);
         } else {
           setError(paymentResult.error || 'Payment failed');
         }
@@ -546,7 +569,7 @@ const Tetris = () => {
       <Modal 
         isOpen={showTop10Modal && !showNameModal} 
         type="top10" 
-        score={score} 
+        score={scoreInfo} 
         onClose={handleTop10Close} 
       />
 
@@ -558,18 +581,48 @@ const Tetris = () => {
           <div className="competitive-modal-content">
             <h2>Competitive Mode Rules</h2>
             <div className="rules-list">
-              <p>0. Still in testnet, no real money is used!</p>
-              <p>1. All <span className="crypto-amount">$SUPR</span> are collected in a smart contract</p>
-              <p>2. Every season lasts 1 week (Monday to Sunday)</p>
-              <p>3. At the end of each season, the top 5 competitive players get prizes:</p>
-              <ul>
-                <li>1st place: <span className="crypto-amount">50%</span> of the pot</li>
-                <li>2nd place: <span className="crypto-amount">30%</span> of the pot</li>
-                <li>3rd place: <span className="crypto-amount">10%</span> of the pot</li>
-                <li>4th place: <span className="crypto-amount">5%</span> of the pot</li>
-                <li>5th place: <span className="crypto-amount">5%</span> of the pot</li>
-              </ul>
-              <p>5. After that, a new season starts and the leaderboard is cleared</p>
+              <div className="rule-item">
+                <span className="rule-number">0.</span>
+                <span className="rule-text">Still in testnet, no real money is used!</span>
+              </div>
+              <div className="rule-item">
+                <span className="rule-number">1.</span>
+                <span className="rule-text">All <span className="crypto-amount">$SUPR</span> are collected in a smart contract</span>
+              </div>
+              <div className="rule-item">
+                <span className="rule-number">2.</span>
+                <span className="rule-text">Every season lasts 1 week (Monday to Sunday)</span>
+              </div>
+              <div className="rule-item">
+                <span className="rule-number">3.</span>
+                <span className="rule-text">At the end of each season, the top 5 competitive players get prizes:</span>
+              </div>
+              <div className="prizes-list">
+                <div className="prize-item-row">
+                  <span className="prize-rank">1st place:</span>
+                  <span className="prize-value"><span className="crypto-amount">50%</span> of the pot</span>
+                </div>
+                <div className="prize-item-row">
+                  <span className="prize-rank">2nd place:</span>
+                  <span className="prize-value"><span className="crypto-amount">30%</span> of the pot</span>
+                </div>
+                <div className="prize-item-row">
+                  <span className="prize-rank">3rd place:</span>
+                  <span className="prize-value"><span className="crypto-amount">10%</span> of the pot</span>
+                </div>
+                <div className="prize-item-row">
+                  <span className="prize-rank">4th place:</span>
+                  <span className="prize-value"><span className="crypto-amount">5%</span> of the pot</span>
+                </div>
+                <div className="prize-item-row">
+                  <span className="prize-rank">5th place:</span>
+                  <span className="prize-value"><span className="crypto-amount">5%</span> of the pot</span>
+                </div>
+              </div>
+              <div className="rule-item">
+                <span className="rule-number">5.</span>
+                <span className="rule-text">After that, a new season starts and the leaderboard is cleared</span>
+              </div>
             </div>
             
             {error && <p className="error-message">{error}</p>}
@@ -653,8 +706,7 @@ const Tetris = () => {
               
               {/* Mobile: Leaderboard and player info below */}
               <div className="sidebar mobile-sidebar">
-                <CompetitiveLeaderboard /> {/* Always show competitive leaderboard */}
-                <div className="player-info">
+                <div className="player-info mobile-player-info">
                   <div className="player-info-row">
                     <div className="player-detail">
                       <span className="detail-label">Player:</span>
@@ -667,9 +719,10 @@ const Tetris = () => {
                       </span>
                     </div>
                   </div>
-                  {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
+                  {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                 </div>
+                <CompetitiveLeaderboard /> {/* Leaderboard comes after player info */}
               </div>
             </>
           ) : (

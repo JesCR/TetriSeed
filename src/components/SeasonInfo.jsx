@@ -21,6 +21,15 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
     }
   }, []);
 
+  // Expose fetch method globally to allow manual refresh after payment
+  useEffect(() => {
+    window.refreshSeasonInfo = fetchSeasonData;
+    
+    return () => {
+      window.refreshSeasonInfo = undefined;
+    };
+  }, [fetchSeasonData]);
+
   useEffect(() => {
     fetchSeasonData();
     

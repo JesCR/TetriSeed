@@ -4,23 +4,23 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 const xLogoBase64 = "../src/assets/images/x.png";
 
 const FACTS = [
-  "💸 Loans That Repay Themselves?!\nYep, on Superseed your debt can literally vanish on its own—thanks to Supercollateral and protocol-level repayments. Zero stress, just freedom.",
+  "💸 Loans Repay Themselves\nYep, on Superseed your debt can literally vanish on its own—thanks to Supercollateral and protocol-level repayments. Zero stress, just freedom.",
   
-  "⚡️No Interest. Ever.\nBorrow with no interest when using Supercollateral. It's not a promo, it's how the system actually works. 🧠",
+  "⚡️No Interest\nBorrow with no interest when using Supercollateral. It's not a promo, it's how the system actually works. 🧠",
   
-  "🔥 Daily Auctions, Daily Rewards\nProof-of-Repayment distributes tokens every single day—just by burning debt with our stablecoin. Real value, real users, every day.",
+  "🔥 Daily Auctions&Rewards\nProof-of-Repayment distributes tokens every single day—just by burning debt with our stablecoin. Real value, real users, every day.",
   
-  "🧱 Built Right Into the Chain\nOur lending system isn't an app—it's part of the Layer 2 itself. That means more power, fewer hacks, and unstoppable DeFi. 🛡️",
+  "🧱 Designed On-Chain\nOur lending system isn't an app—it's part of the Layer 2 itself. That means more power, fewer hacks, and unstoppable DeFi. 🛡️",
   
   "🌱 DeFi That Gives Back\nEvery protocol fee—sequencer, interest, bridge—is recycled to repay users' loans. Superseed doesn't take—it returns.",
   
   "🪙 Stablecoin With Purpose\nThe Superseed stablecoin isn't just stable—it's designed to be burned constantly to repay community debt. A true value engine.",
   
-  "🤝 You're Not a User. You're a Partner.\nOn Superseed, growth literally benefits the individual. As the chain grows, so does your upside.",
+  "🤝 Not a User, a Partner.\nOn Superseed, growth literally benefits the individual. As the chain grows, so does your upside.",
   
-  "🔓 100% Unlocked Token Launch\nNo VC lockups here. Our Supersale tokens are fully unlocked from day one. Power to the people. 🙌",
+  "🔓 100% Unlocked\nNo VC lockups here. Our Supersale tokens are fully unlocked from day one. Power to the people. 🙌",
   
-  "🚫 No Liquidations (Yes, Really)\nPartners like MarginZero bring non-liquidatable perps to Superseed. That's right—leverage without the rug.",
+  "🚫 No Liquidations\nPartners like MarginZero bring non-liquidatable perps to Superseed. That's right—leverage without the rug.",
   
   "🧠 DeFi for Smart LPs\nOur partner Jones brings institutional-grade yield strategies to your fingertips. One-click, passive gains. 🎯",
   
@@ -28,21 +28,31 @@ const FACTS = [
   
   "🌉 Live on the Superchain\nWe're part of Optimism's Superchain—meaning better security, shared liquidity, and a network that grows together. 🚀",
   
-  "🪄 Testnet = Rewards\nJoin the testnet? Get NFTs, Discord roles, XP, and maybe more. (Hint: You really want that \"Superseed Pioneer\" role. 😉)",
-  
-  "🎨 Culture of Contribution\nMake a meme, write a thread, suggest a feature—get noticed. Our top contributors get real rewards, not just emojis.",
-  
   "🧬 A New Financial Primitive\nSupercollateral is not just a feature—it's a new foundation for DeFi. Build on it. Borrow with it. Innovate with it.",
   
   "🥇 No More DeFi Gatekeeping\nForget low float, high FDV launches. Superseed prioritizes you with fair distribution, early access, and zero BS.",
   
-  "📈 Options, Perps & LPDfi — On One Chain\nThanks to Stryke, MarginZero, Orange & more, Superseed is your new home for cutting-edge financial products.",
+  "📈 Options, Perps & LPDfi\nThanks to Stryke, MarginZero, Orange & more, Superseed is your new home for cutting-edge financial products.",
   
   "🤯 Oracle Game-Changer\nChronicle brings ultra-secure, gas-efficient oracles to Superseed. Transparent, verified pricing—like DeFi always promised.",
   
   "🧩 Composable From Day 1\nWith partners like Socket and Dolomite, your assets flow across chains seamlessly. Interop, meet innovation.",
   
-  "🧑‍🌾 Harvest Season is Now\nOur Phase 3 testnet is here—and it's packed with dApps, quests, and rare NFTs. Complete it all to lock in launch rewards. 🌾"
+  "🚀 Mainnet Launch Milestone\nSuperSeed Mainnet officially launched on March 31st, 2025 as part of the Superchain ecosystem, powered by the OP Stack for Ethereum L2 scalability.",
+  
+  "🤝 Launch Partners Ecosystem\nSuperSeed's initial DeFi ecosystem includes Velodrome, BulletX, MarginZero, Jones, Orange Finance, Stryke, SeedFi, Bebop, Ionic, Dolomite...",
+  
+  "🗺️ Roadmap Sequence\nFollowing the Mainnet launch, SuperSeed will release Genesis Passport NFTs, launch the Seeds rewards program, and conclude with a TGE.",
+  
+  "🔮 Upcoming Features\nFuture development includes Proof-of-Repayment, Supercollateral, and the SuperCDP - all designed to turn debt into opportunity.",
+  
+  "🎫 Genesis Passport NFTs\nOn April 2nd, 2025, SuperSeed will launch 1,148 Genesis Passport NFTs with unique benefits exclusively for Supersale participants.",
+  
+  "🌉 Bridge Options\nUsers can bridge to SuperSeed using the official Canonical Bridge at bridge.superseed.xyz or third-party bridges like LayerSwap and Relay.",
+  
+  "🧰 Ecosystem Resources\nSuperSeed provides comprehensive resources including a block explorer, documentation, check: superseed.xyz/ecosystem.",
+  
+  "🔗 Superchain Benefits\nAs part of the Superchain ecosystem, SuperSeed benefits from shared security, seamless interoperability."
 ];
 
 const SuperSeedFacts = () => {
@@ -56,26 +66,6 @@ const SuperSeedFacts = () => {
     return FACTS[randomIndex];
   }, []);
   
-  // Change fact every 30 seconds (increased from 10 seconds)
-  useEffect(() => {
-    setCurrentFact(getRandomFact());
-    
-    const intervalId = setInterval(() => {
-      // Trigger flash effect
-      setIsFlashing(true);
-      
-      // Set new fact
-      setCurrentFact(getRandomFact());
-      
-      // Remove flash effect after animation completes
-      setTimeout(() => {
-        setIsFlashing(false);
-      }, 700); // Animation duration
-    }, 30000); // Update every 30 seconds
-    
-    return () => clearInterval(intervalId);
-  }, [getRandomFact]);
-  
   // Format fact text by separating emoji and splitting into paragraphs
   const formatFact = useCallback((fact) => {
     const lines = fact.split('\n');
@@ -86,6 +76,37 @@ const SuperSeedFacts = () => {
       content: lines.slice(1).join('\n')
     };
   }, []);
+  
+  // Change fact every 10 seconds (reduced from 30 seconds)
+  useEffect(() => {
+    setCurrentFact(getRandomFact());
+    
+    const intervalId = setInterval(() => {
+      // Create triple-flash effect
+      setIsFlashing(true);
+      setTimeout(() => {
+        setIsFlashing(false);
+        setTimeout(() => {
+          setIsFlashing(true);
+          setTimeout(() => {
+            setIsFlashing(false);
+            setTimeout(() => {
+              setIsFlashing(true);
+              setTimeout(() => {
+                setIsFlashing(false);
+              }, 150); // Duration of third flash
+            }, 150); // Pause between second and third flash
+          }, 150); // Duration of second flash
+        }, 150); // Pause between first and second flash
+      }, 150); // Duration of first flash
+      
+      // Set new fact
+      setCurrentFact(getRandomFact());
+      
+    }, 10000); // Update every 10 seconds
+    
+    return () => clearInterval(intervalId);
+  }, [getRandomFact]);
   
   const formattedFact = formatFact(currentFact);
   

@@ -269,49 +269,46 @@ const getSeasonHistory = () => {
   }
 };
 
-// Add score to competitive leaderboard and update pot
+// Add score to competitive leaderboard
 const addCompetitiveScore = (name, score, address) => {
   try {
-    if (!name || !score || !address) {
-      return { success: false, message: 'Missing required data' };
+    if (!name || score === undefined || !address) {
+      return { success: false, message: 'Name, score, and address are required' };
     }
     
-    // Validate score
-    const scoreValue = parseInt(score, 10);
-    if (isNaN(scoreValue) || scoreValue <= 0) {
-      return { success: false, message: 'Invalid score' };
-    }
+    // Create a new entry
+    const newEntry = {
+      name: String(name),
+      score: parseInt(score, 10),
+      date: new Date().toISOString().split('T')[0],
+      address: address
+    };
     
-    // Get current competitive leaderboard
+    // Get existing leaderboard
     const leaderboard = getLeaderboard(true);
     
     // Add new entry
-    const newEntry = {
-      name,
-      score: scoreValue,
-      date: new Date().toISOString().split('T')[0],
-      address
-    };
-    
-    // Add entry to leaderboard
     leaderboard.push(newEntry);
     
-    // Sort leaderboard by score
+    // Sort by score (highest first)
     leaderboard.sort((a, b) => b.score - a.score);
     
     // Write updated leaderboard back to file
     const csvContent = stringify(leaderboard, { header: true });
     fs.writeFileSync(COMPETITIVE_LEADERBOARD_PATH, csvContent);
     
-    // Update season pot
-    const season = getCurrentSeason();
-    if (season) {
-      season.potSize += 1; // Add 1 $SUPR to pot
-      season.playerCount += 1;
-      fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(season, null, 2));
-    }
+    // Calculate rank for the response
+    const rank = leaderboard.findIndex(entry => 
+      entry.name === newEntry.name && 
+      entry.score === newEntry.score &&
+      entry.date === newEntry.date
+    ) + 1;
     
-    return { success: true, message: 'Score added to competitive leaderboard' };
+    return { 
+      success: true, 
+      message: 'Score added to competitive leaderboard',
+      rank: rank
+    };
   } catch (error) {
     console.error('Error adding competitive score:', error);
     return { success: false, message: 'Server error' };
@@ -424,8 +421,29 @@ app.get('/api/competitive-leaderboard', (req, res) => {
 // Submit competitive score
 app.post('/api/competitive-score', (req, res) => {
   const { name, score, address } = req.body;
+  
+  if (!name || score === undefined || !address) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Name, score, and address are required' 
+    });
+  }
+  
+  // Process the score submission
   const result = addCompetitiveScore(name, score, address);
-  res.json(result);
+  
+  if (result.success) {
+    res.json({
+      success: true,
+      rank: result.rank,
+      message: 'Score submitted successfully'
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      error: result.message
+    });
+  }
 });
 
 // Get current season data
@@ -542,6 +560,52 @@ app.post('/api/leaderboard', (req, res) => {
   } catch (error) {
     console.error('Error writing to leaderboard:', error);
     res.status(500).json({ error: 'Failed to update leaderboard' });
+  }
+});
+
+// Process competitive payment
+app.post('/api/payment', (req, res) => {
+  const { address } = req.body;
+  
+  if (!address) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Wallet address is required' 
+    });
+  }
+  
+  try {
+    // Get current season
+    const season = getCurrentSeason();
+    if (!season) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Season data not found' 
+      });
+    }
+    
+    // Update pot size and player count
+    season.potSize += 1; // Add 1 $SUPR to pot
+    season.playerCount += 1;
+    
+    // Write updated season config to file
+    fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(season, null, 2));
+    
+    console.log(`Payment processed: 1 $SUPR added to pot from ${address}. New pot size: ${season.potSize}, player count: ${season.playerCount}`);
+    
+    return res.json({ 
+      success: true, 
+      message: 'Payment processed successfully', 
+      potSize: season.potSize,
+      playerCount: season.playerCount,
+      txHash: `mock_tx_${Date.now()}` 
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Server error processing payment' 
+    });
   }
 });
 
