@@ -26,3 +26,4 @@ dist-ssr
 # Server data files
 server/*.csv
 server/**/*.csv
+server/season_config.json
