@@ -11,10 +11,11 @@
 A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing rows and climb the leaderboard!
 
 ## 🧞‍♂️ Prompts used:
+- [GitHub backup] (https://github.com/JesCR/TetriSeed/tree/main/.specstory/history)
 - [MVP] (https://share.specstory.com/stories/8adc6ede-fd57-448b-81e6-c633aea82180)
 - [Competitive mode] (https://share.specstory.com/stories/13af7b26-946d-4d59-ad79-2c9100332c51)
 - [Adding domain tetriseed.xyz] (https://chatgpt.com/share/67eaf5d7-0b70-8003-a4c7-c6639a61f87a)
-
+- [Fixes, Mainnet, Best UI/UX] (https://share.specstory.com/stories/1221b13d-b474-49d9-99e5-0a8edab2fe1a)
 
 ## 📋 Table of Contents
 
