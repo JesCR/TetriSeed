@@ -17,6 +17,9 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 - [Adding domain tetriseed.xyz](https://chatgpt.com/share/67eaf5d7-0b70-8003-a4c7-c6639a61f87a)
 - [Fixes, Mainnet, Best UI/UX](https://share.specstory.com/stories/1221b13d-b474-49d9-99e5-0a8edab2fe1a)
 - [First Smart Contract, finding prompts](https://chatgpt.com/share/67ece76a-0c4c-8003-96d5-96ac58aee7d6)
+- [Smart Contract Development Project Decision](https://share.specstory.com/stories/12bc67f7-5b69-4c48-9f97-ebcfbd2a42b0)
+- [Adjust tetris falling speed](https://share.specstory.com/stories/6cba4295-9580-4a79-a6fb-fc0b9d5c8e90)
+- [Implement Next Piece Display](https://share.specstory.com/stories/87c27cfb-b86d-40c3-89f9-7325b7e8e241)
 
 ## 📋 Table of Contents
 
