@@ -146,21 +146,25 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
             <p>Your final score: <span className="score-value">{getScoreValue()}</span></p>
             
             {getRank() && getRank() <= 10 ? (
-              <p>You've made it to rank #{getRank()} on the leaderboard!</p>
+              <p>You've made it to rank #{getRank()} on the competitive leaderboard!</p>
             ) : getRank() ? (
-              <p>Your current rank: #{getRank()}</p>
-            ) : null}
+              <p>Your current rank: #{getRank()} on the competitive leaderboard</p>
+            ) : (
+              <p className="competitive-notice">Only competitive scores are tracked.<br/>Play in competitive mode to join the leaderboard!</p>
+            )}
             
             <p>Share your achievement:</p>
-            <a 
-              href={tweetUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="tweet-button"
-            >
-              Tweet Your Score
-            </a>
-            <button onClick={onClose} className="modal-button">Play Again</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a 
+                href={tweetUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="tweet-button"
+              >
+                Tweet Your Score
+              </a>
+              <button onClick={onClose} className="modal-button">Play Again</button>
+            </div>
           </>
         )}
         

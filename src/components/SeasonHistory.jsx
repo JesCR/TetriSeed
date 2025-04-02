@@ -11,7 +11,22 @@ const SeasonHistory = () => {
     try {
       setLoading(true);
       const data = await getSeasonHistory();
-      setSeasons(data);
+      
+      // Map the data to standardize property names
+      const formattedData = data.map(season => ({
+        seasonNumber: season.season,
+        startDate: season.startDate,
+        endDate: season.endDate,
+        potSize: season.potSize,
+        playerCount: season.playerCount || 0,
+        gameCount: season.gameCount || 0,
+        winners: Array.isArray(season.winners) ? season.winners : []
+      }));
+      
+      // Sort seasons in descending order (most recent first)
+      formattedData.sort((a, b) => b.seasonNumber - a.seasonNumber);
+      
+      setSeasons(formattedData);
       setError('');
     } catch (err) {
       console.error('Error fetching season history:', err);
@@ -36,10 +51,10 @@ const SeasonHistory = () => {
     });
   }, []);
 
-  // Format wallet address to show only first and last 4 characters
+  // Format wallet address to show only first 6 characters
   const formatAddress = useCallback((address) => {
     if (!address) return 'Unknown';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    return `${address.slice(0, 6)}...`;
   }, []);
 
   if (loading) {
@@ -73,42 +88,52 @@ const SeasonHistory = () => {
     <div className="season-history">
       <h3>Season History</h3>
       
-      <div className="seasons-list">
-        {seasons.map((season) => (
-          <div key={season.seasonNumber} className="past-season">
-            <div className="season-header">
-              <h4>Season {season.seasonNumber}</h4>
-              <span className="season-dates">
-                {formatDate(season.startDate)} - {formatDate(season.endDate)}
-              </span>
-            </div>
-            
-            <div className="season-details">
-              <div className="pot-size">
-                <span className="label">Prize Pool:</span>
-                <span className="value"><span className="crypto-amount">{season.potSize} $SUPR</span></span>
+      <div className="seasons-list-container">
+        <div className="seasons-list">
+          {seasons.map((season) => (
+            <div key={season.seasonNumber} className="past-season">
+              <div className="season-header">
+                <h4>Season {season.seasonNumber}</h4>
+                <span className="season-dates">
+                  {formatDate(season.startDate)} - {formatDate(season.endDate)}
+                </span>
               </div>
               
-              <div className="player-count">
-                <span className="label">Players:</span>
-                <span className="value">{season.playerCount}</span>
+              <div className="season-details">
+                <div className="pot-size">
+                  <span className="label">Prize Pool:</span>
+                  <span className="value"><span className="crypto-amount">{season.potSize} $SUPR</span></span>
+                </div>
+                <div className="stats-row">
+                  <div className="player-count">
+                    <span className="label">Players:</span>
+                    <span className="value">{season.playerCount}</span>
+                  </div>
+                  <div className="game-count">
+                    <span className="label">Games Played:</span>
+                    <span className="value">{season.gameCount}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="winners">
+                <h5>Winners</h5>
+                <ol className="winners-list">
+                  {season.winners && season.winners.map((winner, index) => (
+                    <li key={index} className="winner-item">
+                      <div className="winner-details">
+                        <span className="winner-rank">#{winner.rank}</span>
+                        <span className="winner-name">{winner.name || 'Player ' + (index + 1)}</span>
+                        <span className="winner-address">{formatAddress(winner.address)}</span>
+                        <span className="winner-prize"><span className="crypto-amount">{winner.prize} $SUPR</span></span>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </div>
-            
-            <div className="winners">
-              <h5>Winners</h5>
-              <ol>
-                {season.winners && season.winners.map((winner, index) => (
-                  <li key={index}>
-                    <span className="winner-address">{formatAddress(winner.walletAddress)}</span>
-                    <span className="winner-score"><span className="crypto-amount">{winner.score}</span></span>
-                    <span className="winner-prize"><span className="crypto-amount">{winner.prize} $SUPR</span></span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

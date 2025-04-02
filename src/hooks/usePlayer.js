@@ -3,6 +3,9 @@ import { useState, useCallback } from 'react';
 import { TETROMINOS, randomTetromino, checkCollision } from '../utils/tetrisUtils';
 
 export const usePlayer = () => {
+  // Add state for the next piece
+  const [nextTetromino, setNextTetromino] = useState(randomTetromino());
+  
   const [player, setPlayer] = useState({
     pos: { x: 0, y: 0 },
     tetromino: TETROMINOS[0].shape,
@@ -59,12 +62,31 @@ export const usePlayer = () => {
   };
 
   const resetPlayer = useCallback(() => {
-    setPlayer({
-      pos: { x: 5, y: 0 },
-      tetromino: randomTetromino().shape,
-      collided: false,
-    });
-  }, []);
+    // First game start (empty tetromino)
+    if (player.tetromino === TETROMINOS[0].shape) {
+      // Initialize both current and next tetromino
+      const firstPiece = randomTetromino();
+      const secondPiece = randomTetromino();
+      
+      setPlayer({
+        pos: { x: 5, y: 0 },
+        tetromino: firstPiece.shape,
+        collided: false,
+      });
+      
+      setNextTetromino(secondPiece);
+    } else {
+      // Normal flow - use the next piece that was shown in preview
+      setPlayer({
+        pos: { x: 5, y: 0 },
+        tetromino: nextTetromino.shape,
+        collided: false,
+      });
+      
+      // Generate a new next tetromino
+      setNextTetromino(randomTetromino());
+    }
+  }, [nextTetromino, player.tetromino]);
 
-  return [player, updatePlayerPos, resetPlayer, playerRotate];
+  return [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino];
 }; 

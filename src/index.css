@@ -107,6 +107,7 @@ body {
 .stage-container {
   position: relative;
   margin-bottom: 10px;
+  z-index: 1; /* Add explicit z-index for proper stacking */
 }
 
 /* Top debt message */
@@ -192,12 +193,12 @@ body {
   right: 0;
   bottom: 0;
   background: rgba(17, 17, 17, 0.7); /* Semi-transparent overlay to ensure visibility of blocks */
-  z-index: 1;
+  z-index: 2; /* Just above the next piece display but below tetrominos */
 }
 
 .stage > * {
   position: relative;
-  z-index: 2; /* Ensure tetris blocks appear above the overlay */
+  z-index: 4; /* Ensure tetris blocks appear above the overlay and next piece */
 }
 
 /* Cell styling */
@@ -1486,102 +1487,150 @@ html.ios-keyboard-open {
 /* Season History Styles */
 .season-history {
   padding: 10px;
+  max-height: 320px; /* Fixed height */
+  display: flex;
+  flex-direction: column;
 }
 
 .season-history h3 {
   margin-top: 0;
   color: #fcba21;
   text-align: center;
+  margin-bottom: 10px;
 }
 
-.season-selector {
+.seasons-list-container {
+  flex: 1;
+  overflow: hidden; /* Hide overflow */
+  position: relative;
+}
+
+.seasons-list {
+  height: 100%;
+  max-height: 240px; /* Adjust as needed */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 5px; /* Space for scrollbar */
+  scrollbar-width: thin; /* Firefox */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Webkit scrollbar styling */
+.seasons-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.seasons-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.seasons-list::-webkit-scrollbar-thumb {
+  background: rgba(252, 186, 33, 0.5);
+  border-radius: 10px;
+}
+
+.seasons-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(252, 186, 33, 0.7);
+}
+
+.past-season {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #a55c1b;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 8px;
+}
+
+.past-season:last-child {
+  margin-bottom: 0;
+}
+
+.season-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  justify-content: center;
-  margin-bottom: 15px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  border-bottom: 1px solid rgba(252, 186, 33, 0.3);
+  padding-bottom: 5px;
 }
 
-.season-selector button {
-  background: #333;
-  border: none;
-  color: #fff;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: all 0.3s;
+.season-header h4 {
+  margin: 0;
+  color: #fcba21;
+  font-size: 0.95rem;
 }
 
-.season-selector button.active {
-  background: #a55c1b;
-  color: #fff;
+.season-dates {
+  font-size: 0.75rem;
+  color: #aaa;
 }
 
 .season-details {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #a55c1b;
-  border-radius: 4px;
-  padding: 10px;
+  margin-bottom: 8px;
 }
 
-.season-summary {
-  margin-bottom: 15px;
-  text-align: center;
+.pot-size {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
 }
 
-.season-summary p {
-  margin: 5px 0;
+.pot-size .label {
+  color: #aaa;
 }
 
-.season-summary span {
+.pot-size .value {
   color: #fcba21;
   font-weight: bold;
 }
 
-.season-winners h4 {
-  text-align: center;
-  margin-top: 0;
+.winners h5 {
+  margin: 5px 0;
   color: #fcba21;
-}
-
-.winners-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
   font-size: 0.85rem;
+  border-bottom: 1px solid rgba(252, 186, 33, 0.2);
+  padding-bottom: 3px;
 }
 
-.winners-table th,
-.winners-table td {
-  padding: 5px;
-  text-align: center;
-  border-bottom: 1px solid #333;
+.winners-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.8rem;
 }
 
-.winners-table th {
-  background: rgba(0, 0, 0, 0.3);
+.winner-item {
+  margin-bottom: 3px;
+}
+
+.winner-details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.winner-rank {
+  color: #fcba21;
+  font-weight: bold;
+  min-width: 24px;
+}
+
+.winner-name {
+  color: #fff;
+  margin-right: 5px;
+}
+
+.winner-address {
   color: #aaa;
+  font-size: 0.75rem;
 }
 
-.loading-text, 
-.error-text, 
-.empty-text {
-  text-align: center;
-  padding: 10px;
-}
-
-.loading-text {
-  color: #aaa;
-}
-
-.error-text {
-  color: #ff3333;
-}
-
-.empty-text {
-  color: #aaa;
-  font-style: italic;
+.winner-prize {
+  color: #fcba21;
+  margin-left: auto;
+  font-weight: bold;
 }
 
 /* Custom Modal Styles */
@@ -2205,4 +2254,160 @@ html.ios-keyboard-open {
 
 .season-info {
   margin-bottom: 0;
+}
+
+/* Next Piece Preview Styles */
+.next-piece-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  border-radius: 5px;
+  padding: 5px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  transform: scale(0.8);
+  transform-origin: top left;
+}
+
+/* New overlay style for the next piece inside the stage */
+.next-piece-overlay {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 3; /* Between the stage overlay and the tetrominos */
+  background: transparent;
+  border: none;
+  padding: 0;
+  transform: scale(0.7);
+  transform-origin: top left;
+  pointer-events: none; /* Make sure it doesn't interfere with clicks */
+}
+
+.next-piece-overlay .next-piece-container {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.next-piece-overlay .next-piece-grid {
+  opacity: 0.5;
+}
+
+.next-piece-title {
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 5px;
+  color: #0ff;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+  font-family: 'Press Start 2P', cursive;
+}
+
+.next-piece-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.next-piece-row {
+  display: flex;
+  flex-direction: row;
+  height: 18px; /* Fixed height for rows */
+}
+
+/* Cell styles for next piece preview */
+.next-cell {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px;
+  min-height: 18px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Adjust for mobile */
+@media (max-width: 768px) {
+  .next-piece-preview,
+  .next-piece-overlay {
+    transform: scale(0.6);
+  }
+  
+  .next-piece-row {
+    height: 15px;
+  }
+  
+  .next-cell {
+    width: 15px !important;
+    height: 15px !important;
+    min-width: 15px;
+    min-height: 15px;
+  }
+}
+
+.competitive-notice {
+  color: #fcba21;
+  font-style: italic;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  border: 1px solid rgba(252, 186, 33, 0.3);
+}
+
+/* Add back styles for loading, error and empty states */
+.loading-text, 
+.error-text, 
+.empty-text,
+.season-history.loading p,
+.season-history.error p,
+.season-history.empty p {
+  text-align: center;
+  padding: 10px;
+  color: #aaa;
+}
+
+.error-text,
+.season-history.error p {
+  color: #ff3333;
+}
+
+.empty-text,
+.season-history.empty p {
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Style for $SUPR amounts - Arial Bold */
+.crypto-amount {
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+}
+
+/* Stats row in season history */
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.player-count, .game-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.player-count .label, .game-count .label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 3px;
+}
+
+.player-count .value, .game-count .value {
+  font-weight: bold;
+  color: #fff;
 }

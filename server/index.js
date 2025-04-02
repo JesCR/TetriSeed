@@ -49,7 +49,8 @@ const initializeSeasonConfig = () => {
           startDate: nextMonday.toISOString(),
           endDate: nextSunday.toISOString(),
           potSize: 0,
-          playerCount: 0
+          playerCount: 0,
+          gameCount: 0
         };
         
         fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(newSeason, null, 2));
@@ -76,7 +77,8 @@ const initializeSeasonConfig = () => {
       startDate: nextMonday.toISOString(),
       endDate: nextSunday.toISOString(),
       potSize: 0,
-      playerCount: 0
+      playerCount: 0,
+      gameCount: 0
     };
     
     fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(seasonConfig, null, 2));
@@ -88,7 +90,7 @@ const initializeSeasonConfig = () => {
 
 // Initialize files if they don't exist
 const initializeFiles = () => {
-  // Regular leaderboard
+  // Regular leaderboard - just create an empty placeholder
   if (!fs.existsSync(LEADERBOARD_PATH)) {
     fs.writeFileSync(LEADERBOARD_PATH, 'name,score,date\n');
   }
@@ -100,7 +102,7 @@ const initializeFiles = () => {
   
   // Season history
   if (!fs.existsSync(SEASON_HISTORY_PATH)) {
-    fs.writeFileSync(SEASON_HISTORY_PATH, 'season,startDate,endDate,potSize,winners\n');
+    fs.writeFileSync(SEASON_HISTORY_PATH, 'season,startDate,endDate,potSize,playerCount,gameCount,winners\n');
   }
   
   // Season config
@@ -109,6 +111,78 @@ const initializeFiles = () => {
 
 // Initialize files on server start
 initializeFiles();
+
+// Clean up duplicate entries in the competitive leaderboard file
+const cleanupLeaderboard = () => {
+  try {
+    console.log('Running leaderboard cleanup to remove duplicate wallet addresses...');
+    
+    if (!fs.existsSync(COMPETITIVE_LEADERBOARD_PATH)) {
+      console.log('Competitive leaderboard file does not exist, no cleanup needed');
+      return;
+    }
+    
+    const fileContent = fs.readFileSync(COMPETITIVE_LEADERBOARD_PATH, 'utf8');
+    if (!fileContent.trim() || fileContent.trim() === 'name,score,date,address') {
+      console.log('Competitive leaderboard is empty or only has headers, no cleanup needed');
+      return;
+    }
+    
+    const records = parse(fileContent, {
+      columns: true,
+      skip_empty_lines: true
+    });
+    
+    // Check if we have any records to process
+    if (records.length === 0) {
+      console.log('No records found in leaderboard, no cleanup needed');
+      return;
+    }
+    
+    console.log(`Processing ${records.length} leaderboard entries for duplicate wallets...`);
+    
+    // Map to store the best score for each wallet address
+    const addressMap = new Map();
+    
+    // Process each record
+    for (const record of records) {
+      const address = record.address;
+      const score = parseInt(record.score, 10);
+      
+      // Skip records without an address
+      if (!address) continue;
+      
+      // Check if we've seen this address before
+      if (!addressMap.has(address) || score > parseInt(addressMap.get(address).score, 10)) {
+        addressMap.set(address, record);
+      }
+    }
+    
+    // Convert map back to array
+    const cleanedLeaderboard = Array.from(addressMap.values());
+    
+    // Sort by score in descending order
+    cleanedLeaderboard.sort((a, b) => parseInt(b.score, 10) - parseInt(a.score, 10));
+    
+    // Check if we removed any duplicates
+    const duplicatesRemoved = records.length - cleanedLeaderboard.length;
+    console.log(`Found ${duplicatesRemoved} duplicate wallet addresses in the leaderboard`);
+    
+    if (duplicatesRemoved > 0) {
+      // Write the cleaned leaderboard back to the file
+      const csvContent = stringify(cleanedLeaderboard, { header: true });
+      fs.writeFileSync(COMPETITIVE_LEADERBOARD_PATH, csvContent);
+      console.log(`Leaderboard cleaned up - removed ${duplicatesRemoved} duplicate wallet entries`);
+    } else {
+      console.log('No duplicate wallet addresses found, leaderboard is clean');
+    }
+  } catch (error) {
+    console.error('Error cleaning up leaderboard:', error);
+  }
+};
+
+// Clean up any duplicate wallet addresses in the leaderboard
+cleanupLeaderboard();
 
 // Updated getLeaderboard function to support both regular and competitive mode
 const getLeaderboard = (isCompetitive = false) => {
@@ -130,10 +204,27 @@ const getLeaderboard = (isCompetitive = false) => {
     });
     
     // Convert score to number for sorting
-    const leaderboard = records.map(record => ({
+    const parsedRecords = records.map(record => ({
       ...record,
       score: parseInt(record.score, 10)
     }));
+    
+    let leaderboard = parsedRecords;
+    
+    if (isCompetitive) {
+      // For competitive mode, deduplicate by wallet address (keeping best score)
+      const addressMap = new Map();
+      
+      for (const record of parsedRecords) {
+        const address = record.address;
+        if (!addressMap.has(address) || record.score > addressMap.get(address).score) {
+          addressMap.set(address, record);
+        }
+      }
+      
+      // Convert map back to array
+      leaderboard = Array.from(addressMap.values());
+    }
     
     // Sort by score in descending order
     leaderboard.sort((a, b) => b.score - a.score);
@@ -173,7 +264,7 @@ const getSeasonHistory = () => {
     const fileContent = fs.readFileSync(SEASON_HISTORY_PATH, 'utf8');
     console.log('Season history file content:', fileContent);
     
-    if (!fileContent.trim() || fileContent.trim() === 'season,startDate,endDate,potSize,winners') {
+    if (!fileContent.trim() || fileContent.trim() === 'season,startDate,endDate,potSize,playerCount,gameCount,winners') {
       console.log('Season history file is empty or only has headers');
       
       // Return hardcoded data for demonstration purposes
@@ -218,11 +309,25 @@ const getSeasonHistory = () => {
       // Process each season to parse the winners JSON string
       const processedHistory = parsed.map(season => {
         try {
+          // Convert season to number
+          season.season = parseInt(season.season, 10);
+          
+          // Convert potSize to number
+          season.potSize = parseInt(season.potSize, 10) || 0;
+          
+          // Parse winners JSON string if it exists
           if (season.winners && typeof season.winners === 'string') {
-            season.winners = JSON.parse(season.winners);
+            try {
+              season.winners = JSON.parse(season.winners);
+            } catch (e) {
+              console.error('Error parsing winners JSON:', e);
+              season.winners = [];
+            }
+          } else {
+            season.winners = [];
           }
         } catch (e) {
-          console.error('Error parsing winners JSON:', e);
+          console.error('Error processing season:', e);
         }
         return season;
       });
@@ -276,19 +381,64 @@ const addCompetitiveScore = (name, score, address) => {
       return { success: false, message: 'Name, score, and address are required' };
     }
     
-    // Create a new entry
-    const newEntry = {
-      name: String(name),
-      score: parseInt(score, 10),
-      date: new Date().toISOString().split('T')[0],
-      address: address
-    };
+    // Parse score as integer
+    const parsedScore = parseInt(score, 10);
     
     // Get existing leaderboard
     const leaderboard = getLeaderboard(true);
     
-    // Add new entry
-    leaderboard.push(newEntry);
+    // Check if the address already exists in the leaderboard
+    const existingEntryIndex = leaderboard.findIndex(entry => entry.address === address);
+    
+    // Track if we're adding a new entry or updating an existing one
+    let action = 'added';
+    let isUpdate = false;
+    
+    if (existingEntryIndex !== -1) {
+      // Address already exists
+      const existingEntry = leaderboard[existingEntryIndex];
+      
+      // Only update if the new score is higher
+      if (parsedScore > parseInt(existingEntry.score, 10)) {
+        // Create an updated entry
+        const updatedEntry = {
+          name: String(name),
+          score: parsedScore,
+          date: new Date().toISOString().split('T')[0],
+          address: address
+        };
+        
+        // Remove old entry and add updated one
+        leaderboard.splice(existingEntryIndex, 1);
+        leaderboard.push(updatedEntry);
+        action = 'updated';
+        isUpdate = true;
+      } else {
+        // New score is not better, don't update the leaderboard entry
+        console.log(`Score ${parsedScore} not better than existing ${existingEntry.score} for address ${address}`);
+        
+        // Update season statistics (counts for games played, etc.)
+        updateSeasonStatistics(address);
+        
+        return { 
+          success: true, 
+          message: 'Score not high enough to update leaderboard',
+          rank: null,
+          higherScoreExists: true,
+          currentBest: existingEntry.score
+        };
+      }
+    } else {
+      // New wallet address, add to leaderboard
+      const newEntry = {
+        name: String(name),
+        score: parsedScore,
+        date: new Date().toISOString().split('T')[0],
+        address: address
+      };
+      
+      leaderboard.push(newEntry);
+    }
     
     // Sort by score (highest first)
     leaderboard.sort((a, b) => b.score - a.score);
@@ -297,21 +447,42 @@ const addCompetitiveScore = (name, score, address) => {
     const csvContent = stringify(leaderboard, { header: true });
     fs.writeFileSync(COMPETITIVE_LEADERBOARD_PATH, csvContent);
     
+    // Update season statistics (counts for games played, etc.)
+    updateSeasonStatistics(address);
+    
     // Calculate rank for the response
     const rank = leaderboard.findIndex(entry => 
-      entry.name === newEntry.name && 
-      entry.score === newEntry.score &&
-      entry.date === newEntry.date
+      entry.address === address
     ) + 1;
     
     return { 
       success: true, 
-      message: 'Score added to competitive leaderboard',
-      rank: rank
+      message: `Score ${action} to competitive leaderboard`,
+      rank: rank,
+      isUpdate: isUpdate
     };
   } catch (error) {
     console.error('Error adding competitive score:', error);
     return { success: false, message: 'Server error' };
+  }
+};
+
+// Update season statistics without modifying leaderboard
+const updateSeasonStatistics = (address) => {
+  try {
+    // Get current season
+    const season = getCurrentSeason();
+    if (!season) return;
+    
+    // Update game count (but not player count since this is an existing player)
+    season.gameCount = (season.gameCount || 0) + 1;
+    
+    // Write updated season config to file
+    fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(season, null, 2));
+    
+    console.log(`Season statistics updated: Game played by ${address}`);
+  } catch (error) {
+    console.error('Error updating season statistics:', error);
   }
 };
 
@@ -339,6 +510,8 @@ const checkAndUpdateSeason = () => {
         startDate: season.startDate,
         endDate: season.endDate,
         potSize: season.potSize,
+        playerCount: season.playerCount || 0,
+        gameCount: season.gameCount || 0,
         winners: JSON.stringify(prizes)
       };
       
@@ -364,7 +537,8 @@ const checkAndUpdateSeason = () => {
         startDate: nextMonday.toISOString(),
         endDate: nextSunday.toISOString(),
         potSize: 0,
-        playerCount: 0
+        playerCount: 0,
+        gameCount: 0
       };
       
       fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(newSeason, null, 2));
@@ -386,7 +560,19 @@ const checkAndUpdateSeason = () => {
 const calculatePrizes = (top5, potSize) => {
   const percentages = [0.5, 0.3, 0.1, 0.05, 0.05]; // 50%, 30%, 10%, 5%, 5%
   
-  return top5.map((player, index) => {
+  // Ensure each wallet only appears once (take highest score)
+  const uniqueWallets = [];
+  const seen = new Set();
+  
+  for (const player of top5) {
+    if (!seen.has(player.address)) {
+      seen.add(player.address);
+      uniqueWallets.push(player);
+    }
+  }
+  
+  // Calculate prizes only for unique wallets
+  return uniqueWallets.map((player, index) => {
     const percentage = percentages[index] || 0;
     const prize = Math.floor(potSize * percentage * 100) / 100; // Round to 2 decimals
     
@@ -490,77 +676,28 @@ app.get('/api/season-history', (req, res) => {
   res.json(history);
 });
 
-// Get regular leaderboard
+// Get regular leaderboard - return empty array with message
 app.get('/api/leaderboard', (req, res) => {
-  console.log('Received leaderboard request');
-  
-  const leaderboard = getLeaderboard(false);
-  console.log(`Read ${leaderboard.length} entries from leaderboard`);
-  
-  // Send top 5
-  const topScores = leaderboard.slice(0, 5);
-  console.log('Sending top 5:', topScores);
-  res.json(topScores);
+  console.log('Received regular leaderboard request - only tracking competitive scores');
+  res.json({
+    scores: [],
+    message: 'Only competitive scores are tracked'
+  });
 });
 
-// Add score to regular leaderboard
+// Add score to regular leaderboard - just return success without saving
 app.post('/api/leaderboard', (req, res) => {
   const { name, score } = req.body;
   
-  console.log('Received score submission:', { name, score });
+  console.log('Received regular score submission:', { name, score });
+  console.log('Not saving - only competitive scores are tracked');
   
-  if (!name || score === undefined) {
-    return res.status(400).json({ error: 'Name and score are required' });
-  }
-  
-  // Ensure score is a number
-  const scoreNum = parseInt(score, 10);
-  if (isNaN(scoreNum) || scoreNum < 0) {
-    return res.status(400).json({ error: 'Score must be a valid positive number' });
-  }
-  
-  const newEntry = {
-    name: String(name),
-    score: scoreNum,
-    date: new Date().toISOString().split('T')[0]
-  };
-  
-  console.log('Created new entry:', newEntry);
-  
-  // Get existing leaderboard
-  const leaderboard = getLeaderboard(false);
-  
-  // Add new entry
-  leaderboard.push(newEntry);
-  
-  // Sort by score (highest first)
-  leaderboard.sort((a, b) => b.score - a.score);
-  
-  // Write back to CSV
-  try {
-    const csvContent = stringify(leaderboard, { header: true });
-    fs.writeFileSync(LEADERBOARD_PATH, csvContent);
-    
-    // Check if the new entry is in the top 5
-    const rank = leaderboard.findIndex(entry => 
-      entry.name === newEntry.name && 
-      entry.score === newEntry.score &&
-      entry.date === newEntry.date
-    ) + 1;
-    
-    const isTop5 = rank <= 5;
-    
-    console.log('Entry saved, rank:', rank, 'isTop5:', isTop5);
-    
-    res.json({ 
-      success: true, 
-      isTop5,
-      rank
-    });
-  } catch (error) {
-    console.error('Error writing to leaderboard:', error);
-    res.status(500).json({ error: 'Failed to update leaderboard' });
-  }
+  // Return successful response but don't actually save anything
+  res.json({ 
+    success: true,
+    message: 'Only competitive scores are tracked',
+    rank: null
+  });
 });
 
 // Process competitive payment
@@ -584,20 +721,33 @@ app.post('/api/payment', (req, res) => {
       });
     }
     
-    // Update pot size and player count
+    // Check if this is a new player for this season
+    const leaderboard = getLeaderboard(true);
+    const isNewPlayer = !leaderboard.some(entry => entry.address === address);
+    
+    // Update pot size
     season.potSize += 1; // Add 1 $SUPR to pot
-    season.playerCount += 1;
+    
+    // Only increment player count if this is a new player
+    if (isNewPlayer) {
+      season.playerCount = (season.playerCount || 0) + 1;
+    }
+    
+    // Initialize or update game count
+    season.gameCount = (season.gameCount || 0) + 1;
     
     // Write updated season config to file
     fs.writeFileSync(SEASON_CONFIG_PATH, JSON.stringify(season, null, 2));
     
-    console.log(`Payment processed: 1 $SUPR added to pot from ${address}. New pot size: ${season.potSize}, player count: ${season.playerCount}`);
+    console.log(`Payment processed: 1 $SUPR added to pot from ${address}. New pot size: ${season.potSize}, player count: ${season.playerCount}, game count: ${season.gameCount}`);
     
     return res.json({ 
       success: true, 
       message: 'Payment processed successfully', 
       potSize: season.potSize,
       playerCount: season.playerCount,
+      gameCount: season.gameCount,
+      isNewPlayer: isNewPlayer,
       txHash: `mock_tx_${Date.now()}` 
     });
   } catch (error) {

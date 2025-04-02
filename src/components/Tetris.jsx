@@ -9,6 +9,7 @@ import SuperSeedFacts from './SuperSeedFacts';
 import MobileControls from './MobileControls';
 import MusicToggle from './MusicToggle';
 import SeasonInfo from './SeasonInfo';
+import NextPiece from './NextPiece';
 
 import { useStage } from '../hooks/useStage';
 import { usePlayer } from '../hooks/usePlayer';
@@ -30,7 +31,7 @@ const Tetris = () => {
   const savedDropTimeRef = useRef(1000);
 
   // Initialize player and stage
-  const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
+  const [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino] = usePlayer();
   const [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
   const [scoreInfo, setScoreInfo] = useState({ score: 0, rank: null });
@@ -75,29 +76,28 @@ const Tetris = () => {
 
   // Submit score to the leaderboard
   const submitScore = async (score) => {
-    // Only submit if player has a name and a positive score
-    if (!playerName || score <= 0) {
-      console.error('Invalid score submission attempt', { playerName, score });
+    // Only submit if player has a name, a positive score, and is in competitive mode
+    if (!playerName || score <= 0 || !isCompetitiveMode) {
+      console.log('Not submitting score:', { 
+        playerName, 
+        score, 
+        isCompetitive: isCompetitiveMode,
+        reason: !isCompetitiveMode ? 'Casual scores are not tracked' : 'Invalid name/score'
+      });
       return;
     }
     
-    console.log('Submitting score:', { playerName, score, isCompetitive: isCompetitiveMode });
+    console.log('Submitting competitive score:', { playerName, score, address: walletAddress });
     
     try {
-      // Choose the API endpoint based on competitive mode
-      const endpoint = isCompetitiveMode ? 
-        getApiUrl('/api/competitive-score') : 
-        getApiUrl('/api/leaderboard');
+      // Only use competitive endpoint
+      const endpoint = getApiUrl('/api/competitive-score');
       
       const scoreData = {
         name: playerName.trim(),
-        score: score
+        score: score,
+        address: walletAddress
       };
-      
-      // Add wallet address for competitive mode
-      if (isCompetitiveMode && walletAddress) {
-        scoreData.address = walletAddress;
-      }
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -116,7 +116,6 @@ const Tetris = () => {
       const data = await response.json();
       console.log('Score submission response:', data);
       
-      // Always show tweet modal, regardless of ranking
       // Update only the rank in scoreInfo, keeping the current score
       setScoreInfo(prevInfo => ({
         ...prevInfo,
@@ -150,27 +149,34 @@ const Tetris = () => {
     if (rows > (level) * 5) {
       setLevel(prev => prev + 1);
       
-      // Calculate new speed that keeps getting faster at each level
-      // Base speed is now 800ms instead of 1000ms, and speed increases faster
+      // Calculate new speed based on NES Tetris doubled speed table
       const newLevel = level + 1;
-      // Progressive speed formula with faster increments
-      const newDropTime = Math.max(800 / (1 + (newLevel * 0.3)), 50); // Minimum 50ms to keep game playable
+      let framesPerCell;
+      
+      // Determine frames per cell based on level using the NES speed table (doubled speed)
+      if (newLevel === 0) framesPerCell = 48;
+      else if (newLevel === 1) framesPerCell = 40;
+      else if (newLevel === 2) framesPerCell = 34;
+      else if (newLevel === 3) framesPerCell = 28;
+      else if (newLevel === 4) framesPerCell = 24;
+      else if (newLevel === 5) framesPerCell = 18;
+      else if (newLevel === 6) framesPerCell = 14;
+      else if (newLevel === 7) framesPerCell = 10;
+      else if (newLevel === 8) framesPerCell = 7;
+      else if (newLevel === 9) framesPerCell = 6;
+      else if (newLevel >= 10 && newLevel <= 12) framesPerCell = 6;
+      else if (newLevel >= 13 && newLevel <= 15) framesPerCell = 4;
+      else if (newLevel >= 16) framesPerCell = 2;
+      
+      // Convert frames to milliseconds (assuming 60fps, so 1 frame = 16.67ms)
+      const newDropTime = framesPerCell * 16.67;
       setDropTime(newDropTime);
       savedDropTimeRef.current = newDropTime;
       
       // Show interest rate message on level up
       showInterestRateMessage(level + 1);
       
-      console.log(`Level up to ${newLevel}, new speed: ${newDropTime}ms`);
-    }
-
-    // If interest message is shown, add a small speed increase (max 20%)
-    if (showInterestMessage) {
-      // Reduce speed by only 10-20% max instead of 50-60%
-      const speedIncreaseFactor = 0.9 - (Math.random() * 0.1); // 10-20% speed reduction
-      const newDropTime = savedDropTimeRef.current * speedIncreaseFactor;
-      setDropTime(newDropTime);
-      savedDropTimeRef.current = newDropTime;
+      console.log(`Level up to ${newLevel}, new speed: ${newDropTime}ms (${framesPerCell} frames)`);
     }
 
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
@@ -200,7 +206,6 @@ const Tetris = () => {
     setGameOver, 
     setDropTime, 
     setLevel,
-    showInterestMessage,
     showInterestRateMessage
   ]);
 
@@ -272,15 +277,15 @@ const Tetris = () => {
   const startGame = () => {
     // Reset everything
     setStage(createStage());
-    // Initial speed 20% faster than before (1000ms -> 800ms)
-    const initialDropTime = 800;
+    // Set initial drop time based on twice the NES Tetris level 0 (48 frames * 16.67ms = 800ms)
+    const initialDropTime = 48 * 16.67; // Doubled from 24 frames
     setDropTime(initialDropTime);
     savedDropTimeRef.current = initialDropTime;
     resetPlayer();
     setGameOver(false);
     setScore(0);
     setRows(0);
-    setLevel(1);
+    setLevel(0); // Start at level 0 to match NES Tetris
     
     // Start playing background music
     playBackgroundMusic();
@@ -667,14 +672,22 @@ const Tetris = () => {
               
               {/* Mobile: Game area */}
               <div className="game-area">
-                <Stage 
-                  stage={stage} 
-                  message={message} 
-                  showMessage={showMessage} 
-                  interestMessage={interestMessage}
-                  showInterestMessage={showInterestMessage}
-                  onRotate={handleStageRotate}
-                />
+                <div className="stage-container">
+                  {/* Next piece is positioned as a background in stage container */}
+                  {!gameOver && dropTime && (
+                    <div className="next-piece-overlay">
+                      <NextPiece tetromino={nextTetromino} />
+                    </div>
+                  )}
+                  <Stage 
+                    stage={stage} 
+                    message={message} 
+                    showMessage={showMessage} 
+                    interestMessage={interestMessage}
+                    showInterestMessage={showInterestMessage}
+                    onRotate={handleStageRotate}
+                  />
+                </div>
                 <div className="game-info">
                   {gameOver ? (
                     <div className="game-over-container">
@@ -704,8 +717,10 @@ const Tetris = () => {
                 )}
               </div>
               
-              {/* Mobile: Leaderboard and player info below */}
+              {/* Mobile: Leaderboard and player info below - REORDERED */}
               <div className="sidebar mobile-sidebar">
+                {/* Leaderboard comes BEFORE player info */}
+                <CompetitiveLeaderboard />
                 <div className="player-info mobile-player-info">
                   <div className="player-info-row">
                     <div className="player-detail">
@@ -722,21 +737,28 @@ const Tetris = () => {
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                   {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                 </div>
-                <CompetitiveLeaderboard /> {/* Leaderboard comes after player info */}
               </div>
             </>
           ) : (
-            // Desktop layout (unchanged)
+            // Desktop layout - reordered components
             <>
               <div className="game-area">
-                <Stage 
-                  stage={stage} 
-                  message={message} 
-                  showMessage={showMessage} 
-                  interestMessage={interestMessage}
-                  showInterestMessage={showInterestMessage}
-                  onRotate={handleStageRotate}
-                />
+                <div className="stage-container">
+                  {/* Next piece is positioned as a background in stage container */}
+                  {!gameOver && dropTime && (
+                    <div className="next-piece-overlay">
+                      <NextPiece tetromino={nextTetromino} />
+                    </div>
+                  )}
+                  <Stage 
+                    stage={stage} 
+                    message={message} 
+                    showMessage={showMessage} 
+                    interestMessage={interestMessage}
+                    showInterestMessage={showInterestMessage}
+                    onRotate={handleStageRotate}
+                  />
+                </div>
                 <div className="game-info">
                   {gameOver ? (
                     <div className="game-over-container">
@@ -762,7 +784,8 @@ const Tetris = () => {
               </div>
               
               <div className="sidebar">
-                <CompetitiveLeaderboard /> {/* Always show competitive leaderboard */}
+                {/* Leaderboard FIRST */}
+                <CompetitiveLeaderboard />
                 <div className="player-info">
                   <div className="player-info-row">
                     <div className="player-detail">
@@ -779,6 +802,7 @@ const Tetris = () => {
                   {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
+                {/* Re-add SuperSeed Facts */}
                 <SuperSeedFacts />
               </div>
             </>

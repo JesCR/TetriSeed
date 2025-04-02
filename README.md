@@ -11,11 +11,12 @@
 A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing rows and climb the leaderboard!
 
 ## 🧞‍♂️ Prompts used:
-- [GitHub backup] (https://github.com/JesCR/TetriSeed/tree/main/.specstory/history)
-- [MVP] (https://share.specstory.com/stories/8adc6ede-fd57-448b-81e6-c633aea82180)
-- [Competitive mode] (https://share.specstory.com/stories/13af7b26-946d-4d59-ad79-2c9100332c51)
-- [Adding domain tetriseed.xyz] (https://chatgpt.com/share/67eaf5d7-0b70-8003-a4c7-c6639a61f87a)
-- [Fixes, Mainnet, Best UI/UX] (https://share.specstory.com/stories/1221b13d-b474-49d9-99e5-0a8edab2fe1a)
+- [GitHub backup](https://github.com/JesCR/TetriSeed/tree/main/.specstory/history)
+- [MVP](https://share.specstory.com/stories/8adc6ede-fd57-448b-81e6-c633aea82180)
+- [Competitive mode](https://share.specstory.com/stories/13af7b26-946d-4d59-ad79-2c9100332c51)
+- [Adding domain tetriseed.xyz](https://chatgpt.com/share/67eaf5d7-0b70-8003-a4c7-c6639a61f87a)
+- [Fixes, Mainnet, Best UI/UX](https://share.specstory.com/stories/1221b13d-b474-49d9-99e5-0a8edab2fe1a)
+- [First Smart Contract, finding prompts](https://chatgpt.com/share/67ece76a-0c4c-8003-96d5-96ac58aee7d6)
 
 ## 📋 Table of Contents
 
@@ -45,6 +46,10 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 - **Classic Tetris Gameplay** with a financial twist
 - **Debt-themed mechanics**: Clear rows to reduce your debt
 - **Increasing interest rates** as you level up
+- **Two Game Modes**: Casual and Competitive
+- **MetaMask Wallet Integration** for competitive gameplay
+- **Seasonal Competitions** with weekly prize pools
+- **Prize Distribution System** for top players
 - **Global Leaderboard** to compete with other players
 - **Mobile touch support** for playing on the go
 - **SuperSeed Facts** displaying information about the SuperSeed protocol
@@ -139,20 +144,48 @@ npm run serve
 - **Swipe Down**: Soft drop tetromino
 - **Swipe Up / Tap**: Rotate tetromino
 
+### Game Modes
+
+- **Casual Mode**: Play freely without any wallet connection
+- **Competitive Mode**: Connect your MetaMask wallet to enter competitive mode, pay 1 $SUPR per game, and compete for weekly prizes
+
+## 🏆 Competitive Mode
+
+TetriSeed features a competitive mode where players can compete for real rewards:
+
+- Players pay 1 $SUPR token per game to enter competitive mode
+- All entry fees are collected in a smart contract prize pool
+- Each season lasts one week (Monday to Sunday)
+- At the end of each season, prizes are distributed to the top 5 players:
+  - 1st place: 50% of the prize pool
+  - 2nd place: 30% of the prize pool
+  - 3rd place: 10% of the prize pool
+  - 4th place: 5% of the prize pool
+  - 5th place: 5% of the prize pool
+- After each season, the leaderboard is reset for a new competition
+
 ## 📁 Project Structure
 
 ```
 TetriSeed/
 ├── public/                  # Static files
 │   └── data/                # Data files for the game
-│       └── leaderboard.csv  # Leaderboard data
+│       ├── leaderboard.csv  # Casual mode leaderboard data
+│       ├── competitive.csv  # Competitive mode leaderboard data
+│       └── seasons.json     # Season history data
 ├── server/                  # Server-side code
 │   └── index.js             # Express server implementation
 ├── src/                     # Client-side source code
 │   ├── assets/              # Images and other assets
 │   ├── components/          # React components
+│   │   ├── CompetitiveMode.jsx  # Wallet connection and competitive mode
+│   │   ├── SeasonInfo.jsx       # Current season information
+│   │   ├── SeasonHistory.jsx    # Past seasons history
+│   │   └── ...              # Other components
 │   ├── hooks/               # Custom React hooks
 │   ├── utils/               # Utility functions
+│   │   ├── web3Utils.js     # MetaMask and blockchain utilities
+│   │   └── ...              # Other utilities
 │   ├── App.jsx              # Main App component
 │   ├── index.css            # Global styles
 │   └── main.jsx             # Entry point
@@ -170,6 +203,8 @@ TetriSeed is built with modern web technologies:
 - [Vite](https://vitejs.dev/) - Build tool and development server
 - [Node.js](https://nodejs.org/) - JavaScript runtime
 - [Express](https://expressjs.com/) - Web server framework
+- [MetaMask](https://metamask.io/) - Wallet connection for Ethereum blockchain
+- [Ethers.js](https://docs.ethers.org/) - Ethereum wallet interaction library
 - [csv-parser](https://github.com/mafintosh/csv-parser) - CSV parsing library
 
 ## ❓ Troubleshooting
@@ -196,19 +231,38 @@ Make sure:
 2. The `public/data` directory exists and is writable
 3. Check for errors in the browser console or server logs
 
-## 👥 Contributing
+#### MetaMask Connection Issues
 
-Contributions are welcome! Here's how you can contribute:
+If you're having trouble connecting your MetaMask wallet:
+
+1. Ensure MetaMask is installed and unlocked
+2. Make sure you're on a supported network (SuperSeed network)
+3. If the network is not available, the game will prompt you to add it
+4. Check for console errors related to wallet connection
+5. Try refreshing the page and reconnecting
+
+#### Competitive Mode Not Working
+
+If competitive mode isn't working:
+
+1. Ensure your MetaMask wallet is properly connected
+2. Make sure you have sufficient $SUPR tokens for game entry
+3. Check the network connection to the SuperSeed blockchain
+4. See browser console for more detailed error messages
+
+## 🎯 Contributing
+
+Contributions are welcome! If you'd like to contribute to TetriSeed, please follow these steps:
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request
+2. Create a new branch for your feature or bug fix
+3. Make your changes and commit them
+4. Push your changes to your fork
+5. Open a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+TetriSeed is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
 ## 🔗 Related Projects
 
@@ -266,7 +320,7 @@ After deployment, you can test that your API endpoints are working:
 1. Visit your deployed frontend URL
 2. Open the browser's developer tools (F12)
 3. Check the Network tab when the game loads
-4. Verify that requests to `/api/leaderboard` are successfully connecting to your server
+4. Verify that requests to `/api/leaderboard` and `/api/competitive-leaderboard` are successfully connecting to your server
 
 If there are issues with CORS, ensure your server is properly configured to accept requests from your Netlify domain.
 
