@@ -20,6 +20,7 @@ import { initAudio, playBackgroundMusic, pauseBackgroundMusic } from '../utils/a
 import { mockPayCompetitiveFee } from '../utils/web3Utils';
 
 import logoText from '../assets/images/logo_text.png';
+import bgImage from '../assets/images/superseed_logo-removebg.png';
 
 const Tetris = () => {
   const [dropTime, setDropTime] = useState(null);
@@ -29,6 +30,22 @@ const Tetris = () => {
   const [showTop10Modal, setShowTop10Modal] = useState(false);
   // Add a ref to store the current drop time when pressing down
   const savedDropTimeRef = useRef(1000);
+  // Add state for random game over message
+  const [gameOverMessage, setGameOverMessage] = useState('LIQUIDATED!');
+  
+  // List of possible game over messages
+  const gameOverMessages = [
+    'LIQUIDATED!',
+    'BANKRUPT!',
+    'REKT!',
+    'NO LAMBO!',
+    'GAME OVER!',
+    'PORTFOLIO CRASH!',
+    'MARGIN CALLED!',
+    'FUNDS GONE!',
+    'NGMI!',
+    'BAD DEBT WINS!'
+  ];
 
   // Initialize player and stage
   const [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino] = usePlayer();
@@ -56,6 +73,21 @@ const Tetris = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Add Refs to track the previous move time to prevent rapid movements
+  const lastMoveTimeRef = useRef({
+    left: 0,
+    right: 0,
+    down: 0,
+    rotate: 0
+  });
+  
+  const MOVE_DEBOUNCE_MS = 150; // Minimum time between moves in milliseconds
+
+  // Ref to hold the interval ID
+  const intervalRef = useRef(null);
+  // Ref to hold the latest callback function to avoid stale closures
+  const savedCallback = useRef();
+
   // Initialize audio when component mounts
   useEffect(() => {
     // Initialize music
@@ -66,6 +98,45 @@ const Tetris = () => {
       pauseBackgroundMusic();
     };
   }, []);
+
+  // Lock screen orientation to portrait on mobile
+  useEffect(() => {
+    if (isMobile && typeof screen.orientation?.lock === 'function') {
+      screen.orientation.lock('portrait-primary')
+        .then(() => {
+          console.log('Screen orientation locked to portrait.');
+        })
+        .catch((error) => {
+          console.warn('Could not lock screen orientation:', error);
+        });
+    }
+  }, [isMobile]);
+
+  // Handle orientation changes for the overlay message
+  useEffect(() => {
+    // This function needs to be simpler to avoid conflicts with CSS
+    const handleOrientationChange = () => {
+      // Instead of trying to hide/show elements directly,
+      // just add/remove a class that our CSS can target
+      if (window.matchMedia("(orientation: landscape)").matches && isMobile) {
+        document.body.classList.add('landscape-mode');
+      } else {
+        document.body.classList.remove('landscape-mode');
+      }
+    };
+
+    // Initial check
+    handleOrientationChange();
+
+    // Listen to both resize and orientationchange for better device support
+    window.addEventListener("resize", handleOrientationChange);
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    return () => {
+      window.removeEventListener("resize", handleOrientationChange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+    };
+  }, [isMobile]);
 
   // Make scoreInfo state track the actual score during the game
   useEffect(() => {
@@ -136,88 +207,39 @@ const Tetris = () => {
     }
   };
   
-  // Move tetromino left and right
+  // Simplified move player function - just checks collision and moves if possible
   const movePlayer = useCallback((dir) => {
+    // Simple collision check then move
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
+      console.log(`Moving ${dir === -1 ? 'left' : 'right'}`);
       updatePlayerPos({ x: dir, y: 0, collided: false });
     }
   }, [player, stage, updatePlayerPos]);
 
-  // Drop the tetromino by one row
+  // Drop the tetromino by one row manually - only if valid
   const drop = useCallback(() => {
-    // Increase level when player has cleared 5 rows (changed from 10)
-    if (rows > (level) * 5) {
-      setLevel(prev => prev + 1);
-      
-      // Calculate new speed based on NES Tetris doubled speed table
-      const newLevel = level + 1;
-      let framesPerCell;
-      
-      // Determine frames per cell based on level using the NES speed table (doubled speed)
-      if (newLevel === 0) framesPerCell = 48;
-      else if (newLevel === 1) framesPerCell = 40;
-      else if (newLevel === 2) framesPerCell = 34;
-      else if (newLevel === 3) framesPerCell = 28;
-      else if (newLevel === 4) framesPerCell = 24;
-      else if (newLevel === 5) framesPerCell = 18;
-      else if (newLevel === 6) framesPerCell = 14;
-      else if (newLevel === 7) framesPerCell = 10;
-      else if (newLevel === 8) framesPerCell = 7;
-      else if (newLevel === 9) framesPerCell = 6;
-      else if (newLevel >= 10 && newLevel <= 12) framesPerCell = 6;
-      else if (newLevel >= 13 && newLevel <= 15) framesPerCell = 4;
-      else if (newLevel >= 16) framesPerCell = 2;
-      
-      // Convert frames to milliseconds (assuming 60fps, so 1 frame = 16.67ms)
-      const newDropTime = framesPerCell * 16.67;
-      setDropTime(newDropTime);
-      savedDropTimeRef.current = newDropTime;
-      
-      // Show interest rate message on level up
-      showInterestRateMessage(level + 1);
-      
-      console.log(`Level up to ${newLevel}, new speed: ${newDropTime}ms (${framesPerCell} frames)`);
+    // Only drop if game is active
+    if (gameOver || dropTime === null) {
+      return;
     }
-
+    
+    // Check if we can move down
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
       updatePlayerPos({ x: 0, y: 1, collided: false });
-    } else {
-      // Game over
-      if (player.pos.y < 1) {
-        setGameOver(true);
-        setDropTime(null);
-        
-        // Post score to leaderboard
-        if (playerName) {
-          submitScore(score);
-        }
-      }
-      // Mark the piece as collided so it can be merged into the stage
-      updatePlayerPos({ x: 0, y: 0, collided: true });
     }
-  }, [
-    player, 
-    stage, 
-    rows, 
-    level, 
-    playerName, 
-    score, 
-    updatePlayerPos, 
-    setGameOver, 
-    setDropTime, 
-    setLevel,
-    showInterestRateMessage
-  ]);
+    // If we can't move down, we don't do anything - the auto interval will handle collision
+  }, [gameOver, dropTime, player, stage, checkCollision, updatePlayerPos]);
 
   const dropPlayer = useCallback(() => {
-    console.log('Drop player called, current dropTime:', dropTime);
-    // Don't set dropTime to null for fast drop - this causes button to appear
-    // Instead use a temporary fast drop without changing the dropTime state
+    console.log('Drop player called');
     drop();
-  }, [drop, dropTime]);
+  }, [drop]);
   
   // Now define handlers that use the above functions
   const handleTouchStart = useCallback((e) => {
+    // Prevent default to avoid scrolling and zooming
+    e.preventDefault();
+    
     setTouchStart({
       x: e.touches[0].clientX,
       y: e.touches[0].clientY
@@ -225,6 +247,9 @@ const Tetris = () => {
   }, []);
   
   const handleTouchMove = useCallback((e) => {
+    // Prevent default to avoid scrolling
+    e.preventDefault();
+    
     setTouchEnd({
       x: e.touches[0].clientX,
       y: e.touches[0].clientY
@@ -232,35 +257,45 @@ const Tetris = () => {
   }, []);
   
   const handleTouchEnd = useCallback(() => {
-    if (!gameOver) {
-      const swipeThreshold = 50;
-      const diffX = touchEnd.x - touchStart.x;
-      const diffY = touchEnd.y - touchStart.y;
-      
-      // Horizontal swipe
-      if (Math.abs(diffX) > swipeThreshold) {
-        if (diffX > 0) {
-          movePlayer(1); // Right
-        } else {
-          movePlayer(-1); // Left
-        }
-      }
-      
-      // Vertical swipe down
-      if (diffY > swipeThreshold) {
-        dropPlayer();
-      }
-      
-      // Tap or vertical swipe up
-      if (Math.abs(diffX) < 20 && diffY < -swipeThreshold) {
-        playerRotate(stage, 1);
-      }
+    // Ignore if game over
+    if (gameOver) return;
+    
+    // Check if touch coordinates are valid (non-zero)
+    if (touchStart.x === 0 && touchStart.y === 0) return;
+    
+    const swipeThreshold = 75; // Increased threshold
+    const verticalSwipeThreshold = 60; // Separate threshold for vertical swipes
+    const maxVerticalForHorizontal = 60; // Max vertical movement allowed for horizontal swipe
+    const maxHorizontalForVertical = 60; // Max horizontal movement allowed for vertical swipe
+    
+    const diffX = touchEnd.x - touchStart.x;
+    const diffY = touchEnd.y - touchStart.y;
+    const absDiffX = Math.abs(diffX);
+    const absDiffY = Math.abs(diffY);
+
+    // Ignore tiny movements or if touchEnd wasn't updated
+    if ((absDiffX < 10 && absDiffY < 10) || (touchEnd.x === 0 && touchEnd.y === 0)) {
+      setTouchStart({ x: 0, y: 0 });
+      setTouchEnd({ x: 0, y: 0 });
+      return;
     }
     
-    // Reset touch positions
+    // Horizontal swipe - requires significant horizontal movement and limited vertical movement
+    if (absDiffX > swipeThreshold && absDiffY < maxVerticalForHorizontal) {
+      const dir = diffX > 0 ? 1 : -1;
+      console.log(`Swipe ${dir > 0 ? 'right' : 'left'}`);
+      movePlayer(dir);
+    }
+    // Vertical swipe down - requires significant downward movement and limited horizontal movement
+    else if (diffY > verticalSwipeThreshold && absDiffX < maxHorizontalForVertical) {
+      console.log('Swipe down');
+      drop();
+    }
+    
+    // Reset touch positions after processing
     setTouchStart({ x: 0, y: 0 });
     setTouchEnd({ x: 0, y: 0 });
-  }, [gameOver, touchStart, touchEnd, movePlayer, dropPlayer, playerRotate, stage]);
+  }, [gameOver, touchStart, touchEnd, movePlayer, drop]);
 
   // Handle start button click
   const handleStartButtonClick = () => {
@@ -277,15 +312,18 @@ const Tetris = () => {
   const startGame = () => {
     // Reset everything
     setStage(createStage());
-    // Set initial drop time based on twice the NES Tetris level 0 (48 frames * 16.67ms = 800ms)
-    const initialDropTime = 48 * 16.67; // Doubled from 24 frames
+    // Set initial drop time based on level 1 speed (48 frames * 16.67ms)
+    const initialDropTime = 48 * 16.67; // For level 1 (800ms)
     setDropTime(initialDropTime);
     savedDropTimeRef.current = initialDropTime;
     resetPlayer();
     setGameOver(false);
     setScore(0);
     setRows(0);
-    setLevel(0); // Start at level 0 to match NES Tetris
+    setLevel(1); // Start at level 1 instead of 0
+    
+    // Show initial interest rate message for level 1
+    showInterestRateMessage(1);
     
     // Start playing background music
     playBackgroundMusic();
@@ -319,22 +357,20 @@ const Tetris = () => {
   const move = useCallback((event) => {
     const { keyCode } = event;
     
-    if (!gameOver) {
+    // Only process input if the game is active (has a dropTime)
+    if (!gameOver && dropTime !== null) {
       if (keyCode === 37 || keyCode === 65) { // Left arrow or A
         movePlayer(-1);
       } else if (keyCode === 39 || keyCode === 68) { // Right arrow or D
         movePlayer(1);
       } else if (keyCode === 40 || keyCode === 83) { // Down arrow or S
-        // Don't set dropTime to null - this prevents "Ask for a loan" button from appearing
         // Just call drop to move the piece down faster
-        if (dropTime !== null) {
-          drop();
-        }
+        drop();
       } else if (keyCode === 38 || keyCode === 87) { // Up arrow or W
         playerRotate(stage, 1);
       }
     }
-  }, [gameOver, movePlayer, drop, playerRotate, stage, dropTime]);
+  }, [gameOver, dropTime, movePlayer, drop, playerRotate, stage]);
 
   // Focus tetris area on mount and when modals are closed
   useEffect(() => {
@@ -343,23 +379,107 @@ const Tetris = () => {
     }
   }, [showNameModal, showTop10Modal]);
 
-  // Interval for auto-dropping the tetromino
+  // Effect to update the saved callback when dependencies change
   useEffect(() => {
-    console.log('Drop interval effect, dropTime:', dropTime);
-    let interval = null;
-    
-    if (dropTime !== null && !gameOver) {
-      interval = setInterval(() => {
-        drop();
-      }, dropTime);
-    }
-    
-    return () => {
-      if (interval) {
-        clearInterval(interval);
+    // Define the function to be executed on each interval tick
+    savedCallback.current = () => {
+      if (!gameOver) {
+        // Check if we need to level up (every 5 lines)
+        const shouldLevelUp = rows >= level * 5 && level < Math.floor(rows / 5) + 1;
+        if (shouldLevelUp) { 
+          const newLevel = level + 1;
+          console.log(`Leveling up from ${level} to ${newLevel}, rows: ${rows}, threshold: ${level * 5}`);
+          setLevel(newLevel); // Update level state
+
+          // Calculate new speed based on NES Tetris doubled speed table
+          let framesPerCell;
+          if (newLevel === 1) framesPerCell = 48;
+          else if (newLevel === 2) framesPerCell = 40;
+          else if (newLevel === 3) framesPerCell = 34;
+          else if (newLevel === 4) framesPerCell = 28;
+          else if (newLevel === 5) framesPerCell = 24;
+          else if (newLevel === 6) framesPerCell = 18;
+          else if (newLevel === 7) framesPerCell = 14;
+          else if (newLevel === 8) framesPerCell = 10;
+          else if (newLevel === 9) framesPerCell = 7;
+          else if (newLevel === 10) framesPerCell = 6;
+          else if (newLevel >= 11 && newLevel <= 13) framesPerCell = 6;
+          else if (newLevel >= 14 && newLevel <= 16) framesPerCell = 4;
+          else if (newLevel >= 17) framesPerCell = 2;
+          else framesPerCell = 2; // Default for higher levels
+
+          const newDropTime = framesPerCell * 16.67;
+          // Ensure dropTime doesn't become too fast or zero
+          const finalDropTime = Math.max(newDropTime, 50); // Minimum 50ms drop time
+
+          setDropTime(finalDropTime); // Update dropTime state, which will restart the interval effect
+          savedDropTimeRef.current = finalDropTime;
+          console.log(`Showing interest rate message for level ${newLevel}`);
+          showInterestRateMessage(newLevel);
+          console.log(`Level up to ${newLevel}, new speed: ${finalDropTime}ms (${framesPerCell} frames)`);
+          return; // Exit early as dropTime change will handle the next tick
+        }
+
+        // Check if we can move down
+        if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+          updatePlayerPos({ x: 0, y: 1, collided: false });
+        } else {
+          // Handle collision (piece has landed)
+          if (player.pos.y < 1) {
+            setGameOver(true);
+            setDropTime(null); // Stop the interval by setting dropTime to null
+            // Select a random game over message
+            const randomIndex = Math.floor(Math.random() * gameOverMessages.length);
+            setGameOverMessage(gameOverMessages[randomIndex]);
+            if (playerName) {
+              submitScore(score);
+            }
+          } else {
+             // Use setTimeout to delay merging slightly, preventing race conditions
+             setTimeout(() => {
+                updatePlayerPos({ x: 0, y: 0, collided: true });
+             }, 0);
+          }
+        }
       }
     };
-  }, [dropTime, drop, gameOver]);
+  }, [
+      gameOver, rows, level, player, stage, setLevel, setDropTime, 
+      showInterestRateMessage, checkCollision, updatePlayerPos, 
+      setGameOver, playerName, score, submitScore, savedDropTimeRef,
+      gameOverMessages // Add the messages array to dependencies
+  ]); // Dependencies needed inside the callback
+
+  // Interval for auto-dropping the tetromino
+  useEffect(() => {
+    console.log('Setting up drop interval with dropTime:', dropTime);
+    
+    // Clear previous interval if it exists
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      console.log('Cleared previous interval');
+    }
+
+    if (dropTime !== null && !gameOver) {
+      const tick = () => {
+        savedCallback.current(); // Execute the latest callback
+      };
+      intervalRef.current = setInterval(tick, dropTime);
+      console.log('Interval created:', intervalRef.current, 'with dropTime:', dropTime);
+    } else {
+      console.log('Not creating interval - dropTime is null or game is over.');
+    }
+
+    // Clean up function
+    return () => {
+      if (intervalRef.current) {
+        console.log('Clearing interval on cleanup:', intervalRef.current);
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [dropTime, gameOver]); // Only re-run when dropTime or gameOver changes
 
   // Handle name submission and focus
   const handleNameSubmit = (name) => {
@@ -467,7 +587,8 @@ const Tetris = () => {
 
   // Handle mobile control button clicks
   const handleMobileControl = useCallback((direction) => {
-    if (gameOver) return;
+    // Only accept input when the game is active
+    if (gameOver || dropTime === null) return;
     
     console.log('Mobile control clicked:', direction);
     
@@ -482,12 +603,7 @@ const Tetris = () => {
         break;
       case 'down':
         console.log('Moving piece down');
-        // We need to make sure the dropTime doesn't get set to null here
-        // to prevent the "Ask for a loan" button from showing up
-        if (dropTime !== null) {
-          // Just speed up the drop without changing dropTime
-          drop();
-        }
+        drop();
         break;
       case 'rotate':
         console.log('Rotating piece');
@@ -496,15 +612,7 @@ const Tetris = () => {
       default:
         break;
     }
-  }, [gameOver, movePlayer, drop, playerRotate, stage, dropTime]);
-
-  // Add a tap-to-rotate handler specifically for the stage
-  const handleStageRotate = useCallback(() => {
-    if (!gameOver && dropTime) {
-      console.log('Stage tap rotation');
-      playerRotate(stage, 1);
-    }
-  }, [gameOver, playerRotate, stage, dropTime]);
+  }, [gameOver, dropTime, movePlayer, drop, playerRotate, stage]);
 
   // Update competitive mode status and wallet address
   const handleCompetitiveModeActivation = (status, address) => {
@@ -558,255 +666,274 @@ const Tetris = () => {
 
   return (
     <div 
-      className="tetris-wrapper" 
-      role="button" 
-      tabIndex="0" 
-      onKeyDown={move} 
-      onKeyUp={keyUp}
       ref={tetrisRef}
+      className="tetris-wrapper"
+      tabIndex="0"
+      onKeyDown={move}
+      onKeyUp={keyUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '90%',
+        backgroundAttachment: 'fixed'
+      }}
     >
-      <Modal 
-        isOpen={showNameModal} 
-        type="nameInput" 
-        onSubmit={handleNameSubmit} 
-      />
-      
-      <Modal 
-        isOpen={showTop10Modal && !showNameModal} 
-        type="top10" 
-        score={scoreInfo} 
-        onClose={handleTop10Close} 
-      />
-
-      <Modal
-        isOpen={showModal}
-        type="custom"
-        onClose={handleCompetitiveRulesClose}
-        customContent={
-          <div className="competitive-modal-content">
-            <h2>Competitive Mode Rules</h2>
-            <div className="rules-list">
-              <div className="rule-item">
-                <span className="rule-number">0.</span>
-                <span className="rule-text">Still in testnet, no real money is used!</span>
-              </div>
-              <div className="rule-item">
-                <span className="rule-number">1.</span>
-                <span className="rule-text">All <span className="crypto-amount">$SUPR</span> are collected in a smart contract</span>
-              </div>
-              <div className="rule-item">
-                <span className="rule-number">2.</span>
-                <span className="rule-text">Every season lasts 1 week (Monday to Sunday)</span>
-              </div>
-              <div className="rule-item">
-                <span className="rule-number">3.</span>
-                <span className="rule-text">At the end of each season, the top 5 competitive players get prizes:</span>
-              </div>
-              <div className="prizes-list">
-                <div className="prize-item-row">
-                  <span className="prize-rank">1st place:</span>
-                  <span className="prize-value"><span className="crypto-amount">50%</span> of the pot</span>
-                </div>
-                <div className="prize-item-row">
-                  <span className="prize-rank">2nd place:</span>
-                  <span className="prize-value"><span className="crypto-amount">30%</span> of the pot</span>
-                </div>
-                <div className="prize-item-row">
-                  <span className="prize-rank">3rd place:</span>
-                  <span className="prize-value"><span className="crypto-amount">10%</span> of the pot</span>
-                </div>
-                <div className="prize-item-row">
-                  <span className="prize-rank">4th place:</span>
-                  <span className="prize-value"><span className="crypto-amount">5%</span> of the pot</span>
-                </div>
-                <div className="prize-item-row">
-                  <span className="prize-rank">5th place:</span>
-                  <span className="prize-value"><span className="crypto-amount">5%</span> of the pot</span>
-                </div>
-              </div>
-              <div className="rule-item">
-                <span className="rule-number">5.</span>
-                <span className="rule-text">After that, a new season starts and the leaderboard is cleared</span>
-              </div>
-            </div>
-            
-            {error && <p className="error-message">{error}</p>}
-            
-            <div className="competitive-modal-buttons">
-              <button 
-                className="modal-button" 
-                onClick={handleCompetitiveRulesConfirm}
-                disabled={isLoading}
-              >
-                {isCompetitiveMode 
-                  ? (isLoading 
-                    ? 'Processing Payment...' 
-                    : <span>Pay <span className="crypto-amount">1 $SUPR</span> & Start Game</span>
-                    ) 
-                  : 'Start Game'}
-              </button>
-              <button className="modal-button secondary" onClick={handleCompetitiveRulesClose}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        }
-      />
-      
-      {/* Music toggle button */}
-      <MusicToggle />
-      
-      <div className="tetris">
-        <div className="game-header">
-          <img src={logoText} alt="TetriSeed Logo" className="logo" />
-          <h1>&nbsp;Clear your Debt!</h1>
-        </div>
+      <div className="tetris-content" style={{ position: 'relative', zIndex: 1 }}>
+        <Modal 
+          isOpen={showNameModal} 
+          type="nameInput" 
+          onSubmit={handleNameSubmit} 
+        />
         
-        <div className="game-content">
-          {/* Conditional rendering based on mobile or desktop */}
-          {isMobile ? (
-            // Mobile layout with SuperSeed Facts on top
-            <>
-              {/* Mobile: Show SuperSeed Facts first */}
-              <SuperSeedFacts />
-              
-              {/* Mobile: Game area */}
-              <div className="game-area">
-                <div className="stage-container">
-                  {/* Next piece is positioned as a background in stage container */}
-                  {!gameOver && dropTime && (
-                    <div className="next-piece-overlay">
-                      <NextPiece tetromino={nextTetromino} />
-                    </div>
-                  )}
-                  <Stage 
-                    stage={stage} 
-                    message={message} 
-                    showMessage={showMessage} 
-                    interestMessage={interestMessage}
-                    showInterestMessage={showInterestMessage}
-                    onRotate={handleStageRotate}
-                  />
+        <Modal 
+          isOpen={showTop10Modal && !showNameModal} 
+          type="top10" 
+          score={scoreInfo} 
+          onClose={handleTop10Close} 
+        />
+
+        <Modal
+          isOpen={showModal}
+          type="custom"
+          onClose={handleCompetitiveRulesClose}
+          customContent={
+            <div className="competitive-modal-content">
+              <h2>Competitive Mode Rules</h2>
+              <div className="rules-list">
+                <div className="rule-item">
+                  <span className="rule-number">0.</span>
+                  <span className="rule-text">Still in testnet, no real money is used!</span>
                 </div>
-                <div className="game-info">
-                  {gameOver ? (
-                    <div className="game-over-container">
-                      <h2 className="liquidated">LIQUIDATED!</h2>
-                      <p>Your final score: {score}</p>
-                      <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
-                    </div>
-                  ) : (
-                    <div className="game-info-displays">
-                      <Display text={`Score: ${score}`} />
-                      <Display text={isMobile ? `Rows: ${rows}` : `Rows Cleared: ${rows}`} />
-                      <Display text={`Level: ${level}`} />
-                      
-                      {/* Only show start button at game initialization */}
-                      {!dropTime && !gameOver && (
-                        <div className="start-container">
-                          <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
-                        </div>
-                      )}
-                    </div>
+                <div className="rule-item">
+                  <span className="rule-number">1.</span>
+                  <span className="rule-text">All <span className="crypto-amount">$SUPR</span> are collected in a smart contract</span>
+                </div>
+                <div className="rule-item">
+                  <span className="rule-number">2.</span>
+                  <span className="rule-text">Every season lasts 1 week (Monday to Sunday)</span>
+                </div>
+                <div className="rule-item">
+                  <span className="rule-number">3.</span>
+                  <span className="rule-text">At the end of each season, the top 5 competitive players get prizes:</span>
+                </div>
+                <div className="prizes-list">
+                  <div className="prize-item-row">
+                    <span className="prize-rank">1st place:</span>
+                    <span className="prize-value"><span className="crypto-amount">50%</span> of the pot</span>
+                  </div>
+                  <div className="prize-item-row">
+                    <span className="prize-rank">2nd place:</span>
+                    <span className="prize-value"><span className="crypto-amount">30%</span> of the pot</span>
+                  </div>
+                  <div className="prize-item-row">
+                    <span className="prize-rank">3rd place:</span>
+                    <span className="prize-value"><span className="crypto-amount">10%</span> of the pot</span>
+                  </div>
+                  <div className="prize-item-row">
+                    <span className="prize-rank">4th place:</span>
+                    <span className="prize-value"><span className="crypto-amount">5%</span> of the pot</span>
+                  </div>
+                  <div className="prize-item-row">
+                    <span className="prize-rank">5th place:</span>
+                    <span className="prize-value"><span className="crypto-amount">5%</span> of the pot</span>
+                  </div>
+                </div>
+                <div className="rule-item">
+                  <span className="rule-number">5.</span>
+                  <span className="rule-text">After that, a new season starts and the leaderboard is cleared</span>
+                </div>
+              </div>
+              
+              {error && <p className="error-message">{error}</p>}
+              
+              <div className="competitive-modal-buttons">
+                <button 
+                  className="modal-button" 
+                  onClick={handleCompetitiveRulesConfirm}
+                  disabled={isLoading}
+                >
+                  {isCompetitiveMode 
+                    ? (isLoading 
+                      ? 'Processing Payment...' 
+                      : <span>Pay <span className="crypto-amount">1 $SUPR</span> & Start Game</span>
+                      ) 
+                    : 'Start Game'}
+                </button>
+                <button className="modal-button secondary" onClick={handleCompetitiveRulesClose}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          }
+        />
+        
+        {/* Music toggle button */}
+        <MusicToggle />
+        
+        <div className="tetris">
+          <div className="game-header">
+            <img src={logoText} alt="TetriSeed Logo" className="logo" />
+            <h1>&nbsp;Clear your Debt!</h1>
+          </div>
+          
+          <div className="game-content">
+            {/* Conditional rendering based on mobile or desktop */}
+            {isMobile ? (
+              // Mobile layout with SuperSeed Facts on top
+              <>
+                {/* Mobile: Show SuperSeed Facts first */}
+                <SuperSeedFacts isMobile={isMobile} />
+                
+                {/* Mobile: Game area */}
+                <div className="game-area">
+                  <div className="stage-container">
+                    {/* Next piece is positioned as a background in stage container */}
+                    {!gameOver && dropTime && (
+                      <div className="next-piece-overlay">
+                        <NextPiece tetromino={nextTetromino} />
+                      </div>
+                    )}
+                    <Stage 
+                      stage={stage} 
+                      message={message} 
+                      showMessage={showMessage} 
+                      interestMessage={interestMessage}
+                      showInterestMessage={showInterestMessage}
+                    />
+                  </div>
+                  <div className="game-info">
+                    {gameOver ? (
+                      <div className="game-over-container">
+                        <h2 className="liquidated">{gameOverMessage}</h2>
+                        <p>Your final score: {score}</p>
+                        <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
+                      </div>
+                    ) : (
+                      <div className="game-info-displays">
+                        <Display text={`Score: ${score}`} />
+                        <Display text={isMobile ? `Rows: ${rows}` : `Rows Cleared: ${rows}`} />
+                        <Display text={`Level: ${level}`} />
+                        
+                        {/* Only show start button at game initialization */}
+                        {!dropTime && !gameOver && (
+                          <div className="start-container">
+                            <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Mobile controls */}
+                  {!gameOver && dropTime && (
+                    <MobileControls onControlClick={handleMobileControl} />
                   )}
                 </div>
                 
-                {/* Mobile controls */}
-                {!gameOver && dropTime && (
-                  <MobileControls onControlClick={handleMobileControl} />
-                )}
-              </div>
-              
-              {/* Mobile: Leaderboard and player info below - REORDERED */}
-              <div className="sidebar mobile-sidebar">
-                {/* Leaderboard comes BEFORE player info */}
-                <CompetitiveLeaderboard />
-                <div className="player-info mobile-player-info">
-                  <div className="player-info-row">
-                    <div className="player-detail">
-                      <span className="detail-label">Player:</span>
-                      <span className="player-name">{playerName}</span>
-                    </div>
-                    <div className="player-detail">
-                      <span className="detail-label">Mode:</span>
-                      <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
-                        {isCompetitiveMode ? "Competitive" : "Casual"}
-                      </span>
-                    </div>
-                  </div>
-                  <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
-                  {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
-                </div>
-              </div>
-            </>
-          ) : (
-            // Desktop layout - reordered components
-            <>
-              <div className="game-area">
-                <div className="stage-container">
-                  {/* Next piece is positioned as a background in stage container */}
-                  {!gameOver && dropTime && (
-                    <div className="next-piece-overlay">
-                      <NextPiece tetromino={nextTetromino} />
-                    </div>
-                  )}
-                  <Stage 
-                    stage={stage} 
-                    message={message} 
-                    showMessage={showMessage} 
-                    interestMessage={interestMessage}
-                    showInterestMessage={showInterestMessage}
-                    onRotate={handleStageRotate}
-                  />
-                </div>
-                <div className="game-info">
-                  {gameOver ? (
-                    <div className="game-over-container">
-                      <h2 className="liquidated">LIQUIDATED!</h2>
-                      <p>Your final score: {score}</p>
-                      <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
-                    </div>
-                  ) : (
-                    <div className="game-info-displays">
-                      <Display text={`Score: ${score}`} />
-                      <Display text={`Rows Cleared: ${rows}`} />
-                      <Display text={`Level: ${level}`} />
+                {/* Mobile: Leaderboard and player info below - REORDERED */}
+                <div className="sidebar mobile-sidebar">
+                  {/* Leaderboard comes BEFORE player info - REMOVE for mobile */}
+                  {/* <CompetitiveLeaderboard /> */}
+                  <div className="player-info mobile-player-info">
+                    {/* NEW: Top Row container */}
+                    <div className="player-info-top-row">
+                      {/* Player Name Detail */}
+                      <div className="player-detail player-name-detail">
+                        <span className="detail-label">Player:</span>
+                        <span className="player-name">{playerName}</span>
+                      </div>
                       
-                      {/* Only show start button at game initialization */}
-                      {!dropTime && !gameOver && (
-                        <div className="start-container">
-                          <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
-                        </div>
-                      )}
+                      {/* Competitive Mode Component (contains buttons) */}
+                      {/* Note: This includes the connect/disconnect button */}
+                      <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
+                      
+                      {/* Game Mode Detail */}
+                      <div className="player-detail mode-detail">
+                        <span className="detail-label">Mode:</span>
+                        <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
+                          {isCompetitiveMode ? "Competitive" : "Casual"}
+                        </span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="sidebar">
-                {/* Leaderboard FIRST */}
-                <CompetitiveLeaderboard />
-                <div className="player-info">
-                  <div className="player-info-row">
-                    <div className="player-detail">
-                      <span className="detail-label">Player:</span>
-                      <span className="player-name">{playerName}</span>
-                    </div>
-                    <div className="player-detail">
-                      <span className="detail-label">Mode:</span>
-                      <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
-                        {isCompetitiveMode ? "Competitive" : "Casual"}
-                      </span>
-                    </div>
+                    
+                    {/* Optional: Season Info remains below */}
+                    {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
                   </div>
-                  {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
-                  <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
                 </div>
-                {/* Re-add SuperSeed Facts */}
-                <SuperSeedFacts />
-              </div>
-            </>
-          )}
+              </>
+            ) : (
+              // Desktop layout - reordered components
+              <>
+                <div className="game-area">
+                  <div className="stage-container">
+                    {/* Next piece is positioned as a background in stage container */}
+                    {!gameOver && dropTime && (
+                      <div className="next-piece-overlay">
+                        <NextPiece tetromino={nextTetromino} />
+                      </div>
+                    )}
+                    <Stage 
+                      stage={stage} 
+                      message={message} 
+                      showMessage={showMessage} 
+                      interestMessage={interestMessage}
+                      showInterestMessage={showInterestMessage}
+                    />
+                  </div>
+                  <div className="game-info">
+                    {gameOver ? (
+                      <div className="game-over-container">
+                        <h2 className="liquidated">{gameOverMessage}</h2>
+                        <p>Your final score: {score}</p>
+                        <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
+                      </div>
+                    ) : (
+                      <div className="game-info-displays">
+                        <Display text={`Score: ${score}`} />
+                        <Display text={`Rows Cleared: ${rows}`} />
+                        <Display text={`Level: ${level}`} />
+                        
+                        {/* Only show start button at game initialization */}
+                        {!dropTime && !gameOver && (
+                          <div className="start-container">
+                            <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Desktop: Leaderboard and player info below - REORDERED */}
+                <div className="sidebar desktop-sidebar">
+                  {/* Leaderboard comes BEFORE player info - Keep for desktop */}
+                  <CompetitiveLeaderboard />
+                  <div className="player-info desktop-player-info">
+                    <div className="player-info-row">
+                      <div className="player-detail">
+                        <span className="detail-label">Player:</span>
+                        <span className="player-name">{playerName}</span>
+                      </div>
+                      <div className="player-detail">
+                        <span className="detail-label">Mode:</span>
+                        <span className={isCompetitiveMode ? "competitive-mode-active" : "casual-mode"}>
+                          {isCompetitiveMode ? "Competitive" : "Casual"}
+                        </span>
+                      </div>
+                    </div>
+                    <CompetitiveMode onActivation={handleCompetitiveModeActivation} isActive={isCompetitiveMode} />
+                    {isCompetitiveMode && <SeasonInfo isDetailed={false} />}
+                  </div>
+                  {/* Add SuperSeedFacts back to the desktop sidebar */}
+                  <SuperSeedFacts isMobile={isMobile} />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

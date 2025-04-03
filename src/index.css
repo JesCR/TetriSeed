@@ -5,10 +5,11 @@
 body {
   margin: 0;
   padding: 0;
-  background: #000;
+  background-color: #000000;
   color: #fff;
   font-family: 'Lacquer', sans-serif;
-  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   max-width: 100vw;
   min-height: 100vh;
   display: block;
@@ -18,22 +19,39 @@ body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent; /* Remove blue flash on tap */
+}
+
+/* Remove the focus styles causing conflicts */
+/* Remove focus outlines globally */
+*:focus {
+  outline: none !important;
+}
+
+/* Remove blue highlight on mobile */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection where needed */
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* App container */
 .App {
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
 }
 
 /* Tetris wrapper */
 .tetris-wrapper {
   width: 100%;
-  height: 100%;
-  overflow: auto;
   outline: none;
-  background: linear-gradient(to bottom, #000000, #1c1c1c);
+  background: #000000; /* Change from gradient to pure black */
   touch-action: manipulation;
 }
 
@@ -42,6 +60,7 @@ body {
   max-width: 900px;
   margin: 0 auto;
   padding: 10px;
+  padding-bottom: 50px;
 }
 
 /* Game header with logo and title */
@@ -106,7 +125,7 @@ body {
 /* Stage (game board) styling */
 .stage-container {
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 3px;
   z-index: 1; /* Add explicit z-index for proper stacking */
 }
 
@@ -135,13 +154,21 @@ body {
   transform: translate(-50%, -50%);
   text-align: center;
   color: #ff3333;
-  font-size: 1.05rem;
-  text-shadow: 0 0 15px rgba(255, 51, 51, 0.9);
-  background: rgba(0, 0, 0, 0.7);
-  padding: 15px;
-  border-radius: 5px;
-  z-index: 20;
-  animation: pulse-red 0.5s ease-in-out infinite alternate;
+  font-size: 1.3rem; /* Increased font size */
+  font-weight: bold; /* Added bold text */
+  text-shadow: 0 0 20px rgba(255, 51, 51, 1); /* Stronger glow */
+  background: rgba(0, 0, 0, 0.85); /* Darker background for better contrast */
+  padding: 20px; /* More padding */
+  border-radius: 8px;
+  border: 2px solid #ff3333; /* Added border */
+  z-index: 25; /* Higher z-index to ensure visibility */
+  animation: pulse-red 0.7s ease-in-out infinite alternate; /* Faster animation */
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.7); /* Added glow around the box */
+}
+
+@keyframes pulse-red {
+  from { opacity: 0.8; transform: translate(-50%, -50%) scale(0.93); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
 }
 
 /* Bottom message area */
@@ -182,7 +209,7 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  touch-action: manipulation;
+  touch-action: none; /* Prevent scrolling when touching buttons */
 }
 
 .stage::before {
@@ -205,14 +232,42 @@ body {
 .cell {
   width: 100%;
   height: 100%;
-  font-size: 16px;
-  text-align: center;
-  line-height: 25px;
-  font-weight: bold;
-  color: #ffdd00;
-  text-shadow: 0 0 5px rgba(255, 221, 0, 0.7);
-  font-family: Arial, sans-serif;
+  position: relative;
 }
+
+/* Common style for the '$' symbol on pieces */
+.cell.cell-I::before,
+.cell.cell-J::before,
+.cell.cell-L::before,
+.cell.cell-O::before,
+.cell.cell-S::before,
+.cell.cell-T::before,
+.cell.cell-Z::before {
+  content: 'w';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: Arial;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 0.8em;
+  color: #FFFFFF;
+  text-shadow: none;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  z-index: 1;
+  line-height: 1;
+}
+
+/* Define Tetromino Colors (adjust if needed) - these are just placeholders if JS handles colors */
+.cell.cell-I { background-color: #00FFFF; }
+.cell.cell-J { background-color: #0000FF; }
+.cell.cell-L { background-color: #FFA500; }
+.cell.cell-O { background-color: #FFFF00; }
+.cell.cell-S { background-color: #00FF00; }
+.cell.cell-T { background-color: #800080; }
+.cell.cell-Z { background-color: #FF0000; }
 
 /* Game info section */
 .game-info {
@@ -554,61 +609,91 @@ body {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 10px auto;
-  padding: 0;
+  margin: 20px auto;
+  padding: 10px 0;
   max-width: 350px; /* Match the game area width */
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  touch-action: manipulation;
+  touch-action: none; /* Prevent scrolling when touching buttons */
 }
 
 .mobile-btn {
-  width: 52px;
-  height: 52px;
-  background: rgba(0, 0, 0, 0.85);
-  border: 2px solid #0ff;
+  width: 65px;
+  height: 65px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 3px solid #0ff;
   border-radius: 50%;
   color: #0ff;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.1s;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   position: relative;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+  -webkit-touch-callout: none; /* Prevent callout on long press */
+  touch-action: none; /* Prevent default touch actions */
 }
 
 .mobile-btn:active {
-  background: rgba(0, 255, 255, 0.3);
-  transform: scale(0.92);
+  background: rgba(0, 255, 255, 0.5);
+  transform: scale(0.95);
   color: #000;
+  box-shadow: 0 0 18px rgba(0, 255, 255, 0.8);
 }
 
 /* Distinct colors for each button */
 .mobile-btn.left {
-  background: rgba(0, 0, 0, 0.9);
   border-color: rgb(0, 200, 255);
+  box-shadow: 0 0 12px rgba(0, 200, 255, 0.7);
 }
 
 .mobile-btn.right {
-  background: rgba(0, 0, 0, 0.9);
   border-color: rgb(0, 255, 180);
+  box-shadow: 0 0 12px rgba(0, 255, 180, 0.7);
 }
 
 .mobile-btn.down {
-  background: rgba(0, 0, 0, 0.9);
   border-color: rgb(255, 230, 0);
+  box-shadow: 0 0 12px rgba(255, 230, 0, 0.7);
 }
 
 .mobile-btn.rotate {
-  background: rgba(0, 0, 0, 0.9);
   border-color: rgb(255, 100, 255);
-  font-size: 1.3rem;
+  box-shadow: 0 0 12px rgba(255, 100, 255, 0.7);
+  font-size: 1.6rem;
+}
+
+/* Larger mobile controls for tablet/larger screens */
+@media (min-width: 768px) {
+  .mobile-controls {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 10px 0;
+  }
+  
+  /* Make controls more prominent */
+  .mobile-btn {
+    width: 65px;
+    height: 65px;
+    font-size: 1.8rem;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  }
+  
+  .mobile-btn.rotate {
+    font-size: 1.6rem;
+  }
+  
+  .mobile-btn:active {
+    transform: scale(0.9);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+  }
 }
 
 /* Mobile sidebar adjustments */
@@ -715,19 +800,17 @@ body {
   
   /* More compact game messages */
   .interest-message {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     padding: 8px;
   }
   
-  .debt-message {
-    font-size: 0.8rem;
-    padding: 8px;
-  }
+  /* Mobile-specific interest message style (will be overridden by our @media query) */
+  /* Keeping this empty rule to avoid disrupting other CSS line numbers */
   
   /* Game info container for mobile */
   .game-info {
     width: 100%;
-    margin: 10px auto;
+    margin: 3px auto 10px; /* Reduced top margin from 10px to 3px */
     max-width: 100%;
   }
   
@@ -777,23 +860,6 @@ body {
     padding: 3px 1px;
   }
   
-  /* Make controls more prominent */
-  .mobile-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 1.7rem;
-    box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
-  }
-  
-  .mobile-btn.rotate {
-    font-size: 1.5rem;
-  }
-  
-  .mobile-btn:active {
-    transform: scale(0.9);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
-  }
-  
   /* Adjust order of elements on mobile */
   .mobile-sidebar {
     display: flex;
@@ -802,29 +868,83 @@ body {
     margin-top: 0;
   }
   
-  /* Mobile player info styles - reduced space */
+  /* Mobile player info styles - use grid layout */
   .mobile-player-info {
     width: 100%;
     max-width: 350px;
     order: 0;
-    min-height: auto;
-    padding: 10px;
+    padding: 5px; /* Reduced padding */
     margin-bottom: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-areas:
+      "player-details connect-button"
+      "competitive-button competitive-button"
+      "season-info season-info";
+    grid-template-columns: auto 1fr;
     gap: 8px;
+    align-items: center; /* Align items vertically */
+    background: rgba(0, 0, 0, 0.5); /* Add subtle background */
+    border: 1px solid rgba(0, 255, 255, 0.1); /* Add subtle border */
+    border-radius: 5px;
   }
   
   .mobile-player-info .player-info-row {
-    margin-bottom: 8px;
-    padding: 5px;
+    grid-area: player-details;
+    display: flex;
+    flex-direction: column; /* Stack Player and Mode vertically */
+    gap: 2px; /* Small gap between Player and Mode */
+    margin: 0;
+    padding: 0;
+    background: none; /* Remove individual background */
+    border: none; /* Remove individual border */
+  }
+  
+  .mobile-player-info .player-detail {
+    gap: 5px; /* Slightly smaller gap */
+    font-size: 0.75rem; /* Slightly smaller font */
+  }
+  
+  .mobile-player-info .detail-label {
+    font-size: 0.7rem;
+  }
+  
+  .mobile-player-info .player-name {
+    font-size: 0.8rem;
+  }
+  
+  .mobile-player-info .competitive-mode {
+    grid-area: connect-button; /* Place the connect button area */
+    margin: 0;
+    width: auto; /* Let grid control width */
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
   }
   
   .mobile-player-info .wallet-buttons {
-    margin-bottom: 8px;
+    grid-area: competitive-button; /* Place competitive button below */
+    margin: 0;
+    display: flex;
+    flex-direction: column; /* Ensure button stacking if competitive is shown */
+  }
+  
+  /* Style only the Connect/Disconnect button in this context */
+  .mobile-player-info .competitive-mode .wallet-button {
+    padding: 6px 10px; /* Adjust padding */
+    font-size: 0.8rem; /* Adjust font size */
+    width: auto; /* Fit content width */
+    min-width: 70px; /* Ensure minimum width */
+    flex: 0 0 auto; /* Don't grow/shrink */
+  }
+  
+  /* Style the competitive button if it exists */
+  .mobile-player-info .wallet-buttons .competitive-button {
+    width: 100%; /* Take full width */
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
   
   .mobile-player-info .season-info {
+    grid-area: season-info;
     margin: 0;
     padding: 5px;
   }
@@ -999,26 +1119,9 @@ body {
   margin-right: 5px;
 }
 
-/* iOS-specific fixes */
-html, body {
-  height: 100%;
-  width: 100%;
-  position: fixed;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-html.ios-keyboard-open {
-  position: relative;
-  height: calc(100% + 60px); /* Add extra space for keyboard */
-}
-
 /* Main container */
 #root {
-  height: 100%;
   width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 /* Music toggle button styling */
@@ -1883,26 +1986,84 @@ html.ios-keyboard-open {
   width: 100%;
   max-width: 350px;
   order: 0;
-  min-height: auto;
-  padding: 10px;
+  padding: 5px; /* Reduced padding */
   margin-bottom: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-areas:
+    "player-details connect-button"
+    "competitive-button competitive-button"
+    "season-info season-info";
+  grid-template-columns: auto 1fr;
   gap: 8px;
+  align-items: center; /* Align items vertically */
+  background: rgba(0, 0, 0, 0.5); /* Add subtle background */
+  border: 1px solid rgba(0, 255, 255, 0.1); /* Add subtle border */
+  border-radius: 5px;
 }
 
 .mobile-player-info .player-info-row {
-  margin-bottom: 8px;
-  padding: 5px;
+  grid-area: player-details;
+  display: flex;
+  flex-direction: column; /* Stack Player and Mode vertically */
+  gap: 2px; /* Small gap between Player and Mode */
+  margin: 0;
+  padding: 0;
+  background: none; /* Remove individual background */
+  border: none; /* Remove individual border */
+}
+
+.mobile-player-info .player-detail {
+  gap: 5px; /* Slightly smaller gap */
+  font-size: 0.75rem; /* Slightly smaller font */
+}
+
+.mobile-player-info .detail-label {
+  font-size: 0.7rem;
+}
+
+.mobile-player-info .player-name {
+  font-size: 0.8rem;
+}
+
+.mobile-player-info .competitive-mode {
+  grid-area: connect-button; /* Place the connect button area */
+  margin: 0;
+  width: auto; /* Let grid control width */
+  display: flex;
+  justify-content: flex-end; /* Align button to the right */
 }
 
 .mobile-player-info .wallet-buttons {
-  margin-bottom: 8px;
+  grid-area: competitive-button; /* Place competitive button below */
+  margin: 0;
+  display: flex;
+  flex-direction: column; /* Ensure button stacking if competitive is shown */
+}
+
+/* Style only the Connect/Disconnect button in this context */
+.mobile-player-info .competitive-mode .wallet-button {
+  padding: 6px 10px; /* Adjust padding */
+  font-size: 0.8rem; /* Adjust font size */
+  width: auto; /* Fit content width */
+  min-width: 70px; /* Ensure minimum width */
+  flex: 0 0 auto; /* Don't grow/shrink */
+}
+
+/* Style the competitive button if it exists */
+.mobile-player-info .wallet-buttons .competitive-button {
+  width: 100%; /* Take full width */
+  padding: 6px 10px;
+  font-size: 0.8rem;
 }
 
 .mobile-player-info .season-info {
+  grid-area: season-info;
   margin: 0;
   padding: 5px;
+}
+
+.mobile-sidebar {
+  gap: 8px;
 }
 
 /* Mobile warning modal styles - more compact */
@@ -1944,9 +2105,6 @@ html.ios-keyboard-open {
   .modal-content {
     width: 90%;
     padding: 15px;
-    font-size: 14px;
-    max-height: none;
-    overflow: visible;
   }
   
   .modal-content h2, 
@@ -2410,4 +2568,142 @@ html.ios-keyboard-open {
 .player-count .value, .game-count .value {
   font-weight: bold;
   color: #fff;
+}
+
+/* Stage touch styles */
+.stage {
+  touch-action: none; /* Prevent default touch behavior on the stage */
+  -webkit-touch-callout: none; /* Prevent callout to copy image, etc */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+/* NFT Card */
+.nft-card {
+  /* Existing styles... */
+}
+
+/* Mobile player info styles - Flex layout for top row */
+.mobile-player-info {
+  width: 100%;
+  max-width: 350px;
+  order: 0;
+  padding: 8px; /* Adjusted padding */
+  margin-bottom: 0;
+  display: flex; /* Changed from grid */
+  flex-direction: column; /* Stack top row and season info */
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+/* NEW: Style the top row container */
+.mobile-player-info .player-info-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px; /* Gap between items */
+}
+
+/* Adjust Player Name and Mode details sizing */
+.mobile-player-info .player-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  flex: 0 1 auto; /* Allow shrinking but not growing */
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.mobile-player-info .player-name-detail {
+  /* No specific styles needed, flex handles it */
+}
+
+.mobile-player-info .mode-detail {
+  justify-content: flex-end; /* Align mode to the right within its flex item */
+}
+
+/* Adjust CompetitiveMode container */
+.mobile-player-info .competitive-mode {
+  margin: 0;
+  padding: 0; /* Remove extra padding */
+  width: auto; /* Let content define width */
+  text-align: center; /* Center button if needed */
+  flex: 0 0 auto; /* Prevent growing or shrinking */
+}
+
+/* Adjust Wallet Buttons container within CompetitiveMode */
+.mobile-player-info .competitive-mode .wallet-buttons {
+  margin: 0;
+  padding: 0; /* Remove extra padding */
+  display: flex; /* Ensure button is inline */
+  justify-content: center; /* Center button */
+}
+
+/* Style the Connect/Disconnect button */
+.mobile-player-info .competitive-mode .wallet-button {
+  padding: 5px 8px; /* Smaller padding */
+  font-size: 0.75rem; /* Smaller font */
+  width: auto; /* Fit content width */
+  min-width: 60px; /* Smaller min-width */
+  flex: 0 0 auto; /* Don't grow/shrink */
+}
+
+/* Remove styles for the old row structure */
+/* .mobile-player-info .player-info-row { ... } */
+/* .mobile-player-info .wallet-buttons { ... } */ /* Styles now inside .competitive-mode */
+
+.mobile-player-info .season-info {
+  margin: 0;
+  padding: 5px;
+  width: 100%; /* Ensure it takes full width */
+}
+
+.mobile-sidebar {
+  gap: 8px;
+}
+
+/* Adjust leaderboard size for mobile */
+
+/* Modal mobile notice */
+.mobile-notice {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 5px;
+  padding: 8px;
+  margin: 10px 0;
+  color: #0ff;
+  text-align: center;
+}
+
+.mobile-notice p {
+  margin: 5px 0;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+/* Apply blinking only to the second paragraph */
+.mobile-notice p:nth-child(2) {
+  animation: blinkCyanToRed 2s infinite alternate;
+}
+
+/* Animation for blinking from cyan to red */
+@keyframes blinkCyanToRed {
+  0% { color: #0ff; }
+  100% { color: #ff3333; }
+}
+
+/* More compact game messages for mobile */
+@media (max-width: 768px) {
+  .interest-message {
+    font-size: 1.1rem; /* Slightly smaller than desktop but still larger than original */
+    padding: 12px; /* More padding than before, less than desktop */
+    max-width: 90%; /* Prevent overflowing on very small screens */
+    border-width: 1px; /* Thinner border for mobile */
+  }
 }

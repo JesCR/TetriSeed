@@ -101,11 +101,17 @@ export const checkCollision = (player, stage, { x: moveX, y: moveY }) => {
 
 // Random debt repayment messages
 export const DEBT_MESSAGES = [
-  "Debt repayed!",
-  "Enjoy SuperCollateral",
-  "Proof of repayment checked!",
+  "SuperCollateral!",
+  "Proof of Repayment!",
   "LFG SuperSeed!",
-  "Clear your Debt"
+  "Clear your debt!",
+  "Debt repaid!",
+  "Debt cleared!",
+  "Debt paid off!",
+  "Debt settled!",
+  "Debt paid in full!",
+  "No debt!",
+  "Debt paid!"
 ];
 
 // Get random message

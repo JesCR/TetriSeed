@@ -194,12 +194,12 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
     <div className="competitive-mode">
       <div className={`wallet-buttons ${walletConnected ? 'wallet-connected' : ''}`}>
         {/* FIRST: Connect/Disconnect button */}
-        <button 
+        <button
           className="wallet-button"
           onClick={handleConnectWallet}
           disabled={isLoading}
         >
-          {isLoading ? 'Processing...' : (walletConnected ? 'Disconnect' : 'Connect Wallet')}
+          {isLoading ? 'Processing...' : (walletConnected ? 'Disconnect Wallet' : 'Connect Wallet')}
         </button>
         
         {/* SECOND: Competitive mode button (only visible when connected) */}

@@ -6,8 +6,8 @@ const Cell = ({ type }) => {
   const tetrominoType = typeof type === 'string' && type !== '0' ? type : 0;
   const color = TETROMINOS[tetrominoType].color;
   
-  // Display a $ symbol for all non-empty cells
-  const content = type === 0 ? '' : '$';
+  // Display a money bag emoji for all non-empty cells
+  const content = type === 0 ? '' : '💰';
   
   return (
     <div

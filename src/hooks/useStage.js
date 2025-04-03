@@ -60,10 +60,22 @@ export const useStage = (player, resetPlayer) => {
       player.tetromino.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value !== 0) {
-            newStage[y + player.pos.y][x + player.pos.x] = [
-              value,
-              `${player.collided ? 'merged' : 'clear'}`,
-            ];
+            // Add boundary checking to prevent index out of bounds errors
+            const newY = y + player.pos.y;
+            const newX = x + player.pos.x;
+            
+            // Only draw if within stage bounds
+            if (
+              newY >= 0 && 
+              newY < newStage.length && 
+              newX >= 0 && 
+              newX < newStage[0].length
+            ) {
+              newStage[newY][newX] = [
+                value,
+                `${player.collided ? 'merged' : 'clear'}`,
+              ];
+            }
           }
         });
       });
@@ -87,13 +99,21 @@ export const useStage = (player, resetPlayer) => {
   // Function to trigger interest rate change message
   // This is now called externally when level increases
   const showInterestRateMessage = (level) => {
-    setInterestMessage(`INTEREST RATE INCREASED TO ${level * 5}%!`);
-    setShowInterestMessage(true);
+    // For level 1, show starting message, for other levels show increase message
+    const message = level === 1 
+      ? `STARTING INTEREST RATE: ${level * 5}%!` 
+      : `INTEREST RATE INCREASED TO ${level * 5}%!`;
     
-    // Hide the message after 2 seconds
+    console.log(`Setting interest message to: "${message}"`);
+    setInterestMessage(message);
+    setShowInterestMessage(true);
+    console.log(`Interest message display enabled, visible: ${showInterestMessage}`);
+    
+    // Hide the message after 2.5 seconds (extended time for better visibility)
     setTimeout(() => {
+      console.log('Hiding interest rate message');
       setShowInterestMessage(false);
-    }, 2000);
+    }, 2500);
   };
 
   return [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage];

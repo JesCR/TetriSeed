@@ -1,87 +1,89 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 const MobileControls = ({ onControlClick }) => {
-  // Track if buttons were recently clicked to prevent double actions
-  const rotateDebounceRef = useRef(false);
-  const leftDebounceRef = useRef(false);
-  const rightDebounceRef = useRef(false);
+  // Track last pressed button to prevent duplicate events
+  const lastButtonPressedRef = useRef('');
+  const lastPressTimeRef = useRef(0);
   
-  const handleButtonClick = (e, direction) => {
-    // Prevent any default browser behavior
+  // Handle button press with improved event handling
+  const handleButtonPress = useCallback((e, direction) => {
+    // Prevent any default browser behavior and stop propagation
     e.preventDefault();
     e.stopPropagation();
     
-    // Check debounce for each direction
-    if (direction === 'rotate' && rotateDebounceRef.current) {
-      return; // Ignore if already rotating
+    // Get the current time to check for double presses
+    const now = Date.now();
+    
+    // Prevent too-rapid button presses (debounce)
+    if (lastButtonPressedRef.current === direction && 
+        now - lastPressTimeRef.current < 80) {
+      return;
     }
     
-    if (direction === 'left' && leftDebounceRef.current) {
-      return; // Ignore if already moving left
-    }
+    // Update the last button pressed info
+    lastButtonPressedRef.current = direction;
+    lastPressTimeRef.current = now;
     
-    if (direction === 'right' && rightDebounceRef.current) {
-      return; // Ignore if already moving right
-    }
-    
-    // Set appropriate debounce flag
-    if (direction === 'rotate') {
-      rotateDebounceRef.current = true;
-      
-      // Reset debounce after animation completes
-      setTimeout(() => {
-        rotateDebounceRef.current = false;
-      }, 200);
-    } else if (direction === 'left') {
-      leftDebounceRef.current = true;
-      
-      // Reset debounce after animation completes
-      setTimeout(() => {
-        leftDebounceRef.current = false;
-      }, 150); // Slightly faster than rotate
-    } else if (direction === 'right') {
-      rightDebounceRef.current = true;
-      
-      // Reset debounce after animation completes
-      setTimeout(() => {
-        rightDebounceRef.current = false;
-      }, 150); // Slightly faster than rotate
-    }
+    console.log(`Button ${direction} pressed`);
     
     // Call the control function with the direction
     onControlClick(direction);
-  };
+  }, [onControlClick]);
+  
+  // Reset the last button pressed on touch end to allow quick alternating presses
+  const handleTouchEnd = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Clear last button to allow rapid alternating presses
+    lastButtonPressedRef.current = '';
+  }, []);
+  
+  // Prevent touch move events on buttons to avoid scrolling
+  const preventTouchMove = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, []);
   
   return (
     <div className="mobile-controls">
       <button 
         className="mobile-btn left" 
-        onClick={(e) => handleButtonClick(e, 'left')}
-        onTouchStart={(e) => handleButtonClick(e, 'left')}
+        onTouchStart={(e) => handleButtonPress(e, 'left')}
+        onTouchMove={preventTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         aria-label="Move Left"
       >
         ←
       </button>
       <button 
         className="mobile-btn down" 
-        onClick={(e) => handleButtonClick(e, 'down')}
-        onTouchStart={(e) => handleButtonClick(e, 'down')}
+        onTouchStart={(e) => handleButtonPress(e, 'down')}
+        onTouchMove={preventTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         aria-label="Move Down"
       >
         ↓
       </button>
       <button 
         className="mobile-btn right" 
-        onClick={(e) => handleButtonClick(e, 'right')}
-        onTouchStart={(e) => handleButtonClick(e, 'right')}
+        onTouchStart={(e) => handleButtonPress(e, 'right')}
+        onTouchMove={preventTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         aria-label="Move Right"
       >
         →
       </button>
       <button 
         className="mobile-btn rotate" 
-        onClick={(e) => handleButtonClick(e, 'rotate')}
-        onTouchStart={(e) => handleButtonClick(e, 'rotate')}
+        onTouchStart={(e) => handleButtonPress(e, 'rotate')}
+        onTouchMove={preventTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         aria-label="Rotate"
       >
         ↻

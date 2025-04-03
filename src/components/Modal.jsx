@@ -1,9 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import logoText from '../assets/images/logo_text.png';
 
 const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check if the device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -121,7 +134,6 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
         {type === 'nameInput' && (
           <>
             <h2>Welcome to TetriSeed!</h2>
-            <p>Play on desktop for best experience</p>
             <p>Please enter your name to start playing:</p>
             <input
               type="text"
@@ -136,6 +148,12 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
               pattern="[A-Za-z0-9]+"
             />
             {error && <p className="error-message">{error}</p>}
+            {isMobile && (
+              <div className="mobile-notice">
+                <p>Play on desktop for best experience</p>
+                <p>Use only portrait mode on mobile</p>
+              </div>
+            )}
             <button onClick={handleSubmit} className="modal-button">Start Playing</button>
           </>
         )}

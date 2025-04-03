@@ -55,7 +55,7 @@ const FACTS = [
   "🔗 Superchain Benefits\nAs part of the Superchain ecosystem, SuperSeed benefits from shared security, seamless interoperability."
 ];
 
-const SuperSeedFacts = () => {
+const SuperSeedFacts = ({ isMobile }) => {
   const [currentFact, setCurrentFact] = useState("");
   const [isFlashing, setIsFlashing] = useState(false);
   const factsContainerRef = useRef(null);
@@ -119,16 +119,19 @@ const SuperSeedFacts = () => {
       <div>
         <p className="fact-title">{formattedFact.title}</p>
         <p className="fact-content">{formattedFact.content}</p>
-        <div className="facts-footer">
-          <a href="https://superseed.xyz" target="_blank" rel="noopener noreferrer">
-            Check SuperSeed!
-          </a>
-          <div className="social-icons">
-            <a href="https://x.com/superseedxyz" target="_blank" rel="noopener noreferrer">
-              <img src={xLogoBase64} alt="X.com" className="social-icon" />
+        {/* Conditionally render footer only on desktop */}
+        {!isMobile && (
+          <div className="facts-footer">
+            <a href="https://superseed.xyz" target="_blank" rel="noopener noreferrer">
+              Check SuperSeed!
             </a>
+            <div className="social-icons">
+              <a href="https://x.com/superseedxyz" target="_blank" rel="noopener noreferrer">
+                <img src={xLogoBase64} alt="X.com" className="social-icon" />
+              </a>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

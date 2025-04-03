@@ -28,21 +28,77 @@ export const usePlayer = () => {
     const clonedPlayer = JSON.parse(JSON.stringify(player));
     clonedPlayer.tetromino = rotate(clonedPlayer.tetromino, dir);
 
-    // Handle collision during rotation - ensure the piece doesn't go outside the play area
+    // Check if the rotated piece is out of bounds
+    const isWithinBounds = (playerToCheck) => {
+      const stageWidth = 12; // Standard Tetris width
+      const stageHeight = 20; // Standard Tetris height
+      
+      // For each cell in the tetromino, check if it's in bounds
+      for (let row = 0; row < playerToCheck.tetromino.length; row++) {
+        for (let col = 0; col < playerToCheck.tetromino[row].length; col++) {
+          if (playerToCheck.tetromino[row][col] !== 0) {
+            // We found a filled cell, check its absolute position
+            const absoluteX = playerToCheck.pos.x + col;
+            const absoluteY = playerToCheck.pos.y + row;
+            
+            // Check bounds
+            if (absoluteX < 0 || absoluteX >= stageWidth || absoluteY >= stageHeight) {
+              return false; // Out of bounds
+            }
+          }
+        }
+      }
+      
+      return true; // All cells are in bounds
+    };
+
+    // Adjusted collision detection for rotation
     const pos = clonedPlayer.pos.x;
     let offset = 1;
     
-    // Keep trying offsets until we find a valid position
-    while (checkCollision(clonedPlayer, stage, { x: 0, y: 0 })) {
-      // Try moving right then left, with increasing distance
-      clonedPlayer.pos.x += offset;
-      offset = -(offset + (offset > 0 ? 1 : -1));
+    // First check if out of bounds after rotation
+    if (!isWithinBounds(clonedPlayer)) {
+      // Try to fit by adjusting x position
+      let fitsWithinBounds = false;
       
-      // If we've tried moving further than the piece width, reset rotation
-      if (Math.abs(offset) > clonedPlayer.tetromino[0].length) {
-        rotate(clonedPlayer.tetromino, -dir); // Rotate back
+      // Try small offsets first to ensure piece stays close to original position
+      const maxOffset = clonedPlayer.tetromino[0].length;
+      
+      for (let testOffset = 0; testOffset <= maxOffset; testOffset++) {
+        // Try right
+        clonedPlayer.pos.x = pos + testOffset;
+        if (isWithinBounds(clonedPlayer) && !checkCollision(clonedPlayer, stage, { x: 0, y: 0 })) {
+          fitsWithinBounds = true;
+          break;
+        }
+        
+        // Try left
+        clonedPlayer.pos.x = pos - testOffset;
+        if (isWithinBounds(clonedPlayer) && !checkCollision(clonedPlayer, stage, { x: 0, y: 0 })) {
+          fitsWithinBounds = true;
+          break;
+        }
+      }
+      
+      // If can't fit within bounds, revert rotation
+      if (!fitsWithinBounds) {
+        clonedPlayer.tetromino = rotate(clonedPlayer.tetromino, -dir); // Rotate back
         clonedPlayer.pos.x = pos;
         return; // Failed to rotate
+      }
+    } else {
+      // Regular collision check with other pieces
+      while (checkCollision(clonedPlayer, stage, { x: 0, y: 0 })) {
+        // Try moving right then left with increasing distance
+        clonedPlayer.pos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        
+        // If we've tried moving further than the piece width, reset rotation
+        if (Math.abs(offset) > clonedPlayer.tetromino[0].length) {
+          clonedPlayer.tetromino = rotate(clonedPlayer.tetromino, -dir); // Rotate back
+          clonedPlayer.pos.x = pos;
+          return; // Failed to rotate
+        }
       }
     }
 
@@ -51,6 +107,7 @@ export const usePlayer = () => {
   };
 
   const updatePlayerPos = ({ x, y, collided }) => {
+    // Simple direct update, no checks
     setPlayer(prev => ({
       ...prev,
       pos: { 
@@ -59,6 +116,7 @@ export const usePlayer = () => {
       },
       collided,
     }));
+    return true;
   };
 
   const resetPlayer = useCallback(() => {
