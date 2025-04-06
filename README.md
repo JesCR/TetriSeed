@@ -20,6 +20,7 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 - [Smart Contract Development Project Decision](https://share.specstory.com/stories/12bc67f7-5b69-4c48-9f97-ebcfbd2a42b0)
 - [Adjust tetris falling speed](https://share.specstory.com/stories/6cba4295-9580-4a79-a6fb-fc0b9d5c8e90)
 - [Implement Next Piece Display](https://share.specstory.com/stories/87c27cfb-b86d-40c3-89f9-7325b7e8e241)
+- [UI/UX, fast drop, footer, bugs fixing](https://share.specstory.com/stories/194ce98e-832f-49bf-92fb-db1f32a0a5a7)
 
 ## 📋 Table of Contents
 
