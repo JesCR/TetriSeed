@@ -16,7 +16,7 @@ const MusicToggle = () => {
       aria-label={isMusicEnabled ? "Turn music off" : "Turn music on"}
       title={isMusicEnabled ? "Turn music off" : "Turn music on"}
     >
-      {isMusicEnabled ? '🔊' : '🔇'}
+      {isMusicEnabled ? '🎻' : '🔕'}
     </button>
   );
 };

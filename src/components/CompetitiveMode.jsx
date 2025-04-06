@@ -4,7 +4,9 @@ import {
   getMetaMaskDownloadLink, 
   connectWallet,
   disconnectWallet,
-  switchToSuperSeedNetwork
+  switchToSuperSeedNetwork,
+  checkInitialWalletConnection,
+  setupWalletListeners
 } from '../utils/web3Utils';
 import Modal from './Modal';
 
@@ -30,32 +32,119 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   
-  // Check if wallet is already connected
+  // Check if wallet is already connected using our improved function
   useEffect(() => {
     const checkConnection = async () => {
-      if (isMetaMaskInstalled() && window.ethereum.selectedAddress) {
+      const { connected, address } = await checkInitialWalletConnection();
+      if (connected && address) {
         setWalletConnected(true);
-        setWalletAddress(window.ethereum.selectedAddress);
+        setWalletAddress(address);
+      } else {
+        // Make sure to clear the state if the wallet is not connected
+        setWalletConnected(false);
+        setWalletAddress('');
+        // If in competitive mode, deactivate it
+        if (isActive && onActivation) {
+          onActivation(false, '');
+        }
       }
     };
     
     checkConnection();
-  }, []);
+    
+    // Setup wallet connection listeners
+    const cleanupWalletListeners = setupWalletListeners(
+      // onAccountsChanged callback
+      (newAccount) => {
+        console.log('Wallet account changed in CompetitiveMode:', newAccount);
+        setWalletConnected(true);
+        setWalletAddress(newAccount);
+      },
+      // onDisconnect callback
+      () => {
+        console.log('Wallet disconnected in CompetitiveMode');
+        setWalletConnected(false);
+        setWalletAddress('');
+        // If in competitive mode, deactivate it
+        if (isActive && onActivation) {
+          onActivation(false, '');
+        }
+      }
+    );
+    
+    // Also perform periodic checks to ensure UI stays in sync
+    const connectionCheckInterval = setInterval(async () => {
+      if (!isMetaMaskInstalled() || !window.ethereum) {
+        if (walletConnected) {
+          setWalletConnected(false);
+          setWalletAddress('');
+          if (isActive && onActivation) {
+            onActivation(false, '');
+          }
+        }
+        return;
+      }
+      
+      try {
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_accounts',
+          params: []
+        });
+        
+        if (!accounts || accounts.length === 0) {
+          // Only update if we're changing from connected to disconnected
+          if (walletConnected) {
+            console.log('Periodic check found wallet disconnected in CompetitiveMode');
+            setWalletConnected(false);
+            setWalletAddress('');
+            if (isActive && onActivation) {
+              onActivation(false, '');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error in periodic wallet check:', error);
+      }
+    }, 3000);
+    
+    // Cleanup listeners on component unmount
+    return () => {
+      if (cleanupWalletListeners) {
+        cleanupWalletListeners();
+      }
+      clearInterval(connectionCheckInterval);
+    };
+  }, [isActive, onActivation, walletConnected]);
   
   // Handle wallet connection
   const handleConnectWallet = async () => {
     if (walletConnected) {
       // Disconnect wallet
       try {
-        await disconnectWallet();
-        setWalletConnected(false);
-        setWalletAddress('');
-        // If in competitive mode, deactivate it
-        if (isActive) {
-          onActivation(false, '');
+        console.log('Disconnecting wallet from CompetitiveMode button');
+        setIsLoading(true);
+        const result = await disconnectWallet();
+        setIsLoading(false);
+        
+        if (result.success) {
+          console.log('Successfully disconnected wallet');
+          setWalletConnected(false);
+          setWalletAddress('');
+          
+          // If in competitive mode, deactivate it
+          if (isActive && onActivation) {
+            onActivation(false, '');
+          }
+          
+          // Force trigger an event to notify all components
+          window.dispatchEvent(new Event('wallet_state_changed'));
+        } else {
+          setError(result.error || 'Failed to disconnect wallet');
         }
       } catch (error) {
+        setIsLoading(false);
         console.error('Error disconnecting wallet:', error);
+        setError(error.message || 'An error occurred while disconnecting');
       }
       return;
     }
@@ -104,8 +193,14 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
       
       const result = await connectWallet();
       if (result.success) {
+        console.log('Successfully connected wallet in CompetitiveMode:', result.account);
         setWalletConnected(true);
         setWalletAddress(result.account);
+        
+        // Dispatch a custom event with the wallet address to notify all components
+        window.dispatchEvent(new CustomEvent('wallet_connected', {
+          detail: { address: result.account }
+        }));
         
         // After connecting wallet, verify network
         const networkResult = await switchToSuperSeedNetwork();

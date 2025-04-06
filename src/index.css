@@ -5,14 +5,17 @@
 body {
   margin: 0;
   padding: 0;
+  /* Remove bottom padding that's causing extra scrolling space */
   background-color: #000000;
   color: #fff;
   font-family: 'Lacquer', sans-serif;
-  overflow-y: auto;
+  overflow-x: hidden; /* Allow vertical scroll only when needed */
   -webkit-overflow-scrolling: touch;
   max-width: 100vw;
   min-height: 100vh;
   display: block;
+  /* Make sure content doesn't force scrolling unless necessary */
+  position: relative;
 }
 
 * {
@@ -45,6 +48,10 @@ input, textarea {
 /* App container */
 .App {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 60px); /* Account for fixed footer */
+  justify-content: space-between;
 }
 
 /* Tetris wrapper */
@@ -52,7 +59,14 @@ input, textarea {
   width: 100%;
   outline: none;
   background: #000000; /* Change from gradient to pure black */
-  touch-action: manipulation;
+  touch-action: none; /* Prevent all default touch actions */
+  height: 100vh;
+  overflow: hidden; /* Prevent scrolling within the wrapper */
+  position: fixed; /* Fix the position to prevent scrolling */
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* Main game container */
@@ -60,24 +74,28 @@ input, textarea {
   max-width: 900px;
   margin: 0 auto;
   padding: 10px;
-  padding-bottom: 50px;
+  padding-bottom: 0; /* Remove bottom padding */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 /* Game header with logo and title */
 .game-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 900px;
+  margin-bottom: 5px; /* Reduced from 10px */
+  justify-content: space-between;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  padding: 5px 10px; /* Reduced top/bottom padding */
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 5px;
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .logo {
-  height: 100px;
+  height: 80px; /* Reduced from 100px */
   margin-right: 5px;
 }
 
@@ -93,14 +111,31 @@ input, textarea {
   letter-spacing: 1px;
 }
 
+/* Title row container */
+.title-row {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+}
+
+/* Header wallet info container */
+.header-wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 /* Game content layout */
 .game-content {
   display: flex;
-  gap: 20px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
-  max-width: 900px;
-  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box; /* Ensure padding is included in width */
+  max-width: 100%; /* Ensure content doesn't overflow container */
 }
 
 .game-area {
@@ -118,8 +153,14 @@ input, textarea {
 }
 
 .sidebar {
-  width: 280px;
-  margin-top: 20px;
+  width: 300;
+  max-width: 300; /* Add max-width to enforce containing */
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
+}
+
+/* Desktop-specific sidebar alignment */
+.desktop-sidebar {
+  margin-top: 0;
 }
 
 /* Stage (game board) styling */
@@ -149,41 +190,33 @@ input, textarea {
 /* Interest rate message (centered) */
 .interest-message {
   position: absolute;
-  top: 50%;
+  top: 20%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   text-align: center;
   color: #ff3333;
-  font-size: 1.3rem; /* Increased font size */
+  font-size: 1.0rem; /* Increased font size */
   font-weight: bold; /* Added bold text */
   text-shadow: 0 0 20px rgba(255, 51, 51, 1); /* Stronger glow */
   background: rgba(0, 0, 0, 0.85); /* Darker background for better contrast */
-  padding: 20px; /* More padding */
+  padding: 15px 20px; /* More padding */
   border-radius: 8px;
-  border: 2px solid #ff3333; /* Added border */
+  border-top: none;
+  border-left: 2px solid #ff3333; /* Added border */
+  border-right: 2px solid #ff3333; /* Added border */
+  border-bottom: 2px solid #ff3333; /* Added border */
   z-index: 25; /* Higher z-index to ensure visibility */
-  animation: pulse-red 0.7s ease-in-out infinite alternate; /* Faster animation */
+  animation: pulse-interest 0.7s ease-in-out infinite alternate; /* Custom animation */
   box-shadow: 0 0 15px rgba(255, 51, 51, 0.7); /* Added glow around the box */
+  width: 80%; /* Control width */
+  max-width: 300px;
+  margin: 0 auto;
 }
 
-@keyframes pulse-red {
-  from { opacity: 0.8; transform: translate(-50%, -50%) scale(0.93); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
-}
-
-/* Bottom message area */
-.message-area {
-  margin-top: 10px;
-  min-height: 30px;
-  position: relative;
-}
-
-.bottom-message {
-  text-align: center;
-  color: #ffdd00;
-  font-size: 1rem;
-  text-shadow: 0 0 8px rgba(255, 221, 0, 0.7);
-  animation: flash 0.5s ease-in-out infinite alternate;
+/* Custom animation for top-positioned message */
+@keyframes pulse-interest {
+  from { opacity: 0.7; transform: translateX(-50%) scale(0.98); }
+  to { opacity: 1; transform: translateX(-50%) scale(1.02); }
 }
 
 @keyframes flash {
@@ -192,8 +225,8 @@ input, textarea {
 }
 
 @keyframes pulse-red {
-  from { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  from { opacity: 0.7; transform: translate(-50%, -50%) scale(0.93); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
 }
 
 .stage {
@@ -233,31 +266,12 @@ input, textarea {
   width: 100%;
   height: 100%;
   position: relative;
-}
-
-/* Common style for the '$' symbol on pieces */
-.cell.cell-I::before,
-.cell.cell-J::before,
-.cell.cell-L::before,
-.cell.cell-O::before,
-.cell.cell-S::before,
-.cell.cell-T::before,
-.cell.cell-Z::before {
-  content: 'w';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: Arial;
-  font-weight: normal;
-  font-style: normal;
-  font-size: 0.8em;
-  color: #FFFFFF;
-  text-shadow: none;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: none;
-  z-index: 1;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px; /* Control emoji size */
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Define Tetromino Colors (adjust if needed) - these are just placeholders if JS handles colors */
@@ -289,7 +303,7 @@ input, textarea {
 
 /* Display component */
 .display {
-  padding: 15px;
+  padding: 10px 15px; /* Reduced padding to match button height */
   margin-bottom: 15px;
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid #0ff;
@@ -300,6 +314,10 @@ input, textarea {
   text-align: center;
   width: 100%;
   letter-spacing: 1px;
+  min-height: 38px; /* Match wallet button height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .game-over {
@@ -323,8 +341,8 @@ input, textarea {
 }
 
 @keyframes pulse {
-  from { opacity: 0.7; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0.7; transform: scale(0.98) translateZ(0); }
+  to { opacity: 1; transform: scale(1) translateZ(0); }
 }
 
 /* Start container */
@@ -337,7 +355,7 @@ input, textarea {
 
 /* Start button */
 .start-button {
-  padding: 15px 30px;
+  padding: 8px 16px; /* Reduced padding to match wallet buttons */
   margin-top: 10px;
   background: linear-gradient(to right, #0f0, #0ff);
   color: #000;
@@ -349,6 +367,7 @@ input, textarea {
   transition: all 0.3s;
   text-align: center;
   letter-spacing: 1px;
+  min-height: 38px; /* Same height as wallet buttons */
 }
 
 .start-button:hover {
@@ -366,12 +385,14 @@ input, textarea {
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   position: relative;
   width: 100%;
-  min-width: 300px;
-  max-width: 400px;
+  min-width: initial; /* Remove conflicting min-width properties */
+  max-width: 100%; /* These were previously set to 400px, causing overflow */
+  box-sizing: border-box; /* Include padding and border in width */
+  margin-left: 0;
+  margin-right: 0;
   overflow: hidden;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  box-sizing: border-box;
 }
 
 .leaderboard-header {
@@ -475,16 +496,18 @@ input, textarea {
   font-size: 0.7rem;
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   width: 100%;
-  min-width: 300px;
-  max-width: 400px;
+  min-width: initial; /* Remove conflicting min-width properties */
+  max-width: 100%; /* These were previously set to 400px, causing overflow */
+  box-sizing: border-box; /* Include padding and border in width */
+  margin-left: 0;
+  margin-right: 0;
   min-height: auto;
   max-height: 400px;
   overflow-y: auto;
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  display: flex; /* Restore display flex */
+  flex-direction: column; /* Restore flex direction */
 }
 
 .player-info-row {
@@ -529,6 +552,10 @@ input, textarea {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  /* Prevent scrolling and layout shifts */
+  overflow: hidden;
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 .modal-content {
@@ -540,6 +567,12 @@ input, textarea {
   width: 90%;
   text-align: center;
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+  /* Prevent content jumps */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  overflow-y: auto;
+  max-height: 90vh;
 }
 
 .modal-logo {
@@ -562,17 +595,18 @@ input, textarea {
 }
 
 .modal-button {
-  padding: 15px 30px;
-  margin-top: 20px;
+  padding: 10px 0;
+  margin-top: 0;
   background: linear-gradient(to right, #0f0, #0ff);
   color: #000;
   font-family: 'Lacquer', cursive;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s;
   letter-spacing: 1px;
+  box-sizing: border-box;
 }
 
 .modal-button:hover {
@@ -582,16 +616,18 @@ input, textarea {
 
 .tweet-button {
   display: inline-block;
-  padding: 15px 30px;
-  margin-top: 20px;
+  padding: 10px 0;
+  margin-top: 0;
   background: #1DA1F2;
   color: #fff;
   font-family: 'Lacquer', cursive;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-decoration: none;
   border-radius: 5px;
   transition: all 0.3s;
   letter-spacing: 1px;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .tweet-button:hover {
@@ -609,24 +645,23 @@ input, textarea {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  margin: 20px auto;
-  padding: 10px 0;
-  max-width: 350px; /* Match the game area width */
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  touch-action: none; /* Prevent scrolling when touching buttons */
+  margin: 10px auto;
+  padding: 0;
+  max-width: 350px;
+  margin-bottom: 0;
+  /* Ensure consistent height on mobile */
+  height: 70px;
+  contain: layout size;
 }
 
 .mobile-btn {
-  width: 65px;
-  height: 65px;
+  width: 60px;
+  height: 60px;
   background: rgba(0, 0, 0, 0.9);
   border: 3px solid #0ff;
   border-radius: 50%;
   color: #0ff;
-  font-size: 1.8rem;
+  font-size: 1.7rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -638,6 +673,16 @@ input, textarea {
   box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
   -webkit-touch-callout: none; /* Prevent callout on long press */
   touch-action: none; /* Prevent default touch actions */
+  -webkit-user-drag: none; /* Prevent dragging */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  -o-user-select: none; /* Opera */
+  user-select: none; /* Non-prefixed version */
+  /* Prevent layout shifts during active state */
+  will-change: transform, background-color;
+  transform: translateZ(0);
 }
 
 .mobile-btn:active {
@@ -661,6 +706,7 @@ input, textarea {
 .mobile-btn.down {
   border-color: rgb(255, 230, 0);
   box-shadow: 0 0 12px rgba(255, 230, 0, 0.7);
+  touch-action: manipulation; /* More specific touch action */
 }
 
 .mobile-btn.rotate {
@@ -711,6 +757,11 @@ input, textarea {
   box-sizing: border-box;
   overflow: hidden;
   width: 100%;
+  max-width: 100%; /* These were previously set to 400px, causing overflow */
+  min-width: initial; /* Remove conflicting min-width properties */
+  box-sizing: border-box; /* Include padding and border in width */
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .facts-container h3 {
@@ -734,12 +785,16 @@ input, textarea {
   /* SuperSeed Facts container for mobile */
   .facts-container {
     max-height: 160px;
+    min-height: 160px; /* Ensure consistent height */
     font-size: 0.6rem;
     margin-bottom: 5px;
     margin-top: 5px;
     width: 100%;
     max-width: 350px;
     order: 1;
+    /* Prevent layout shifts */
+    contain: content;
+    position: relative;
   }
   
   /* Set game area as second element */
@@ -780,18 +835,25 @@ input, textarea {
   }
   
   .cell {
-    font-size: 12px;
+    font-size: 12px; /* Smaller emoji size for mobile */
     line-height: 17px;
   }
   
   /* More compact header */
   .game-header {
+    padding: 5px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  
+  .title-row {
     margin-bottom: 5px;
   }
   
   .game-header h1 {
     font-size: 1rem;
-    margin-top: 10px;
+    margin-top: 0;
   }
   
   .logo {
@@ -800,8 +862,10 @@ input, textarea {
   
   /* More compact game messages */
   .interest-message {
-    font-size: 0.9rem;
-    padding: 8px;
+    font-size: 0.9rem; /* Smaller than desktop */
+    padding: 8px 12px; /* Less padding than desktop */
+    max-width: 85%; /* Prevent overflowing on very small screens */
+    border-width: 1px; /* Thinner border for mobile */
   }
   
   /* Mobile-specific interest message style (will be overridden by our @media query) */
@@ -1007,7 +1071,7 @@ input, textarea {
   }
   
   .cell {
-    font-size: 8px;
+    font-size: 10px; /* Even smaller emoji for very small screens */
     line-height: 14px;
   }
   
@@ -1031,13 +1095,21 @@ input, textarea {
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   width: 100%;
-  min-width: 300px;
-  max-width: 400px;
+  min-width: initial; /* Remove conflicting min-width properties */
+  max-width: 100%; /* These were previously set to 400px, causing overflow */
+  box-sizing: border-box; /* Include padding and border in width */
+  margin-left: 0;
+  margin-right: 0;
   overflow-y: auto;
-  max-height: calc(100vh - 450px);
+  max-height: calc(100vh - 420px);
+  min-height: 250px; /* Set consistent minimum height */
+  height: auto; /* Allow height to adjust but with min-height set */
   color: white;
   margin-bottom: 20px;
   transition: background-color 0.15s ease;
+  /* Prevent content jumps */
+  contain: content;
+  position: relative;
 }
 
 .facts-container h3 {
@@ -1078,8 +1150,11 @@ input, textarea {
 
 .flash-effect {
   animation: tripleFlash 0.15s ease;
-  transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0); /* Force GPU acceleration */
   will-change: background-color;
+  /* Prevent layout shifts by not changing dimensions during animation */
+  backface-visibility: hidden;
+  box-sizing: border-box !important;
 }
 
 .facts-footer {
@@ -1103,15 +1178,20 @@ input, textarea {
   text-decoration: underline;
 }
 
-.social-icons {
+.social-link {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.social-icon {
-  width: 16px;
-  height: 16px;
-  margin-left: 10px;
+.social-link svg {
+  color: #0ff;
+  transition: all 0.3s;
+}
+
+.social-link:hover svg {
+  color: #ffdd00;
+  transform: scale(1.1);
 }
 
 .facts-emoji {
@@ -1126,9 +1206,6 @@ input, textarea {
 
 /* Music toggle button styling */
 .music-toggle-btn {
-  position: fixed;
-  top: 15px;
-  right: 15px;
   width: 40px;
   height: 40px;
   background: rgba(0, 0, 0, 0.7);
@@ -1158,8 +1235,6 @@ input, textarea {
 
 @media (max-width: 768px) {
   .music-toggle-btn {
-    top: 10px;
-    right: 10px;
     width: 35px;
     height: 35px;
     font-size: 1rem;
@@ -2701,9 +2776,223 @@ input, textarea {
 /* More compact game messages for mobile */
 @media (max-width: 768px) {
   .interest-message {
-    font-size: 1.1rem; /* Slightly smaller than desktop but still larger than original */
-    padding: 12px; /* More padding than before, less than desktop */
-    max-width: 90%; /* Prevent overflowing on very small screens */
+    font-size: 0.9rem; /* Smaller than desktop */
+    padding: 8px 12px; /* Less padding than desktop */
+    max-width: 85%; /* Prevent overflowing on very small screens */
     border-width: 1px; /* Thinner border for mobile */
   }
+}
+
+/* Adjust content container to properly distribute space */
+@media (min-width: 769px) {
+  .game-content {
+    justify-content: space-between; /* Distribute space between game area and sidebar */
+    flex-wrap: nowrap; /* Prevent wrapping on desktop */
+    align-items: flex-start; /* Align items to the top */
+    gap: 10px; /* Ensure consistent gap in desktop view */
+  }
+  
+  /* Ensure sidebar has consistent width on desktop */
+  .sidebar {
+    width: 300px;
+    max-width: 300px;
+  }
+}
+
+/* Make sure mobile layout works properly */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    max-width: 350px; /* Maintain mobile width limit */
+  }
+  
+  /* Reset fixed widths in mobile view */
+  .leaderboard-container, 
+  .player-info, 
+  .facts-container {
+    max-width: 350px;
+  }
+}
+
+/* Bottom message area */
+.message-area {
+  margin-top: 10px;
+  min-height: 30px;
+  position: relative;
+}
+
+.bottom-message {
+  text-align: center;
+  color: #ffdd00;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(255, 221, 0, 0.7);
+  animation: flash 0.5s ease-in-out infinite alternate;
+}
+
+/* Main Footer styles */
+.main-footer {
+  width: 100%;
+  padding: 10px 5px;
+  background: rgba(0, 0, 0, 0.8);
+  border-top: none; /* Removed the border */
+  margin-top: 0;
+  box-shadow: none; /* Removed the box shadow as well for better continuity */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.footer-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #0ff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0, 255, 255, 0.1);
+}
+
+.footer-links a:hover {
+  color: #ffdd00;
+  background: rgba(255, 221, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 255, 255, 0.3);
+}
+
+.footer-love {
+  font-size: 0.85rem;
+  color: #fff;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.heart {
+  color: #ff3333;
+  font-size: 1.1rem;
+  display: inline-block;
+  animation: heartbeat 1.5s ease infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.1); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.1); }
+}
+
+/* Responsive footer styles */
+@media (max-width: 768px) {
+  .main-footer {
+    padding: 8px 5px;
+    margin-top: 0;
+  }
+  
+  .tetris {
+    padding-bottom: 10px; /* Even smaller on mobile */
+  }
+  
+  .footer-links {
+    gap: 12px;
+  }
+  
+  .footer-links a {
+    font-size: 0.8rem;
+  }
+  
+  .footer-love {
+    font-size: 0.75rem;
+  }
+}
+
+.screenshot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px auto 20px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.game-screenshot {
+  display: block;
+  object-fit: contain;
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  margin: 10px auto;
+  border: 2px solid #0ff;
+  border-radius: 4px;
+}
+
+.screenshot-button {
+  background: linear-gradient(to right, #0c1f3e, #164575);
+  color: #0ff;
+  border: 2px solid #0ff;
+  border-radius: 4px;
+  padding: 10px 0;
+  font-family: 'Lacquer', cursive;
+  margin-top: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  font-size: 0.9rem;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+  height: 40px;
+  line-height: 20px;
+}
+
+.screenshot-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.8);
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+  margin: 5px auto 0;
+  max-width: 280px;
+}
+
+.modal-content p {
+  margin-bottom: 8px;
+}
+
+.share-text {
+  margin: 5px 0 10px;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.modal-actions .tweet-button,
+.modal-actions .modal-button {
+  flex: 1;
+  min-width: 120px;
+  max-width: none;
+  height: 40px;
+  line-height: 20px;
 }

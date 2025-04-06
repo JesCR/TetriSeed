@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import logoText from '../assets/images/logo_text.png';
 
 const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [isCapturing, setIsCapturing] = useState(false);
   
   // Check if the device is mobile
   useEffect(() => {
@@ -18,7 +21,53 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Capture screenshot when the game ends
+  useEffect(() => {
+    if (isOpen && type === 'top10' && !screenshotUrl && !isCapturing) {
+      captureScreenshot();
+    }
+  }, [isOpen, type, screenshotUrl, isCapturing]);
+
   if (!isOpen) return null;
+
+  // Function to capture the game screen
+  const captureScreenshot = async () => {
+    try {
+      setIsCapturing(true);
+      
+      // Target the main game area for screenshot
+      const gameElement = document.querySelector('.stage-container');
+      
+      if (gameElement) {
+        // Hide any overlays or messages that might interfere
+        const tempOverlays = document.querySelectorAll('.debt-message, .interest-message');
+        tempOverlays.forEach(overlay => {
+          if (overlay) overlay.style.display = 'none';
+        });
+        
+        // Take the screenshot
+        const canvas = await html2canvas(gameElement, {
+          backgroundColor: '#000000',
+          scale: 2, // Higher quality
+          logging: false,
+          useCORS: true
+        });
+        
+        // Convert to data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        setScreenshotUrl(dataUrl);
+        
+        // Restore any hidden elements
+        tempOverlays.forEach(overlay => {
+          if (overlay) overlay.style.display = '';
+        });
+      }
+    } catch (error) {
+      console.error('Error capturing screenshot:', error);
+    } finally {
+      setIsCapturing(false);
+    }
+  };
 
   const handleSubmit = () => {
     if (type === 'nameInput' && (!name.trim() || name.length < 2)) {
@@ -117,9 +166,30 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   };
 
   const tweetText = getRank() 
-    ? `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! Ranked #${getRank()} on the leaderboard! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt` 
-    : `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt`;
-  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+    ? `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! Ranked #${getRank()} on the leaderboard! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt Check it out: tetriseed.xyz` 
+    : `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt Check it out: tetriseed.xyz`;
+  
+  // Create tweet URL with media if screenshot is available
+  const getTweetUrl = () => {
+    const baseUrl = 'https://twitter.com/intent/tweet';
+    const textParam = `text=${encodeURIComponent(tweetText)}`;
+    
+    // Twitter's web intent doesn't directly support attaching images
+    // But we can still share the text
+    return `${baseUrl}?${textParam}`;
+  };
+
+  // Function to download the screenshot
+  const downloadScreenshot = () => {
+    if (!screenshotUrl) return;
+    
+    const link = document.createElement('a');
+    link.href = screenshotUrl;
+    link.download = `tetriseed-score-${getScoreValue()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="modal-overlay">
@@ -154,7 +224,7 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
                 <p>Use only portrait mode on mobile</p>
               </div>
             )}
-            <button onClick={handleSubmit} className="modal-button">Start Playing</button>
+            <button onClick={handleSubmit} className="modal-button">&nbsp;Start Playing&nbsp;</button>
           </>
         )}
         
@@ -171,17 +241,32 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
               <p className="competitive-notice">Only competitive scores are tracked.<br/>Play in competitive mode to join the leaderboard!</p>
             )}
             
-            <p>Share your achievement:</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {screenshotUrl && (
+              <div className="screenshot-container">
+                <img 
+                  src={screenshotUrl} 
+                  alt="Your game" 
+                  className="game-screenshot" 
+                />
+                <button onClick={downloadScreenshot} className="screenshot-button">
+                  Download Screenshot
+                </button>
+              </div>
+            )}
+            
+            <p className="share-text">Share your achievement:</p>
+            <div className="modal-actions">
               <a 
-                href={tweetUrl} 
+                href={getTweetUrl()} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="tweet-button"
               >
-                Tweet Your Score
+                Tweet it!
               </a>
-              <button onClick={onClose} className="modal-button">Play Again</button>
+              <button onClick={onClose} className="modal-button">
+                Play Again
+              </button>
             </div>
           </>
         )}

@@ -8,51 +8,51 @@ const FACTS = [
   
   "⚡️No Interest\nBorrow with no interest when using Supercollateral. It's not a promo, it's how the system actually works. 🧠",
   
-  "🔥 Daily Auctions&Rewards\nProof-of-Repayment distributes tokens every single day—just by burning debt with our stablecoin. Real value, real users, every day.",
+  "🔥 Daily Auctions&Rewards\nProof-of-Repayment distributes tokens every day by burning debt with our stablecoin. Real value for real users, providing sustainable rewards daily.",
   
-  "🧱 Designed On-Chain\nOur lending system isn't an app—it's part of the Layer 2 itself. That means more power, fewer hacks, and unstoppable DeFi. 🛡️",
+  "🧱 Designed On-Chain\nOur lending system isn't just an app—it's built into the Layer 2 itself. This architecture delivers more power, better security, and truly unstoppable DeFi solutions.",
   
-  "🌱 DeFi That Gives Back\nEvery protocol fee—sequencer, interest, bridge—is recycled to repay users' loans. Superseed doesn't take—it returns.",
+  "🌱 DeFi That Gives Back\nEvery protocol fee—from sequencers, interest, and bridges—is recycled to repay users' loans. Unlike traditional systems, Superseed returns value instead of extracting it.",
   
-  "🪙 Stablecoin With Purpose\nThe Superseed stablecoin isn't just stable—it's designed to be burned constantly to repay community debt. A true value engine.",
+  "🪙 Stablecoin With Purpose\nThe Superseed stablecoin isn't just stable—it's designed to be continuously burned to repay community debt, creating a sustainable value engine for the ecosystem.",
   
-  "🤝 Not a User, a Partner.\nOn Superseed, growth literally benefits the individual. As the chain grows, so does your upside.",
+  "🤝 Not a User, a Partner.\nOn Superseed, ecosystem growth directly benefits individual participants. As the chain expands, your potential upside grows proportionally with the network.",
   
-  "🔓 100% Unlocked\nNo VC lockups here. Our Supersale tokens are fully unlocked from day one. Power to the people. 🙌",
+  "🔓 100% Unlocked\nNo venture capital lockups here. Our Supersale tokens are fully unlocked from day one, giving complete freedom and control to community members from the start.",
   
-  "🚫 No Liquidations\nPartners like MarginZero bring non-liquidatable perps to Superseed. That's right—leverage without the rug.",
+  "🚫 No Liquidations\nPartners like MarginZero bring non-liquidatable perpetuals to Superseed. Experience leverage trading without the typical liquidation risks that plague traditional platforms.",
   
-  "🧠 DeFi for Smart LPs\nOur partner Jones brings institutional-grade yield strategies to your fingertips. One-click, passive gains. 🎯",
+  "🧠 DeFi for Smart LPs\nOur partner Jones delivers institutional-grade yield strategies accessible with just one click. Enjoy sophisticated, passive gains without complex setup or management.",
   
-  "🛠️ Supercollateral = Superpowers\nBorrow with insane efficiency, get your loan paid off, and unlock perks for holding governance tokens. What's not to love?",
+  "🛠️ Supercollateral is Super\nBorrow with exceptional efficiency, get loans automatically paid off, and unlock special benefits for holding governance tokens. A complete reimagining of collateral.",
   
-  "🌉 Live on the Superchain\nWe're part of Optimism's Superchain—meaning better security, shared liquidity, and a network that grows together. 🚀",
+  "🌉 Live on the Superchain\nWe're integrated with Optimism's Superchain ecosystem, providing enhanced security, shared liquidity pools, and a collaborative network that grows stronger together.",
   
-  "🧬 A New Financial Primitive\nSupercollateral is not just a feature—it's a new foundation for DeFi. Build on it. Borrow with it. Innovate with it.",
+  "🧬 A New Financial Primitive\nSupercollateral isn't just a feature—it's a foundational building block for the future of DeFi. Use it to borrow, build upon it, or create innovative new applications.",
   
-  "🥇 No More DeFi Gatekeeping\nForget low float, high FDV launches. Superseed prioritizes you with fair distribution, early access, and zero BS.",
+  "🥇 No More DeFi Gatekeeping\nForget low float, high FDV token launches. Superseed prioritizes fair distribution, early access opportunities, and transparent tokenomics for all participants.",
   
-  "📈 Options, Perps & LPDfi\nThanks to Stryke, MarginZero, Orange & more, Superseed is your new home for cutting-edge financial products.",
+  "📈 Options, Perps & LPDfi\nThanks to partners like Stryke, MarginZero, and Orange, Superseed offers a comprehensive suite of cutting-edge financial products for sophisticated DeFi users.",
   
-  "🤯 Oracle Game-Changer\nChronicle brings ultra-secure, gas-efficient oracles to Superseed. Transparent, verified pricing—like DeFi always promised.",
+  "🤯 Oracle Game-Changer\nChronicle delivers ultra-secure, gas-efficient oracles to the Superseed ecosystem. Experience transparent, verifiable pricing that fulfills DeFi's original promise.",
   
-  "🧩 Composable From Day 1\nWith partners like Socket and Dolomite, your assets flow across chains seamlessly. Interop, meet innovation.",
+  "🧩 Composable From Day 1\nWith integration partners like Socket and Dolomite, assets flow seamlessly across multiple chains. True interoperability meets continuous innovation in our ecosystem.",
   
-  "🚀 Mainnet Launch Milestone\nSuperSeed Mainnet officially launched on March 31st, 2025 as part of the Superchain ecosystem, powered by the OP Stack for Ethereum L2 scalability.",
+  "🚀 Mainnet Launch Milestone\nSuperSeed Mainnet launched March 31st as part of the Superchain, leveraging the OP Stack to provide Ethereum L2 scalability with enhanced performance.",
   
-  "🤝 Launch Partners Ecosystem\nSuperSeed's initial DeFi ecosystem includes Velodrome, BulletX, MarginZero, Jones, Orange Finance, Stryke, SeedFi, Bebop, Ionic, Dolomite...",
+  "🤝 Launch Partners Ecosystem\nOur initial DeFi ecosystem includes Velodrome, BulletX, MarginZero, Jones, OrangeFi, Stryke, SeedFi, Bebop, Dolomite and more trusted protocol partners.",
   
-  "🗺️ Roadmap Sequence\nFollowing the Mainnet launch, SuperSeed will release Genesis Passport NFTs, launch the Seeds rewards program, and conclude with a TGE.",
+  "🗺️ Roadmap Sequence\nFollowing our successful Mainnet launch, SuperSeed will release Genesis Passport NFTs, launch the Seeds rewards program, and conclude with a Token Generation Event.",
   
-  "🔮 Upcoming Features\nFuture development includes Proof-of-Repayment, Supercollateral, and the SuperCDP - all designed to turn debt into opportunity.",
+  "🔮 Upcoming Features\nOur development roadmap includes Proof-of-Repayment mechanisms, Supercollateral implementation, and the SuperCDP—all designed to transform debt into opportunity.",
   
-  "🎫 Genesis Passport NFTs\nOn April 2nd, 2025, SuperSeed will launch 1,148 Genesis Passport NFTs with unique benefits exclusively for Supersale participants.",
+  "🎫 Genesis Passport NFTs\nOn April 2nd, 2025, we'll launch 1,148 Genesis Passport NFTs offering unique benefits exclusively available to participants in our initial Supersale event.",
   
-  "🌉 Bridge Options\nUsers can bridge to SuperSeed using the official Canonical Bridge at bridge.superseed.xyz or third-party bridges like LayerSwap and Relay.",
+  "🌉 Bridge Options\nUsers can access SuperSeed via the official Canonical Bridge at bridge.superseed.xyz or through trusted third-party bridges including LayerSwap and Relay.",
   
-  "🧰 Ecosystem Resources\nSuperSeed provides comprehensive resources including a block explorer, documentation, check: superseed.xyz/ecosystem.",
+  "🧰 Ecosystem Resources\nSuperSeed provides comprehensive documentation, tools, block explorers and integration guides. Find everything you need at superseed.xyz/ecosystem.",
   
-  "🔗 Superchain Benefits\nAs part of the Superchain ecosystem, SuperSeed benefits from shared security, seamless interoperability."
+  "🔗 Superchain Benefits\nAs a core member of the Superchain ecosystem, SuperSeed leverages shared security infrastructure and seamless interoperability between compatible networks."
 ];
 
 const SuperSeedFacts = ({ isMobile }) => {
@@ -94,14 +94,13 @@ const SuperSeedFacts = ({ isMobile }) => {
               setIsFlashing(true);
               setTimeout(() => {
                 setIsFlashing(false);
+                // Set new fact only after flash effect is complete
+                setCurrentFact(getRandomFact());
               }, 150); // Duration of third flash
             }, 150); // Pause between second and third flash
           }, 150); // Duration of second flash
         }, 150); // Pause between first and second flash
       }, 150); // Duration of first flash
-      
-      // Set new fact
-      setCurrentFact(getRandomFact());
       
     }, 10000); // Update every 10 seconds
     
@@ -112,26 +111,24 @@ const SuperSeedFacts = ({ isMobile }) => {
   
   return (
     <div 
-      className={`facts-container ${isFlashing ? 'flash-effect' : ''}`}
       ref={factsContainerRef}
+      className={`facts-container ${isFlashing ? 'flash-effect' : ''}`}
+      style={{ minHeight: '250px' }} // Ensure consistent height
     >
       <h3>SuperSeed Facts</h3>
       <div>
         <p className="fact-title">{formattedFact.title}</p>
         <p className="fact-content">{formattedFact.content}</p>
-        {/* Conditionally render footer only on desktop */}
-        {!isMobile && (
-          <div className="facts-footer">
-            <a href="https://superseed.xyz" target="_blank" rel="noopener noreferrer">
-              Check SuperSeed!
-            </a>
-            <div className="social-icons">
-              <a href="https://x.com/superseedxyz" target="_blank" rel="noopener noreferrer">
-                <img src={xLogoBase64} alt="X.com" className="social-icon" />
-              </a>
-            </div>
-          </div>
-        )}
+      </div>
+      <div className="facts-footer">
+        <a href="https://superseed.xyz" target="_blank" rel="noopener noreferrer">
+          Check SuperSeed
+        </a>
+        <a href="https://x.com/superseedxyz" target="_blank" rel="noopener noreferrer" className="social-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
       </div>
     </div>
   );

@@ -108,3 +108,232 @@
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Make audio controls and wallet info appear side by side */
+.audio-wallet-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+}
+
+.music-toggle-btn {
+  font-size: 24px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+/* Título y sección del header */
+.title-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  margin-bottom: 0;
+}
+
+.title-row h1 {
+  margin: 0;
+}
+
+/* Header wallet info posicionado a la derecha */
+.header-wallet-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+/* Wallet Info Component */
+.wallet-info-container {
+  position: relative;
+  display: inline-block;
+}
+
+.wallet-info-button {
+  background-color: #0f1c3f;
+  color: #00e5ff;
+  border: 2px solid #00c2cb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Pixel', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 8px rgba(0, 199, 207, 0.6);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.8);
+  font-size: 14px;
+  min-width: 80px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.wallet-icon {
+  font-size: 16px;
+  margin-right: 2px;
+}
+
+.wallet-info-button:hover {
+  background-color: #1a2d57;
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.8);
+}
+
+.wallet-info-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background-color: rgba(15, 28, 63, 0.95);
+  border: 2px solid #00c2cb;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 199, 207, 0.5), 0 0 15px rgba(0, 229, 255, 0.3);
+  z-index: 100;
+  padding: 15px;
+  backdrop-filter: blur(5px);
+}
+
+.wallet-dropdown-title {
+  font-family: 'Pixel', sans-serif;
+  color: #00e5ff;
+  text-align: center;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0, 199, 207, 0.5);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.wallet-info-dropdown:before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  margin-left: -8px;
+  width: 15px;
+  height: 15px;
+  background-color: rgba(15, 28, 63, 0.95);
+  transform: rotate(45deg);
+  border-top: 2px solid #00c2cb;
+  border-left: 2px solid #00c2cb;
+}
+
+.wallet-address, .wallet-balance {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-family: 'Pixel', sans-serif;
+  font-size: 0.9rem;
+  color: #fff;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 199, 207, 0.3);
+}
+
+.wallet-balance:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.wallet-address span:first-child,
+.wallet-balance span:first-child {
+  color: #00e5ff;
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+  font-weight: bold;
+}
+
+.wallet-address span:last-child {
+  font-family: monospace;
+  word-break: break-all;
+  text-align: right;
+  max-width: 160px;
+  color: #ffffff;
+}
+
+.wallet-balance span:last-child {
+  color: #ffffff;
+  font-weight: bold;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  animation: spin 1s infinite linear;
+  font-size: 18px;
+}
+
+.currency {
+  color: #00e5ff;
+  font-size: 0.85em;
+  opacity: 0.9;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile responsiveness for wallet info */
+@media (max-width: 768px) {
+  .audio-wallet-controls {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .title-row h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+  
+  .header-wallet-info {
+    margin: 0;
+    margin-top: 4px;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .wallet-info-button {
+    font-size: 12px;
+    padding: 6px 10px;
+    min-width: 70px;
+  }
+  
+  .wallet-dropdown-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .wallet-info-dropdown {
+    width: 240px;
+    padding: 12px;
+  }
+  
+  .music-toggle-btn {
+    font-size: 20px;
+    min-width: 35px;
+    height: 35px;
+  }
+}

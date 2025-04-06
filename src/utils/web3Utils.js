@@ -2,18 +2,49 @@
 import { ethers } from 'ethers';
 import { getApiUrl } from './apiConfig';
 
-// Network configuration for SuperSeed
-const SUPERSEED_NETWORK = {
-  chainId: '0x14D2', // 5330 in hex
-  chainName: 'Superseed',
-  nativeCurrency: {
-    name: 'Ethereum',
-    symbol: 'ETH',
-    decimals: 18
+// Network configuration - Add Sepolia testnet and mainnet configurations
+const NETWORK_CONFIG = {
+  mainnet: {
+    chainId: '0x14D2', // 5330 in hex
+    chainName: 'Superseed',
+    nativeCurrency: {
+      name: 'Ethereum',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    rpcUrls: ['https://mainnet.superseed.xyz'],
+    blockExplorerUrls: ['https://explorer.superseed.xyz']
   },
-  rpcUrls: ['https://mainnet.superseed.xyz'],
-  blockExplorerUrls: ['https://explorer.superseed.xyz']
+  testnet: {
+    chainId: '0xD036', // 53302 in hex (correct value)
+    chainName: 'Superseed Sepolia Testnet',
+    nativeCurrency: {
+      name: 'Ethereum',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    rpcUrls: ['https://sepolia.superseed.xyz'],
+    blockExplorerUrls: ['https://explorer-sepolia-superseed-826s35710w.t.conduit.xyz']
+  }
 };
+
+// Default to testnet as specified
+const DEFAULT_NETWORK = 'testnet';
+
+// USDC token contracts for each network
+export const USDC_CONTRACTS = {
+  mainnet: '0x0459d257914d1c1b08D6Fb98Ac2fe17b02633EAD',
+  testnet: '0x85773169ee07022AA2b4785A5e69803540E9106A'
+};
+
+// Function to get current network configuration
+export const getCurrentNetwork = () => {
+  // This could be expanded to read from localStorage, URL params, etc.
+  return NETWORK_CONFIG[DEFAULT_NETWORK];
+};
+
+// Get the active SuperSeed network configuration
+export const SUPERSEED_NETWORK = getCurrentNetwork();
 
 // Check if MetaMask is installed
 export const isMetaMaskInstalled = () => {
@@ -31,6 +62,179 @@ export const isMetaMaskInstalled = () => {
   }
   
   return isMetaMaskInBrowser;
+};
+
+// Listener for account changes - call this when the app initializes
+export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = null) => {
+  if (typeof window.ethereum !== 'undefined') {
+    // Handle account changes
+    window.ethereum.on('accountsChanged', (accounts) => {
+      console.log('MetaMask accounts changed:', accounts);
+      if (accounts.length === 0) {
+        // User has disconnected their wallet or logged out of MetaMask
+        console.log('User disconnected wallet (accountsChanged event with empty accounts)');
+        if (onDisconnect && typeof onDisconnect === 'function') {
+          onDisconnect();
+        }
+      } else if (onAccountsChanged && typeof onAccountsChanged === 'function') {
+        onAccountsChanged(accounts[0]);
+      }
+    });
+
+    // Handle chain changes
+    window.ethereum.on('chainChanged', (chainId) => {
+      console.log('MetaMask chain changed:', chainId);
+      // Reload the page to avoid any state inconsistencies
+      window.location.reload();
+    });
+
+    // Handle disconnect
+    window.ethereum.on('disconnect', (error) => {
+      console.log('MetaMask disconnected (disconnect event):', error);
+      if (onDisconnect && typeof onDisconnect === 'function') {
+        onDisconnect();
+      }
+    });
+
+    // Handle connection
+    window.ethereum.on('connect', (connectInfo) => {
+      console.log('MetaMask connected:', connectInfo);
+    });
+
+    // Set up a periodic connection check every 5 seconds
+    const connectionCheckInterval = setInterval(async () => {
+      try {
+        // Check if ethereum object still exists
+        if (typeof window.ethereum === 'undefined') {
+          console.log('Ethereum object no longer available');
+          if (onDisconnect && typeof onDisconnect === 'function') {
+            onDisconnect();
+          }
+          clearInterval(connectionCheckInterval);
+          return;
+        }
+
+        // Try to get accounts - this will fail if disconnected
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_accounts',
+          params: []
+        });
+        
+        // If no accounts, consider disconnected
+        if (accounts.length === 0) {
+          console.log('No accounts found in periodic check, wallet may be disconnected');
+          if (onDisconnect && typeof onDisconnect === 'function') {
+            onDisconnect();
+          }
+        }
+      } catch (error) {
+        console.error('Error in wallet connection check:', error);
+        if (error.code === 4100 || error.code === -32603) {
+          // These error codes can indicate disconnection
+          console.log('Detected potential disconnection from error:', error.code);
+          if (onDisconnect && typeof onDisconnect === 'function') {
+            onDisconnect();
+          }
+        }
+      }
+    }, 5000);
+
+    // Also check when page becomes visible again
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Tab became visible, checking wallet connection');
+        try {
+          const accounts = await window.ethereum.request({ 
+            method: 'eth_accounts',
+            params: []
+          });
+          
+          if (accounts.length === 0) {
+            console.log('No accounts found when tab became visible');
+            if (onDisconnect && typeof onDisconnect === 'function') {
+              onDisconnect();
+            }
+          }
+        } catch (error) {
+          console.error('Error checking accounts on visibility change:', error);
+        }
+      }
+    });
+    
+    // Return a cleanup function
+    return () => {
+      clearInterval(connectionCheckInterval);
+      document.removeEventListener('visibilitychange', () => {});
+      if (window.ethereum) {
+        window.ethereum.removeAllListeners('accountsChanged');
+        window.ethereum.removeAllListeners('chainChanged');
+        window.ethereum.removeAllListeners('disconnect');
+        window.ethereum.removeAllListeners('connect');
+      }
+    };
+  }
+  
+  // If window.ethereum doesn't exist, return a no-op cleanup function
+  return () => {};
+};
+
+// Get wallet balance (ETH)
+export const getWalletBalance = async (address) => {
+  try {
+    if (!isMetaMaskInstalled() || !address) {
+      return { success: false, error: 'No wallet connected' };
+    }
+    
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = await provider.getBalance(address);
+    const ethBalance = ethers.utils.formatEther(balance);
+    
+    return { success: true, balance: ethBalance };
+  } catch (error) {
+    console.error('Error getting wallet balance:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Get USDC token balance
+export const getUSDCBalance = async (address) => {
+  try {
+    if (!isMetaMaskInstalled() || !address) {
+      return { success: false, error: 'No wallet connected' };
+    }
+    
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const networkType = DEFAULT_NETWORK;
+    const usdcAddress = USDC_CONTRACTS[networkType];
+    
+    // ERC20 token ABI (just the functions we need)
+    const minABI = [
+      {
+        constant: true,
+        inputs: [{ name: "_owner", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ name: "balance", type: "uint256" }],
+        type: "function",
+      },
+      {
+        constant: true,
+        inputs: [],
+        name: "decimals",
+        outputs: [{ name: "", type: "uint8" }],
+        type: "function",
+      }
+    ];
+    
+    const tokenContract = new ethers.Contract(usdcAddress, minABI, provider);
+    const decimals = await tokenContract.decimals();
+    const balance = await tokenContract.balanceOf(address);
+    const usdcBalance = ethers.utils.formatUnits(balance, decimals);
+    
+    return { success: true, balance: usdcBalance };
+  } catch (error) {
+    console.error('Error getting USDC balance:', error);
+    return { success: false, error: error.message };
+  }
 };
 
 // Get MetaMask download link
@@ -69,12 +273,26 @@ export const connectWallet = async () => {
   }
 };
 
-// Disconnect wallet (for UI purposes only - MetaMask doesn't actually disconnect)
+// Disconnect wallet - Improved implementation
 export const disconnectWallet = async () => {
-  // This doesn't actually disconnect the wallet as MetaMask doesn't support this
-  // It's just for the UI state to represent a disconnected state
-  console.log('Wallet "disconnected" (UI state only)');
-  return { success: true };
+  try {
+    // Use newer MetaMask method to disconnect all connected sites
+    if (window.ethereum && window.ethereum.request) {
+      await window.ethereum.request({
+        method: "wallet_revokePermissions",
+        params: [{ eth_accounts: {} }]
+      });
+      console.log('Successfully revoked site permissions from MetaMask');
+    }
+    
+    // Additionally, we emit a custom event to notify our app
+    window.dispatchEvent(new CustomEvent('wallet_disconnected'));
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error disconnecting wallet:', error);
+    return { success: false, error: error.message };
+  }
 };
 
 // Check if SuperSeed network is added to MetaMask
@@ -99,7 +317,8 @@ export const addSuperSeedNetwork = async () => {
       throw new Error('MetaMask is not installed');
     }
     
-    console.log('Adding SuperSeed mainnet with config:', SUPERSEED_NETWORK);
+    const networkName = SUPERSEED_NETWORK.chainName;
+    console.log(`Adding ${networkName} with config:`, SUPERSEED_NETWORK);
     
     await window.ethereum.request({
       method: 'wallet_addEthereumChain',
@@ -129,25 +348,26 @@ export const switchToSuperSeedNetwork = async () => {
       throw new Error('MetaMask is not installed');
     }
     
-    console.log('Checking if SuperSeed network is added...');
+    const networkName = SUPERSEED_NETWORK.chainName;
+    console.log(`Checking if ${networkName} is added...`);
     const isAdded = await isSuperSeedNetworkAdded();
-    console.log('SuperSeed network already added:', isAdded);
+    console.log(`${networkName} already added:`, isAdded);
     
     if (!isAdded) {
-      console.log('Adding SuperSeed network to MetaMask...');
+      console.log(`Adding ${networkName} to MetaMask...`);
       const addResult = await addSuperSeedNetwork();
       if (!addResult.success) {
         throw new Error(addResult.error);
       }
-      console.log('SuperSeed network added successfully');
+      console.log(`${networkName} added successfully`);
     }
     
-    console.log('Switching to SuperSeed network...');
+    console.log(`Switching to ${networkName}...`);
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: SUPERSEED_NETWORK.chainId }]
     });
-    console.log('Successfully switched to SuperSeed network');
+    console.log(`Successfully switched to ${networkName}`);
     
     return { success: true };
   } catch (error) {
@@ -193,5 +413,30 @@ export const mockPayCompetitiveFee = async (account) => {
   } catch (error) {
     console.error('Error in payment:', error);
     return { success: false, error: error.message };
+  }
+};
+
+// Check initial wallet connection status
+export const checkInitialWalletConnection = async () => {
+  try {
+    if (!isMetaMaskInstalled()) {
+      return { connected: false, address: null };
+    }
+    
+    const accounts = await window.ethereum.request({ 
+      method: 'eth_accounts',
+      params: []
+    });
+    
+    if (accounts && accounts.length > 0) {
+      console.log('Found existing wallet connection:', accounts[0]);
+      return { connected: true, address: accounts[0] };
+    } else {
+      console.log('No wallet connected on initial check');
+      return { connected: false, address: null };
+    }
+  } catch (error) {
+    console.error('Error checking initial wallet connection:', error);
+    return { connected: false, address: null };
   }
 }; 

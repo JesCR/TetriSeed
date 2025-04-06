@@ -1,11 +1,14 @@
 import React from 'react';
 import { TETROMINOS } from '../utils/tetrisUtils';
 
-// Special cell component for the next piece preview without the $ symbol
+// Special cell component for the next piece preview with the 💰 symbol
 const NextPieceCell = ({ type }) => {
   // Determine which Tetromino type to use for styling
   const tetrominoType = typeof type === 'string' && type !== '0' ? type : 0;
   const color = TETROMINOS[tetrominoType].color;
+  
+  // Display money bag emoji for non-empty cells
+  const content = type === 0 ? '' : '💰';
   
   return (
     <div
@@ -18,9 +21,15 @@ const NextPieceCell = ({ type }) => {
         borderRightColor: `rgba(${color}, 1)`,
         borderTopColor: `rgba(${color}, 1)`,
         borderLeftColor: `rgba(${color}, 0.3)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '10px' // Smaller font size for the preview
       }}
       className="next-cell"
-    />
+    >
+      {content}
+    </div>
   );
 };
 

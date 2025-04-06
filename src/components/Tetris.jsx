@@ -10,6 +10,7 @@ import MobileControls from './MobileControls';
 import MusicToggle from './MusicToggle';
 import SeasonInfo from './SeasonInfo';
 import NextPiece from './NextPiece';
+import WalletInfo from './WalletInfo';
 
 import { useStage } from '../hooks/useStage';
 import { usePlayer } from '../hooks/usePlayer';
@@ -17,7 +18,11 @@ import { useGameStatus } from '../hooks/useGameStatus';
 import { checkCollision, createStage } from '../utils/tetrisUtils';
 import { getApiUrl } from '../utils/apiConfig';
 import { initAudio, playBackgroundMusic, pauseBackgroundMusic } from '../utils/audioUtils';
-import { mockPayCompetitiveFee } from '../utils/web3Utils';
+import { 
+  mockPayCompetitiveFee, 
+  setupWalletListeners,
+  checkInitialWalletConnection
+} from '../utils/web3Utils';
 
 import logoText from '../assets/images/logo_text.png';
 import bgImage from '../assets/images/superseed_logo-removebg.png';
@@ -88,14 +93,221 @@ const Tetris = () => {
   // Ref to hold the latest callback function to avoid stale closures
   const savedCallback = useRef();
 
+  // Add ref to track keyboard down key interval
+  const keyDownIntervalRef = useRef(null);
+  const isKeyDownPressedRef = useRef(false);
+
+  // Submit score to the leaderboard - no dependencies to avoid circular references
+  const submitScore = useCallback(async (scoreValue) => {
+    // Only submit if player has a name, a positive score, and is in competitive mode
+    if (!playerName || scoreValue <= 0 || !isCompetitiveMode) {
+      console.log('Not submitting score:', { 
+        playerName, 
+        score: scoreValue, 
+        isCompetitive: isCompetitiveMode,
+        reason: !isCompetitiveMode ? 'Casual scores are not tracked' : 'Invalid name/score'
+      });
+      return;
+    }
+    
+    // Access walletAddress directly from the component scope
+    console.log('Submitting competitive score:', { playerName, score: scoreValue, address: walletAddress });
+    
+    try {
+      // Only use competitive endpoint
+      const endpoint = getApiUrl('/api/competitive-score');
+      
+      const scoreData = {
+        name: playerName.trim(),
+        score: scoreValue,
+        address: walletAddress
+      };
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scoreData),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to submit score:', errorText);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Score submission response:', data);
+      
+      // Update only the rank in scoreInfo, keeping the current score
+      setScoreInfo(prevInfo => ({
+        ...prevInfo,
+        rank: data.rank || null
+      }));
+      
+      setShowTop10Modal(true);
+      
+      // Trigger a refresh of the competitive leaderboard data
+      if (typeof window.refreshCompetitiveLeaderboard === 'function') {
+        // Small delay to ensure the server has processed the new entry
+        setTimeout(() => {
+          window.refreshCompetitiveLeaderboard();
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Error submitting score:', error);
+    }
+  }, [playerName, isCompetitiveMode, walletAddress, setScoreInfo, setShowTop10Modal]); // Add necessary dependencies
+
+  // Simplified move player function - just checks collision and moves if possible
+  const movePlayer = useCallback((dir) => {
+    // Simple collision check then move
+    if (!checkCollision(player, stage, { x: dir, y: 0 })) {
+      console.log(`Moving ${dir === -1 ? 'left' : 'right'}`);
+      updatePlayerPos({ x: dir, y: 0, collided: false });
+    }
+  }, [player, stage, updatePlayerPos]);
+
+  // Drop the tetromino by one row manually - only if valid
+  const drop = useCallback(() => {
+    // Only drop if game is active
+    if (gameOver || dropTime === null) {
+      return;
+    }
+    
+    // Simple, direct collision check regardless of position
+    if (player && stage && !checkCollision(player, stage, { x: 0, y: 1 })) {
+      // If no collision, move down
+      updatePlayerPos({ x: 0, y: 1, collided: false });
+    } else if (player && stage) {
+      // Collision detected - always set collided immediately
+      console.log('DROP: Collision detected - setting collided flag');
+      updatePlayerPos({ x: 0, y: 0, collided: true });
+    }
+  }, [gameOver, dropTime, player, stage, checkCollision, updatePlayerPos]);
+
+  const dropPlayer = useCallback(() => {
+    console.log('Drop player called');
+    drop();
+  }, [drop]);
+  
+  // Listen for overlap events and force game over
+  useEffect(() => {
+    // Function to handle game over due to overlapping pieces
+    const handleGameOverOverlap = () => {
+      console.log('GAME OVER EVENT RECEIVED: Pieces overlapped');
+      setGameOver(true);
+      setDropTime(null);
+      // Select a random game over message
+      const randomIndex = Math.floor(Math.random() * gameOverMessages.length);
+      setGameOverMessage(gameOverMessages[randomIndex]);
+      
+      // Update scoreInfo with current score before submission
+      setScoreInfo(prevInfo => ({
+        ...prevInfo,
+        score: score
+      }));
+      
+      if (playerName) {
+        submitScore(score);
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('tetris_game_over_overlap', handleGameOverOverlap);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('tetris_game_over_overlap', handleGameOverOverlap);
+    };
+  }, [gameOverMessages, playerName, score, submitScore, setGameOver, setDropTime, setGameOverMessage, setScoreInfo]);
+
   // Initialize audio when component mounts
   useEffect(() => {
     // Initialize music
     initAudio();
     
+    // Check if wallet is already connected
+    const checkWalletConnection = async () => {
+      const { connected, address } = await checkInitialWalletConnection();
+      console.log('Initial wallet check in Tetris:', { connected, address });
+      if (connected && address) {
+        setWalletAddress(address);
+      } else {
+        // Ensure wallet address is always cleared when not connected
+        setWalletAddress('');
+        setIsCompetitiveMode(false);
+      }
+    };
+    
+    // Run initial check
+    checkWalletConnection();
+    
+    // Listen for custom wallet events
+    const handleWalletStateChanged = () => {
+      console.log('Wallet state changed event received in Tetris');
+      checkWalletConnection();
+    };
+    
+    const handleWalletConnected = (event) => {
+      console.log('Wallet connected event received in Tetris with address:', event.detail?.address);
+      if (event.detail?.address) {
+        // Directly update the wallet address without going through checkWalletConnection
+        setWalletAddress(event.detail.address);
+      }
+    };
+    
+    window.addEventListener('wallet_state_changed', handleWalletStateChanged);
+    window.addEventListener('wallet_disconnected', handleWalletStateChanged);
+    window.addEventListener('wallet_connected', handleWalletConnected);
+    
+    // Setup wallet connection listeners and store cleanup function
+    const cleanupWalletListeners = setupWalletListeners(
+      // onAccountsChanged callback
+      (newAccount) => {
+        console.log('Wallet account changed to:', newAccount);
+        if (newAccount) {
+          setWalletAddress(newAccount);
+        } else {
+          setWalletAddress('');
+          setIsCompetitiveMode(false);
+        }
+      },
+      // onDisconnect callback
+      () => {
+        console.log('Wallet disconnected');
+        setWalletAddress('');
+        setIsCompetitiveMode(false);
+      }
+    );
+    
+    // Also set up a periodic check for wallet connection status
+    const connectionCheckInterval = setInterval(async () => {
+      const { connected, address } = await checkInitialWalletConnection();
+      if (!connected) {
+        // Only update if we're changing from connected to disconnected
+        if (walletAddress) {
+          console.log('Periodic check found wallet disconnected');
+          setWalletAddress('');
+          setIsCompetitiveMode(false);
+        }
+      }
+    }, 3000);
+    
     return () => {
       // Clean up by pausing music if component unmounts
       pauseBackgroundMusic();
+      // Clean up event listeners
+      window.removeEventListener('wallet_state_changed', handleWalletStateChanged);
+      window.removeEventListener('wallet_disconnected', handleWalletStateChanged);
+      window.removeEventListener('wallet_connected', handleWalletConnected);
+      // Clean up wallet listeners
+      if (cleanupWalletListeners) {
+        cleanupWalletListeners();
+      }
+      // Clean up connection check interval
+      clearInterval(connectionCheckInterval);
     };
   }, []);
 
@@ -145,96 +357,6 @@ const Tetris = () => {
     }
   }, [score]);
 
-  // Submit score to the leaderboard
-  const submitScore = async (score) => {
-    // Only submit if player has a name, a positive score, and is in competitive mode
-    if (!playerName || score <= 0 || !isCompetitiveMode) {
-      console.log('Not submitting score:', { 
-        playerName, 
-        score, 
-        isCompetitive: isCompetitiveMode,
-        reason: !isCompetitiveMode ? 'Casual scores are not tracked' : 'Invalid name/score'
-      });
-      return;
-    }
-    
-    console.log('Submitting competitive score:', { playerName, score, address: walletAddress });
-    
-    try {
-      // Only use competitive endpoint
-      const endpoint = getApiUrl('/api/competitive-score');
-      
-      const scoreData = {
-        name: playerName.trim(),
-        score: score,
-        address: walletAddress
-      };
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(scoreData),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to submit score:', errorText);
-        return;
-      }
-      
-      const data = await response.json();
-      console.log('Score submission response:', data);
-      
-      // Update only the rank in scoreInfo, keeping the current score
-      setScoreInfo(prevInfo => ({
-        ...prevInfo,
-        rank: data.rank || null
-      }));
-      
-      setShowTop10Modal(true);
-      
-      // Trigger a refresh of the competitive leaderboard data
-      if (typeof window.refreshCompetitiveLeaderboard === 'function') {
-        // Small delay to ensure the server has processed the new entry
-        setTimeout(() => {
-          window.refreshCompetitiveLeaderboard();
-        }, 500);
-      }
-    } catch (error) {
-      console.error('Error submitting score:', error);
-    }
-  };
-  
-  // Simplified move player function - just checks collision and moves if possible
-  const movePlayer = useCallback((dir) => {
-    // Simple collision check then move
-    if (!checkCollision(player, stage, { x: dir, y: 0 })) {
-      console.log(`Moving ${dir === -1 ? 'left' : 'right'}`);
-      updatePlayerPos({ x: dir, y: 0, collided: false });
-    }
-  }, [player, stage, updatePlayerPos]);
-
-  // Drop the tetromino by one row manually - only if valid
-  const drop = useCallback(() => {
-    // Only drop if game is active
-    if (gameOver || dropTime === null) {
-      return;
-    }
-    
-    // Check if we can move down
-    if (!checkCollision(player, stage, { x: 0, y: 1 })) {
-      updatePlayerPos({ x: 0, y: 1, collided: false });
-    }
-    // If we can't move down, we don't do anything - the auto interval will handle collision
-  }, [gameOver, dropTime, player, stage, checkCollision, updatePlayerPos]);
-
-  const dropPlayer = useCallback(() => {
-    console.log('Drop player called');
-    drop();
-  }, [drop]);
-  
   // Now define handlers that use the above functions
   const handleTouchStart = useCallback((e) => {
     // Prevent default to avoid scrolling and zooming
@@ -342,6 +464,16 @@ const Tetris = () => {
     }, 100);
   };
 
+  // Clear the key down interval when component unmounts
+  useEffect(() => {
+    return () => {
+      if (keyDownIntervalRef.current) {
+        clearInterval(keyDownIntervalRef.current);
+        keyDownIntervalRef.current = null;
+      }
+    };
+  }, []);
+
   // Start timer
   const keyUp = useCallback(({ keyCode }) => {
     if (!gameOver) {
@@ -349,9 +481,56 @@ const Tetris = () => {
       if (keyCode === 40 || keyCode === 83) { // Down arrow or S
         console.log('Key up - restoring drop speed to:', savedDropTimeRef.current);
         setDropTime(savedDropTimeRef.current);
+        
+        // Clear the down key interval
+        isKeyDownPressedRef.current = false;
+        if (keyDownIntervalRef.current) {
+          clearInterval(keyDownIntervalRef.current);
+          keyDownIntervalRef.current = null;
+        }
       }
     }
   }, [gameOver, setDropTime]);
+
+  // Effect to handle continuous pressing for the down button
+  useEffect(() => {
+    if (isKeyDownPressedRef.current && keyDownIntervalRef.current) {
+      // Set up interval for continuous presses, but check collision each time
+      const checkDropAndCollision = () => {
+        // Only process if game is active and not in game over state
+        if (!gameOver && player && stage) {
+          // Check if we can move down - add a more thorough collision check
+          if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+            // Move piece down
+            drop();
+          } else {
+            // If we hit something, stop continuous dropping
+            console.log('Collision detected in interval - stopping continuous drop');
+            isKeyDownPressedRef.current = false;
+            if (keyDownIntervalRef.current) {
+              clearInterval(keyDownIntervalRef.current);
+              keyDownIntervalRef.current = null;
+            }
+            // Make sure we trigger the collision handling by setting collided to true
+            updatePlayerPos({ x: 0, y: 0, collided: true });
+          }
+        } else {
+          // If game is over or player/stage not available, stop the interval
+          isKeyDownPressedRef.current = false;
+          if (keyDownIntervalRef.current) {
+            clearInterval(keyDownIntervalRef.current);
+            keyDownIntervalRef.current = null;
+          }
+        }
+      };
+      
+      // Replace the existing interval with our collision-checking one
+      if (keyDownIntervalRef.current) {
+        clearInterval(keyDownIntervalRef.current);
+        keyDownIntervalRef.current = setInterval(checkDropAndCollision, 100);
+      }
+    }
+  }, [isKeyDownPressedRef.current, player, stage, gameOver, drop, checkCollision, updatePlayerPos]);
 
   // User controls
   const move = useCallback((event) => {
@@ -359,18 +538,57 @@ const Tetris = () => {
     
     // Only process input if the game is active (has a dropTime)
     if (!gameOver && dropTime !== null) {
+      // Prevent default scrolling for arrow keys
+      if ([37, 38, 39, 40, 65, 68, 83, 87].includes(keyCode)) {
+        event.preventDefault();
+      }
+      
       if (keyCode === 37 || keyCode === 65) { // Left arrow or A
         movePlayer(-1);
       } else if (keyCode === 39 || keyCode === 68) { // Right arrow or D
         movePlayer(1);
       } else if (keyCode === 40 || keyCode === 83) { // Down arrow or S
-        // Just call drop to move the piece down faster
+        // First immediately move down once
         drop();
+        
+        // If this is a new keydown press, set up interval for continuous dropping
+        if (!isKeyDownPressedRef.current) {
+          isKeyDownPressedRef.current = true;
+          
+          // Set a timeout for initial delay before rapid drops
+          const initialDelay = 200; // ms
+          
+          setTimeout(() => {
+            // Only set up the interval if the key is still being pressed and game is active
+            if (isKeyDownPressedRef.current && !keyDownIntervalRef.current && !gameOver) {
+              // Create an interval that checks for collision
+              keyDownIntervalRef.current = setInterval(() => {
+                console.log('Long keypress: down key interval triggered');
+                
+                // Check if we can move down - with thorough collision check
+                if (!gameOver && player && stage && !checkCollision(player, stage, { x: 0, y: 1 })) {
+                  drop();
+                } else {
+                  // Stop continuous dropping if we hit something or game is over
+                  console.log('Collision detected or game over - stopping continuous drop');
+                  isKeyDownPressedRef.current = false;
+                  clearInterval(keyDownIntervalRef.current);
+                  keyDownIntervalRef.current = null;
+                  
+                  // Only set collision if game is still active
+                  if (!gameOver && player && stage) {
+                    updatePlayerPos({ x: 0, y: 0, collided: true });
+                  }
+                }
+              }, 100); // Repeat every 100ms for fast falling
+            }
+          }, initialDelay);
+        }
       } else if (keyCode === 38 || keyCode === 87) { // Up arrow or W
         playerRotate(stage, 1);
       }
     }
-  }, [gameOver, dropTime, movePlayer, drop, playerRotate, stage]);
+  }, [gameOver, dropTime, movePlayer, drop, playerRotate, stage, player, checkCollision, updatePlayerPos]);
 
   // Focus tetris area on mount and when modals are closed
   useEffect(() => {
@@ -420,26 +638,69 @@ const Tetris = () => {
           return; // Exit early as dropTime change will handle the next tick
         }
 
-        // Check if we can move down
-        if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+        // FIXED GAME OVER DETECTION - Check if any active cell of the player piece overlaps with a merged cell
+        // This is the critical check that ensures the game ends when pieces overlap
+        let hasOverlap = false;
+        if (player && player.tetromino && stage) {
+          for (let y = 0; y < player.tetromino.length; y++) {
+            for (let x = 0; x < player.tetromino[y].length; x++) {
+              if (player.tetromino[y][x] !== 0) {
+                const targetY = y + player.pos.y;
+                const targetX = x + player.pos.x;
+                
+                if (targetY >= 0 && targetY < stage.length && 
+                    targetX >= 0 && targetX < stage[0].length) {
+                  // If current cell in the player's tetromino is not empty AND
+                  // the corresponding cell in the stage is merged, we have an overlap
+                  if (stage[targetY][targetX][1] === 'merged') {
+                    console.log(`GAME OVER: Overlap detected at [${targetX},${targetY}]`);
+                    hasOverlap = true;
+                    break;
+                  }
+                }
+              }
+            }
+            if (hasOverlap) break;
+          }
+        }
+        
+        // Set game over if overlap is detected
+        if (hasOverlap) {
+          console.log('GAME OVER: Pieces are overlapping');
+          setGameOver(true);
+          setDropTime(null);
+          // Select a random game over message
+          const randomIndex = Math.floor(Math.random() * gameOverMessages.length);
+          setGameOverMessage(gameOverMessages[randomIndex]);
+          
+          // Update scoreInfo with current score before submission
+          setScoreInfo(prevInfo => ({
+            ...prevInfo,
+            score: score
+          }));
+          
+          if (playerName) {
+            submitScore(score);
+          }
+          return; // Exit immediately
+        }
+
+        // CRITICAL FIX: Force check collision for all pieces
+        const hasCollision = checkCollision(player, stage, { x: 0, y: 1 });
+        
+        if (!hasCollision) {
+          // No collision, move down
           updatePlayerPos({ x: 0, y: 1, collided: false });
         } else {
-          // Handle collision (piece has landed)
-          if (player.pos.y < 1) {
-            setGameOver(true);
-            setDropTime(null); // Stop the interval by setting dropTime to null
-            // Select a random game over message
-            const randomIndex = Math.floor(Math.random() * gameOverMessages.length);
-            setGameOverMessage(gameOverMessages[randomIndex]);
-            if (playerName) {
-              submitScore(score);
-            }
-          } else {
-             // Use setTimeout to delay merging slightly, preventing race conditions
-             setTimeout(() => {
-                updatePlayerPos({ x: 0, y: 0, collided: true });
-             }, 0);
-          }
+          // We have a collision - handle it
+          console.log('GAME LOOP: Setting immediate collision');
+          // Immediately update with collided=true for all pieces
+          updatePlayerPos({ x: 0, y: 0, collided: true });
+          
+          // Run overlap check again on the next tick to catch game over condition
+          setTimeout(() => {
+            // This will be checked on the next tick
+          }, 0);
         }
       }
     };
@@ -578,11 +839,41 @@ const Tetris = () => {
       }
     };
     
-    // Check on resize
+    // Prevent context menu on mobile devices
+    const preventContextMenu = (e) => {
+      // Check if this is the game area or mobile controls
+      if (e.target.closest('.mobile-controls') || 
+          e.target.closest('.tetris-wrapper') ||
+          e.target.closest('.stage') ||
+          e.target.closest('.mobile-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+    
+    // Add event listeners
     window.addEventListener('resize', handleResize);
+    document.addEventListener('contextmenu', preventContextMenu);
+    
+    // Add more aggressive touch handlers for mobile
+    if (window.innerWidth <= 768) {
+      // For iOS devices - add additional handling
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        // iOS-specific touch handling to prevent context menu
+        document.body.style.webkitTouchCallout = 'none';
+        document.body.style.webkitUserSelect = 'none';
+      }
+    }
     
     // Clean up
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('contextmenu', preventContextMenu);
+    };
   }, [showNameModal, showTop10Modal]);
 
   // Handle mobile control button clicks
@@ -771,13 +1062,25 @@ const Tetris = () => {
           }
         />
         
-        {/* Music toggle button */}
-        <MusicToggle />
-        
         <div className="tetris">
           <div className="game-header">
-            <img src={logoText} alt="TetriSeed Logo" className="logo" />
-            <h1>&nbsp;Clear your Debt!</h1>
+            <div className="title-row">
+              <img src={logoText} alt="TetriSeed Logo" className="logo" />
+              <h1>&nbsp;Clear your Debt!&nbsp;</h1>
+            </div>
+            {walletAddress ? (
+              <div className="header-wallet-info">
+                <WalletInfo 
+                  walletAddress={walletAddress} 
+                  key={`wallet-${walletAddress.substring(0, 8)}`} 
+                />
+                <MusicToggle />
+              </div>
+            ) : (
+              <div className="header-wallet-info">
+                <MusicToggle />
+              </div>
+            )}
           </div>
           
           <div className="game-content">
@@ -830,7 +1133,13 @@ const Tetris = () => {
                   
                   {/* Mobile controls */}
                   {!gameOver && dropTime && (
-                    <MobileControls onControlClick={handleMobileControl} />
+                    <MobileControls 
+                      onControlClick={handleMobileControl} 
+                      player={player}
+                      stage={stage}
+                      checkCollision={checkCollision}
+                      updatePlayerPos={updatePlayerPos}
+                    />
                   )}
                 </div>
                 

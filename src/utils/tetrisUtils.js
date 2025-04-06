@@ -77,25 +77,46 @@ export const randomTetromino = () => {
   return TETROMINOS[randTetromino];
 };
 
-// Check collision
+// Collision detection function with enhanced checking for top rows
 export const checkCollision = (player, stage, { x: moveX, y: moveY }) => {
-  for (let y = 0; y < player.tetromino.length; y += 1) {
-    for (let x = 0; x < player.tetromino[y].length; x += 1) {
-      // 1. Check that we're on an actual tetromino cell
+  // Enhanced validation to make sure all inputs are valid
+  if (!player || !player.tetromino || !Array.isArray(player.tetromino) || 
+      !player.pos || typeof player.pos.x !== 'number' || typeof player.pos.y !== 'number' ||
+      !stage || !Array.isArray(stage)) {
+    console.error('Invalid inputs to checkCollision:', { player, stage, moveX, moveY });
+    return true; // Assume collision if invalid input to prevent issues
+  }
+  
+  // ALWAYS PRIORITIZE COLLISION DETECTION
+  // Check for any direct collisions regardless of position
+  let hasCollision = false;
+  
+  // First check: direct collision detection for ALL pieces
+  for (let y = 0; y < player.tetromino.length; y++) {
+    for (let x = 0; x < player.tetromino[y].length; x++) {
+      // Only check cells that are part of the tetromino (non-zero)
       if (player.tetromino[y][x] !== 0) {
-        if (
-          // 2. Check if our move is inside the game area height (y)
-          !stage[y + player.pos.y + moveY] ||
-          // 3. Check if our move is inside the game area width (x)
-          !stage[y + player.pos.y + moveY][x + player.pos.x + moveX] ||
-          // 4. Check if the cell we're moving to isn't set to clear
-          stage[y + player.pos.y + moveY][x + player.pos.x + moveX][1] !== 'clear'
-        ) {
-          return true;
+        const targetY = y + player.pos.y + moveY;
+        const targetX = x + player.pos.x + moveX;
+        
+        // Check if we're moving out of bounds
+        if (targetY < 0 || targetY >= stage.length || 
+            targetX < 0 || targetX >= stage[0].length) {
+          return true; // Out of bounds collision
+        }
+        
+        // Check if target cell is already occupied by a merged piece
+        if (stage[targetY] && 
+            stage[targetY][targetX] && 
+            stage[targetY][targetX][1] === 'merged') {
+          console.log(`COLLISION FOUND at [${targetX},${targetY}]`);
+          return true; // Collision detected
         }
       }
     }
   }
+  
+  // No collision detected
   return false;
 };
 
