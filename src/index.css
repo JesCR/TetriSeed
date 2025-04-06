@@ -10,12 +10,29 @@ body {
   color: #fff;
   font-family: 'Lacquer', sans-serif;
   overflow-x: hidden; /* Allow vertical scroll only when needed */
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   max-width: 100vw;
   min-height: 100vh;
   display: block;
   /* Make sure content doesn't force scrolling unless necessary */
   position: relative;
+}
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    position: relative;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  body {
+    overscroll-behavior-y: contain;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 * {
@@ -62,7 +79,7 @@ input, textarea {
   touch-action: none; /* Prevent all default touch actions */
   height: 100vh;
   overflow: hidden; /* Prevent scrolling within the wrapper */
-  position: fixed; /* Fix the position to prevent scrolling */
+  position: absolute; /* Change from fixed to absolute to allow scrolling */
   left: 0;
   top: 0;
   right: 0;
@@ -109,6 +126,11 @@ input, textarea {
   text-shadow: 0 0 10px rgba(77, 190, 255, 0.5);
   font-family: 'Lacquer', cursive;
   letter-spacing: 1px;
+}
+
+.game-header h1.small-title {
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 /* Title row container */
@@ -642,47 +664,41 @@ input, textarea {
 
 /* Mobile controls */
 .mobile-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
   width: 100%;
-  display: flex;
-  justify-content: space-between;
-  margin: 10px auto;
-  padding: 0;
-  max-width: 350px;
-  margin-bottom: 0;
-  /* Ensure consistent height on mobile */
-  height: 70px;
-  contain: layout size;
+  max-width: 300px;
+  margin: 15px auto;
+  z-index: 10;
+  touch-action: none; /* Prevent scrolling when using game controls */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .mobile-btn {
-  width: 60px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.9);
-  border: 3px solid #0ff;
-  border-radius: 50%;
+  border: none;
+  background: rgba(0, 255, 255, 0.1);
+  border: 2px solid #0ff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   color: #0ff;
-  font-size: 1.7rem;
+  font-size: 1.5rem;
+  padding: 15px 0;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.1s;
-  -webkit-tap-highlight-color: transparent;
+  transition: all 0.1s ease;
+  touch-action: none; /* Prevent scrolling when touching these elements */
   user-select: none;
-  position: relative;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
-  -webkit-touch-callout: none; /* Prevent callout on long press */
-  touch-action: none; /* Prevent default touch actions */
-  -webkit-user-drag: none; /* Prevent dragging */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  -o-user-select: none; /* Opera */
-  user-select: none; /* Non-prefixed version */
-  /* Prevent layout shifts during active state */
-  will-change: transform, background-color;
-  transform: translateZ(0);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .mobile-btn:active {
@@ -784,17 +800,30 @@ input, textarea {
   
   /* SuperSeed Facts container for mobile */
   .facts-container {
-    max-height: 160px;
-    min-height: 160px; /* Ensure consistent height */
-    font-size: 0.6rem;
-    margin-bottom: 5px;
-    margin-top: 5px;
+    padding: 8px;
+    max-width: 100%;
     width: 100%;
-    max-width: 350px;
-    order: 1;
-    /* Prevent layout shifts */
-    contain: content;
-    position: relative;
+    margin: 0 0 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    box-sizing: border-box;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    min-height: auto;
+  }
+  
+  .facts-container h3 {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  
+  .facts-container .fact-title {
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+  }
+  
+  .facts-container .fact-content {
+    font-size: 0.7rem;
+    line-height: 1.2;
   }
   
   /* Set game area as second element */
@@ -841,23 +870,36 @@ input, textarea {
   
   /* More compact header */
   .game-header {
-    padding: 5px;
-    flex-direction: column;
+    padding: 3px;
+    flex-direction: row;
     align-items: center;
-    margin-bottom: 5px;
+    justify-content: space-between;
+    margin-bottom: 3px;
   }
   
   .title-row {
-    margin-bottom: 5px;
+    margin-bottom: 0;
+    flex: 1 1 auto;
+    gap: 2px;
+    max-width: 65%;
+  }
+  
+  .header-wallet-info {
+    flex: 0 0 auto;
+    gap: 3px;
+    margin-left: 2px;
   }
   
   .game-header h1 {
-    font-size: 1rem;
+    font-size: 0.75rem;
     margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
   }
   
   .logo {
-    height: 40px;
+    height: 25px;
+    margin-right: 2px;
   }
   
   /* More compact game messages */
@@ -1030,7 +1072,19 @@ input, textarea {
   
   /* Adjust game container spacing */
   .game-content {
-    gap: 0;
+    gap: 5px;
+  }
+  
+  .tetris {
+    max-width: 100%;
+    padding: 5px;
+  }
+  
+  /* Keep game-header full width on mobile */
+  .game-header {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto 5px;
   }
   
   /* Ensure mobile warning modal text is fully visible */
@@ -1235,9 +1289,13 @@ input, textarea {
 
 @media (max-width: 768px) {
   .music-toggle-btn {
-    width: 35px;
-    height: 35px;
+    width: 24px;
+    height: 24px;
     font-size: 1rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -2862,18 +2920,33 @@ input, textarea {
 .footer-links a {
   color: #0ff;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.3s;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(0, 255, 255, 0.1);
+  margin: 0 10px;
+  font-size: 0.85rem;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 
 .footer-links a:hover {
-  color: #ffdd00;
-  background: rgba(255, 221, 0, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 5px rgba(0, 255, 255, 0.3);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+.footer-links a.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-links a.social-link svg {
+  fill: #0ff;
+  transition: fill 0.3s ease;
+}
+
+.footer-links a.social-link:hover svg {
+  fill: white;
 }
 
 .footer-love {
@@ -2901,23 +2974,26 @@ input, textarea {
 @media (max-width: 768px) {
   .main-footer {
     padding: 8px 5px;
-    margin-top: 0;
   }
   
   .tetris {
-    padding-bottom: 10px; /* Even smaller on mobile */
+    padding: 5px;
   }
   
   .footer-links {
-    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
   }
   
   .footer-links a {
-    font-size: 0.8rem;
+    margin: 0 5px;
+    font-size: 0.75rem;
   }
   
   .footer-love {
     font-size: 0.75rem;
+    margin-top: 5px;
   }
 }
 
@@ -2996,3 +3072,170 @@ input, textarea {
   height: 40px;
   line-height: 20px;
 }
+
+/* Wallet info styling for mobile */
+@media (max-width: 768px) {
+  .wallet-info-button {
+    padding: 2px;
+    font-size: 0.9rem;
+    min-width: 0;
+  }
+  
+  .wallet-icon {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  
+  .header-wallet-info {
+    gap: 3px;
+  }
+  
+  .game-header h1.small-title {
+    font-size: 0.75rem;
+  }
+  
+  .music-toggle-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* ... existing code ... */
+  
+  .tetris {
+    max-width: 100%;
+    padding: 3px;
+    margin: 0 auto;
+  }
+  
+  .game-content {
+    gap: 3px;
+  }
+  
+  /* ... existing code ... */
+}
+
+/* Mobile specific overrides */
+@media (max-width: 768px) {
+  .tetris-wrapper {
+    position: relative; /* Enable scrolling on mobile */
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto; /* Allow vertical scrolling */
+    touch-action: pan-y; /* Allow vertical touch scrolling */
+  }
+  
+  body {
+    overscroll-behavior-y: contain; /* Improve scroll behavior on mobile */
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Remove top spacing on mobile */
+  .tetris {
+    padding-top: 0;
+    margin-top: 0;
+  }
+  
+  /* Bring content to the top of the screen */
+  .game-header {
+    margin-top: 0;
+  }
+  
+  /* Adjust padding to save space */
+  .game-content {
+    padding-top: 0;
+  }
+}
+
+.wallet-info-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #0ff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 100;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .wallet-info-dropdown {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    width: auto;
+    max-width: calc(100vw - 20px);
+    font-size: 0.8rem;
+    padding: 10px;
+    z-index: 1000;
+  }
+  
+  .wallet-address {
+    word-break: break-all;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .wallet-dropdown-title {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+  
+  .wallet-balance {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* ... existing code ... */
+  
+  /* Mobile controls for scrollable layout */
+  .mobile-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+    margin: 10px auto;
+    margin-bottom: 15px;
+    touch-action: none;
+  }
+  
+  .mobile-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #0ff;
+    border-radius: 50%;
+    color: #0ff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .mobile-btn:active {
+    background: rgba(0, 255, 255, 0.2);
+    transform: scale(0.95);
+  }
+}
+
+/* ... existing code ... */

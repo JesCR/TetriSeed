@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getWalletBalance, getUSDCBalance, isMetaMaskInstalled } from '../utils/web3Utils';
 
-const WalletInfo = ({ walletAddress }) => {
+const WalletInfo = ({ walletAddress, isMobile }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [ethBalance, setEthBalance] = useState('0');
   const [usdcBalance, setUsdcBalance] = useState('0');
@@ -120,8 +120,9 @@ const WalletInfo = ({ walletAddress }) => {
         onClick={toggleDropdown}
         aria-label="View wallet information"
         title="View wallet information"
+        style={isMobile ? { padding: '0', minWidth: 'auto' } : {}}
       >
-        <span className="wallet-icon">👛</span> {formattedAddress}
+        <span className="wallet-icon">👛</span> {!isMobile && formattedAddress}
       </button>
       
       {isOpen && (

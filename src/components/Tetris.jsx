@@ -359,23 +359,38 @@ const Tetris = () => {
 
   // Now define handlers that use the above functions
   const handleTouchStart = useCallback((e) => {
-    // Prevent default to avoid scrolling and zooming
-    e.preventDefault();
+    // Don't prevent default on mobile to allow scrolling
+    if (!isMobile) {
+      e.preventDefault();
+    }
     
-    setTouchStart({
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY
-    });
-  }, []);
+    // Only set touchStart if touching game elements
+    const isGameElement = e.target.closest('.stage') || 
+                          e.target.closest('.mobile-btn') ||
+                          e.target.closest('.next-piece-overlay');
+    
+    if (isGameElement) {
+      setTouchStart({
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      });
+    }
+  }, [isMobile]);
   
   const handleTouchMove = useCallback((e) => {
-    // Prevent default to avoid scrolling
-    e.preventDefault();
+    // Only prevent default for game elements, not for scrolling the page
+    const isGameElement = e.target.closest('.stage') || 
+                          e.target.closest('.mobile-btn') ||
+                          e.target.closest('.next-piece-overlay');
     
-    setTouchEnd({
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY
-    });
+    if (isGameElement) {
+      e.preventDefault();
+      
+      setTouchEnd({
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      });
+    }
   }, []);
   
   const handleTouchEnd = useCallback(() => {
@@ -1066,12 +1081,15 @@ const Tetris = () => {
           <div className="game-header">
             <div className="title-row">
               <img src={logoText} alt="TetriSeed Logo" className="logo" />
-              <h1>&nbsp;Clear your Debt!&nbsp;</h1>
+              <h1 className={isMobile ? "small-title" : ""}>
+                {isMobile ? "Clear your Debt!" : "\u00A0Clear your Debt!\u00A0"}
+              </h1>
             </div>
             {walletAddress ? (
               <div className="header-wallet-info">
                 <WalletInfo 
                   walletAddress={walletAddress} 
+                  isMobile={isMobile}
                   key={`wallet-${walletAddress.substring(0, 8)}`} 
                 />
                 <MusicToggle />

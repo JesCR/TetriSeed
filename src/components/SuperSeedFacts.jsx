@@ -113,22 +113,24 @@ const SuperSeedFacts = ({ isMobile }) => {
     <div 
       ref={factsContainerRef}
       className={`facts-container ${isFlashing ? 'flash-effect' : ''}`}
-      style={{ minHeight: '250px' }} // Ensure consistent height
+      style={{ 
+        minHeight: isMobile ? '90px' : '250px',
+        padding: isMobile ? '4px' : '10px'
+      }}
     >
-      <h3>SuperSeed Facts</h3>
+      <h3 style={{ 
+        marginBottom: isMobile ? '2px' : '10px',
+        fontSize: isMobile ? '0.8rem' : 'inherit'
+      }}>SuperSeed Facts</h3>
       <div>
-        <p className="fact-title">{formattedFact.title}</p>
-        <p className="fact-content">{formattedFact.content}</p>
-      </div>
-      <div className="facts-footer">
-        <a href="https://superseed.xyz" target="_blank" rel="noopener noreferrer">
-          Check SuperSeed
-        </a>
-        <a href="https://x.com/superseedxyz" target="_blank" rel="noopener noreferrer" className="social-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-        </a>
+        <p className="fact-title" style={{ 
+          marginBottom: isMobile ? '2px' : '6px',
+          fontSize: isMobile ? '0.7rem' : 'inherit'
+        }}>{formattedFact.title}</p>
+        <p className="fact-content" style={{ 
+          lineHeight: isMobile ? '1.1' : '1.3',
+          fontSize: isMobile ? '0.65rem' : 'inherit'
+        }}>{formattedFact.content}</p>
       </div>
     </div>
   );
