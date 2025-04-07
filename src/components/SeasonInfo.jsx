@@ -93,7 +93,7 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
       <div className="season-stat">
         <div className="stat-label">Prize Pool</div>
         <div className="stat-value">
-          <span className="crypto-amount">{seasonData.potSize} $SUPR</span>
+          <span className="crypto-amount">{parseFloat(seasonData.potSize).toFixed(4)} ETH</span>
         </div>
       </div>
       
@@ -141,7 +141,7 @@ const SeasonInfo = ({ isDetailed = false, isVertical = true }) => {
       <div className="season-stat">
         <div className="stat-label">Prize Pool:</div>
         <div className="stat-value">
-          <span className="crypto-amount">{seasonData.potSize} $SUPR</span>
+          <span className="crypto-amount">{parseFloat(seasonData.potSize).toFixed(4)} ETH</span>
         </div>
       </div>
       

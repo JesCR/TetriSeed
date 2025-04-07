@@ -7,6 +7,9 @@ const API_URL = {
 // Get the current environment
 const env = import.meta.env.MODE || 'development';
 
+// Import the contract utilities for ETH prize pool
+import { getPrizePool } from './contractUtils';
+
 // Export the base URL for API calls
 export const API_BASE_URL = API_URL[env];
 
@@ -175,9 +178,34 @@ export const getCurrentSeason = async () => {
     }
     
     const data = await response.json();
+    
+    // Fetch prize pool from smart contract
+    try {
+      const prizePoolResult = await getPrizePool();
+      if (prizePoolResult.success) {
+        // Replace API prize pool with contract prize pool
+        data.potSize = prizePoolResult.prizePool;
+      }
+    } catch (contractError) {
+      console.error('Error fetching prize pool from contract:', contractError);
+      // Keep the API value as fallback
+    }
+    
     return data;
   } catch (error) {
     console.error('Error fetching current season:', error);
+    // Get prize pool from contract for mock data
+    let mockPotSize = MOCK_CURRENT_SEASON.potSize;
+    
+    try {
+      const prizePoolResult = await getPrizePool();
+      if (prizePoolResult.success) {
+        mockPotSize = prizePoolResult.prizePool;
+      }
+    } catch (contractError) {
+      console.error('Error fetching prize pool from contract for mock data:', contractError);
+    }
+    
     // Return mock data as fallback with calculated remaining time
     console.warn('Using mock season data as fallback');
     const now = new Date();
@@ -191,11 +219,13 @@ export const getCurrentSeason = async () => {
       
       return {
         ...MOCK_CURRENT_SEASON,
+        potSize: mockPotSize,
         timeRemaining: { days, hours, minutes }
       };
     } else {
       return {
         ...MOCK_CURRENT_SEASON,
+        potSize: mockPotSize,
         timeRemaining: { days: 0, hours: 0, minutes: 0 }
       };
     }

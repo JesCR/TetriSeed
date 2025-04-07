@@ -27,3 +27,8 @@ dist-ssr
 server/*.csv
 server/**/*.csv
 server/season_config.json
+
+# Environment variables
+.env
+.env.*
+!.env.example

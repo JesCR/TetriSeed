@@ -1,6 +1,7 @@
 // Web3 utilities for competitive mode
 import { ethers } from 'ethers';
 import { getApiUrl } from './apiConfig';
+import { enterGame } from './contractUtils';
 
 // Network configuration - Add Sepolia testnet and mainnet configurations
 const NETWORK_CONFIG = {
@@ -488,39 +489,30 @@ export const switchToSuperSeedNetwork = async () => {
   }
 };
 
-// Mock payment function (to be replaced with real transaction in the future)
+// Replace the mock payment function with real contract interaction
 export const mockPayCompetitiveFee = async (account) => {
   try {
     if (!account) {
       throw new Error('No account connected');
     }
     
-    // Log the mock payment
-    console.log(`Processing payment of 1 $SUPR from ${account}`);
+    // Log the payment attempt
+    console.log(`Processing payment of 0.0001 ETH from ${account}`);
     
-    // Call the payment API endpoint
-    const response = await fetch(getApiUrl('/api/payment'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ address: account }),
-    });
+    // Use the real contract function
+    const result = await enterGame();
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Payment API error:', errorText);
-      throw new Error('Failed to process payment');
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to process payment');
     }
     
-    const data = await response.json();
-    console.log('Payment successful:', data);
+    console.log('Payment successful:', result);
     
     return { 
       success: true, 
-      txHash: data.txHash || `mock_tx_${Date.now()}`,
-      potSize: data.potSize,
-      playerCount: data.playerCount
+      txHash: result.txHash,
+      potSize: result.potSize,
+      playerCount: result.playerCount
     };
   } catch (error) {
     console.error('Error in payment:', error);

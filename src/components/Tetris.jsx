@@ -1021,14 +1021,22 @@ const Tetris = () => {
                 </div>
                 <div className="rule-item">
                   <span className="rule-number">1.</span>
-                  <span className="rule-text">All <span className="crypto-amount">$SUPR</span> are collected in a smart contract</span>
+                  <span className="rule-text">We're temporarily using <span className="crypto-amount">ETH</span> instead of $SUPR until the token launch</span>
                 </div>
                 <div className="rule-item">
                   <span className="rule-number">2.</span>
-                  <span className="rule-text">Every season lasts 1 week (Monday to Sunday)</span>
+                  <span className="rule-text">This is testnet ETH with <strong>no real value</strong> - all transactions are on the Superseed Sepolia testnet</span>
                 </div>
                 <div className="rule-item">
                   <span className="rule-number">3.</span>
+                  <span className="rule-text">All <span className="crypto-amount">ETH</span> are collected in a smart contract</span>
+                </div>
+                <div className="rule-item">
+                  <span className="rule-number">4.</span>
+                  <span className="rule-text">Every season lasts 1 week (Monday to Sunday)</span>
+                </div>
+                <div className="rule-item">
+                  <span className="rule-number">5.</span>
                   <span className="rule-text">At the end of each season, the top 5 competitive players get prizes:</span>
                 </div>
                 <div className="prizes-list">
@@ -1054,7 +1062,7 @@ const Tetris = () => {
                   </div>
                 </div>
                 <div className="rule-item">
-                  <span className="rule-number">5.</span>
+                  <span className="rule-number">6.</span>
                   <span className="rule-text">After that, a new season starts and the leaderboard is cleared</span>
                 </div>
               </div>
@@ -1070,7 +1078,7 @@ const Tetris = () => {
                   {isCompetitiveMode 
                     ? (isLoading 
                       ? 'Processing Payment...' 
-                      : <span>Pay <span className="crypto-amount">1 $SUPR</span> & Start Game</span>
+                      : <span>Pay <span className="crypto-amount">0.0001 ETH</span> & Start Game</span>
                       ) 
                     : 'Start Game'}
                 </button>

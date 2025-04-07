@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
@@ -13,11 +11,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * Compatible with SuperSeed (OP Stack, Bedrock)
  */
 contract TetriSeedGame is Ownable, ReentrancyGuard {
-    using SafeERC20 for IERC20;
-
     // State variables
-    IERC20 public supToken;               // The $SUPR token used for entry fees
-    uint256 public entryFee;              // Entry fee in $SUPR tokens
+    uint256 public entryFee;              // Entry fee in ETH (0.0001 ETH)
     uint8[5] public prizeDistribution;    // Distribution percentages for top 5 winners
     uint256 public weeklyPrizePool;       // Current weekly prize pool amount
     uint256 public seasonStartTime;       // Start timestamp of the current season (week)
@@ -25,11 +20,11 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
     uint256 public currentSeason;         // Current season number
     
     // Player balances tracking
-    mapping(address => uint256) public playerBalances;  // Track deposited tokens by player
+    mapping(address => uint256) public playerBalances;  // Track deposited ETH by player
 
     // Events
-    event TokensDeposited(address indexed player, uint256 amount, uint256 timestamp);
-    event TokensWithdrawn(address indexed recipient, uint256 amount, uint256 timestamp);
+    event EthDeposited(address indexed player, uint256 amount, uint256 timestamp);
+    event EthWithdrawn(address indexed recipient, uint256 amount, uint256 timestamp);
     event GameEntered(address indexed player, uint256 fee, uint256 timestamp);
     event PrizesDistributed(address[5] winners, uint256[5] amounts, uint256 totalDistributed);
     event OwnerWithdrawal(uint256 amount, uint256 timestamp);
@@ -40,11 +35,9 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
 
     /**
      * @dev Constructor
-     * @param _tokenAddress Address of the $SUPR token
      */
-    constructor(address _tokenAddress) {
-        supToken = IERC20(_tokenAddress);
-        entryFee = 1 ether;  // Default 1 $SUPR (assuming 18 decimals)
+    constructor() {
+        entryFee = 0.0001 ether;  // 0.0001 ETH
         
         // Default prize distribution: 50%, 30%, 10%, 5%, 5%
         prizeDistribution = [50, 30, 10, 5, 5];
@@ -60,7 +53,7 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
      * @dev Allow a player to enter the game by paying the entry fee
      * Entry fee is directly transferred from player to the contract
      */
-    function enterGame() external nonReentrant {
+    function enterGame() external payable nonReentrant {
         // Reset prize pool if a new week has started
         if (block.timestamp >= seasonStartTime + SEASON_DURATION) {
             uint256 weeksPassed = (block.timestamp - seasonStartTime) / SEASON_DURATION;
@@ -68,20 +61,25 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
             // Note: We don't reset weeklyPrizePool here, it accumulates
         }
 
-        // Check if the player has sufficient balance or transfer tokens
+        // Check if the player has sufficient balance or transfer ETH
         if (playerBalances[msg.sender] >= entryFee) {
             // Use player's deposited balance
             playerBalances[msg.sender] -= entryFee;
         } else {
-            // Transfer the entry fee from player to the contract
-            supToken.safeTransferFrom(msg.sender, address(this), entryFee);
+            // Check if enough ETH was sent
+            require(msg.value >= entryFee, "Insufficient ETH sent");
+            // Return excess ETH if any
+            if (msg.value > entryFee) {
+                (bool success, ) = msg.sender.call{value: msg.value - entryFee}("");
+                require(success, "ETH refund failed");
+            }
         }
         
         // Add entry fee to the prize pool
         weeklyPrizePool += entryFee;
         
         // Emit both deposit and game entry events
-        emit TokensDeposited(msg.sender, entryFee, block.timestamp);
+        emit EthDeposited(msg.sender, entryFee, block.timestamp);
         emit GameEntered(msg.sender, entryFee, block.timestamp);
     }
 
@@ -121,7 +119,7 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
                 // Add the winnings to the player's balance
                 playerBalances[winners[i]] += shares[i];
                 
-                emit TokensWithdrawn(winners[i], shares[i], block.timestamp);
+                emit EthWithdrawn(winners[i], shares[i], block.timestamp);
                 emit PrizeAwarded(winners[i], shares[i], i + 1, currentSeason);
             }
         }
@@ -140,43 +138,8 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Distribute prizes to the top 5 players
-     * @param winners Array of addresses of the top 5 winners in order
-     * Note: This function is deprecated, use endSeason instead for full season handling
-     */
-    function distributePrizes(address[5] calldata winners) external onlyOwner nonReentrant {
-        require(weeklyPrizePool > 0, "No prizes to distribute");
-        
-        uint256 totalPrizeDistributed = 0;
-        uint256[5] memory amounts;
-        
-        // Calculate and transfer prizes to each winner
-        for (uint8 i = 0; i < 5; i++) {
-            require(winners[i] != address(0), "Invalid winner address");
-            
-            // Calculate prize amount
-            uint256 prizeAmount = (weeklyPrizePool * prizeDistribution[i]) / 100;
-            amounts[i] = prizeAmount;
-            totalPrizeDistributed += prizeAmount;
-            
-            // Transfer prize to winner
-            if (prizeAmount > 0) {
-                // Add the prize to the player's balance
-                playerBalances[winners[i]] += prizeAmount;
-                
-                emit TokensWithdrawn(winners[i], prizeAmount, block.timestamp);
-            }
-        }
-        
-        // Update prize pool
-        weeklyPrizePool -= totalPrizeDistributed;
-        
-        emit PrizesDistributed(winners, amounts, totalPrizeDistributed);
-    }
-
-    /**
      * @dev Update the entry fee
-     * @param newFee The new entry fee in $SUPR tokens
+     * @param newFee The new entry fee in ETH
      */
     function setEntryFee(uint256 newFee) external onlyOwner {
         require(newFee > 0, "Entry fee must be greater than zero");
@@ -211,26 +174,23 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
         require(amount <= weeklyPrizePool, "Amount exceeds available funds");
         
         weeklyPrizePool -= amount;
-        supToken.safeTransfer(owner(), amount);
+        (bool success, ) = owner().call{value: amount}("");
+        require(success, "ETH transfer failed");
         
-        emit TokensWithdrawn(owner(), amount, block.timestamp);
+        emit EthWithdrawn(owner(), amount, block.timestamp);
         emit OwnerWithdrawal(amount, block.timestamp);
     }
 
     /**
-     * @dev Allow a user to deposit additional tokens directly into the prize pool
-     * @param amount Amount to deposit
+     * @dev Allow a user to deposit additional ETH directly into the prize pool
      */
-    function depositTokens(uint256 amount) external nonReentrant {
-        require(amount > 0, "Amount must be greater than zero");
-        
-        // Transfer tokens from sender to contract
-        supToken.safeTransferFrom(msg.sender, address(this), amount);
+    function depositEth() external payable nonReentrant {
+        require(msg.value > 0, "Amount must be greater than zero");
         
         // Add to player's balance
-        playerBalances[msg.sender] += amount;
+        playerBalances[msg.sender] += msg.value;
         
-        emit TokensDeposited(msg.sender, amount, block.timestamp);
+        emit EthDeposited(msg.sender, msg.value, block.timestamp);
     }
     
     /**
@@ -248,21 +208,11 @@ contract TetriSeedGame is Ownable, ReentrancyGuard {
     function getPrizeDistribution() external view returns (uint8[5] memory) {
         return prizeDistribution;
     }
-    
-    /**
-     * @dev Get the current season number
-     * @return Current season number
-     */
-    function getCurrentSeason() external view returns (uint256) {
-        return currentSeason;
-    }
-    
-    /**
-     * @dev Get the balance of a player
-     * @param player Address of the player
-     * @return Balance of the player
-     */
-    function getPlayerBalance(address player) external view returns (uint256) {
-        return playerBalances[player];
+
+    // Allow the contract to receive ETH
+    receive() external payable {
+        // Add to player's balance when ETH is sent directly
+        playerBalances[msg.sender] += msg.value;
+        emit EthDeposited(msg.sender, msg.value, block.timestamp);
     }
 } 

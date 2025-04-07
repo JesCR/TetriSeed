@@ -7,7 +7,8 @@
     "test": "hardhat test",
     "compile": "hardhat compile",
     "deploy:local": "hardhat run scripts/deploy.js --network localhost",
-    "deploy:superseed": "hardhat run scripts/deploy-superseed.js --network superseedSepolia"
+    "deploy:superseed": "hardhat run scripts/deploy-superseed.js --network superseedSepolia",
+    "deploy:eth": "hardhat run scripts/deploy-eth.js --network superseedSepolia"
   },
   "keywords": [],
   "author": "",
