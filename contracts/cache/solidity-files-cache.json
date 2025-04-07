@@ -332,8 +332,8 @@
       ]
     },
     "/Users/jes/MiGithub/SuperSeedSuperGame/contracts/contracts/TetriSeedGame.sol": {
-      "lastModificationDate": 1743587438097,
-      "contentHash": "86803394ac1b485643b3e622c206a05e",
+      "lastModificationDate": 1744046469808,
+      "contentHash": "86873e339d02857fd9232193e516610e",
       "sourceName": "contracts/TetriSeedGame.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -359,8 +359,6 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/security/ReentrancyGuard.sol"
       ],
