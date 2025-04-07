@@ -18,6 +18,7 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [connectionAttempt, setConnectionAttempt] = useState(0); // Track connection attempts
   
   // Check if we're on a mobile device
   useEffect(() => {
@@ -180,22 +181,38 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
       return;
     }
     
+    // Increase connection attempt counter
+    setConnectionAttempt(prev => prev + 1);
+    
     // Connect wallet (desktop only)
+    console.log('Starting wallet connection from CompetitiveMode, attempt:', connectionAttempt + 1);
     setIsLoading(true);
     setError('');
     
     try {
+      console.log('Checking if MetaMask is installed');
       if (!isMetaMaskInstalled()) {
+        console.log('MetaMask not installed, showing modal');
         setModalType('metamask');
         setShowModal(true);
+        setIsLoading(false);
         return;
       }
       
+      // Add longer delay for subsequent attempts
+      const delayTime = connectionAttempt > 0 ? 1000 : 500;
+      console.log(`Adding ${delayTime}ms delay to ensure MetaMask initialization`);
+      await new Promise(resolve => setTimeout(resolve, delayTime));
+      
+      console.log('Calling connectWallet()');
       const result = await connectWallet();
+      console.log('Result from connectWallet:', result);
+      
       if (result.success) {
         console.log('Successfully connected wallet in CompetitiveMode:', result.account);
         setWalletConnected(true);
         setWalletAddress(result.account);
+        setConnectionAttempt(0); // Reset attempts on success
         
         // Dispatch a custom event with the wallet address to notify all components
         window.dispatchEvent(new CustomEvent('wallet_connected', {
@@ -208,11 +225,21 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
           setError(networkResult.error || 'Failed to switch to SuperSeed network');
         }
       } else {
-        setError(result.error || 'Failed to connect wallet');
+        console.log('Failed to connect wallet:', result.error);
+        
+        // If this is a first attempt failure, suggest trying again
+        if (connectionAttempt === 0) {
+          setError('Connection failed. Please try again or check if MetaMask is unlocked.');
+        } else {
+          // For multiple failures, give more specific instructions
+          setError(result.error || 'Failed to connect wallet. Try refreshing the page or restarting your browser.');
+        }
       }
     } catch (error) {
+      console.log('Error caught in handleConnectWallet:', error);
       setError(error.message || 'An error occurred');
     } finally {
+      console.log('Finishing handleConnectWallet, setting isLoading to false');
       setIsLoading(false);
     }
   };
@@ -285,6 +312,25 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
     }
   };
   
+  // Show retry button if we've had a failed connection attempt
+  const renderRetryButton = () => {
+    if (error && !walletConnected && connectionAttempt > 0) {
+      return (
+        <button 
+          className="retry-button"
+          onClick={() => {
+            console.log('Retrying wallet connection');
+            setError('');
+            handleConnectWallet();
+          }}
+        >
+          Retry Connection
+        </button>
+      );
+    }
+    return null;
+  };
+  
   return (
     <div className="competitive-mode">
       <div className={`wallet-buttons ${walletConnected ? 'wallet-connected' : ''}`}>
@@ -294,7 +340,7 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
           onClick={handleConnectWallet}
           disabled={isLoading}
         >
-          {isLoading ? 'Processing...' : (walletConnected ? 'Disconnect Wallet' : 'Connect Wallet')}
+          {isLoading ? 'Processing...' : (walletConnected ? 'Disconnect Wallet' : 'Connect to SuperSeed')}
         </button>
         
         {/* SECOND: Competitive mode button (only visible when connected) */}
@@ -310,6 +356,9 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
       </div>
       
       {error && <p className="error-message">{error}</p>}
+      
+      {/* Add retry button when connection fails */}
+      {renderRetryButton()}
       
       <Modal
         isOpen={showModal}

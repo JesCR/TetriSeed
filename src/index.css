@@ -152,7 +152,7 @@ input, textarea {
 /* Game content layout */
 .game-content {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
@@ -188,7 +188,7 @@ input, textarea {
 /* Stage (game board) styling */
 .stage-container {
   position: relative;
-  margin-bottom: 3px;
+  margin-bottom: 2px; /* Reduced from 3px */
   z-index: 1; /* Add explicit z-index for proper stacking */
 }
 
@@ -307,7 +307,7 @@ input, textarea {
 
 /* Game info section */
 .game-info {
-  margin-top: 10px;
+  margin-top: 5px; /* Reduced from 10px */
   width: 100%;
   max-width: 100%;
   display: flex;
@@ -317,29 +317,34 @@ input, textarea {
 
 .game-info-displays {
   display: flex;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */ /* Remove wrapping */
   justify-content: space-between;
   width: 100%;
-  max-width: 302px; /* Match the game width - 12 cells at 25px each + 2px border */
+  /* max-width: 302px; */ /* Match the game width - 12 cells at 25px each + 2px border */
+  max-width: 315px; /* Adjusted to match calculated stage width (12*25 + 11*1 + 2*2) */
+  gap: 8px; /* Add gap between items */
+  margin-bottom: 2px; /* Reduced from 8px to match space above */
 }
 
 /* Display component */
 .display {
-  padding: 10px 15px; /* Reduced padding to match button height */
-  margin-bottom: 15px;
+  padding: 6px 10px; /* Reduced horizontal padding slightly */
+  margin-bottom: 0; /* Removed bottom margin as spacing is handled by container gap */
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid #0ff;
   border-radius: 5px;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.8rem; /* Reduced font size from 0.9rem */
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   text-align: center;
-  width: 100%;
-  letter-spacing: 1px;
-  min-height: 38px; /* Match wallet button height */
+  /* width: 100%; */ /* Remove fixed width */
+  flex: 1; /* Allow displays to share space */
+  letter-spacing: 0.5px; /* Slightly reduced letter spacing */
+  min-height: 28px; /* Reduced from 32px */
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap; /* Ensure text stays on one line */
 }
 
 .game-over {
@@ -372,13 +377,13 @@ input, textarea {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 5px; /* Reduced from 10px */
 }
 
 /* Start button */
 .start-button {
-  padding: 8px 16px; /* Reduced padding to match wallet buttons */
-  margin-top: 10px;
+  padding: 6px 16px; /* Reduced from 8px */
+  margin-top: 5px; /* Reduced from 10px */
   background: linear-gradient(to right, #0f0, #0ff);
   color: #000;
   font-family: 'Lacquer', cursive;
@@ -389,7 +394,7 @@ input, textarea {
   transition: all 0.3s;
   text-align: center;
   letter-spacing: 1px;
-  min-height: 38px; /* Same height as wallet buttons */
+  min-height: 32px; /* Reduced from 38px */
 }
 
 .start-button:hover {
@@ -403,7 +408,7 @@ input, textarea {
   border: 2px solid #0ff;
   border-radius: 5px;
   padding: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* Reduced bottom margin */
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
   position: relative;
   width: 100%;
@@ -510,7 +515,7 @@ input, textarea {
 }
 
 .player-info {
-  margin-top: 10px;
+  margin-top: 5px; /* Reduced top margin */
   padding: 12px;
   background: rgba(0, 0, 0, 0.7);
   border: 2px solid #0ff;
@@ -584,7 +589,7 @@ input, textarea {
   background: linear-gradient(to bottom, #000000, #1c1c1c);
   border: 3px solid #0ff;
   border-radius: 10px;
-  padding: 30px;
+  padding: 15px 20px 20px; /* Reduced top padding from 20px to 15px */
   max-width: 500px;
   width: 90%;
   text-align: center;
@@ -600,7 +605,7 @@ input, textarea {
 .modal-logo {
   width: 80%;
   max-width: 300px;
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* Reduced margin-bottom from 20px */
 }
 
 .name-input {
@@ -916,7 +921,7 @@ input, textarea {
   /* Game info container for mobile */
   .game-info {
     width: 100%;
-    margin: 3px auto 10px; /* Reduced top margin from 10px to 3px */
+    margin: 2px auto 8px; /* Reduced top margin from 3px auto 10px */
     max-width: 100%;
   }
   
@@ -925,6 +930,9 @@ input, textarea {
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+    max-width: 219px; /* Adjusted for mobile stage width (12*17 + 11*1 + 2*2) */
+    gap: 5px; /* Slightly reduced gap for mobile */
+    margin-bottom: 5px; /* Ensure spacing before start button */
   }
   
   /* Game info displays for mobile */
@@ -932,12 +940,13 @@ input, textarea {
     flex: 1;
     min-width: calc(33.3% - 6px);
     max-width: calc(33.3% - 6px);
-    margin: 3px;
-    padding: 6px 0;
+    margin: 0; /* Removed margin as spacing handled by container */
+    padding: 4px 5px; /* Reduced padding for mobile */
     text-align: center;
-    font-size: 0.65rem;
+    font-size: 0.6rem; /* Reduced from 0.65rem */
     box-sizing: border-box;
     letter-spacing: 0.5px;
+    min-height: 24px; /* Reduced min-height for mobile */
   }
   
   /* Mobile controls should match game width */
@@ -945,7 +954,7 @@ input, textarea {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    margin: 10px auto;
+    margin: 8px auto 0; /* Reduced from 10px auto */
     padding: 0;
     max-width: 350px;
     margin-bottom: 0;
@@ -1142,7 +1151,7 @@ input, textarea {
 
 /* SuperSeed Facts container */
 .facts-container {
-  margin-top: 20px;
+  margin-top: 10px; /* Reduced top margin */
   padding: 15px;
   background: rgba(0, 0, 0, 0.8);
   border: 2px solid #00ffff;
@@ -1155,9 +1164,8 @@ input, textarea {
   margin-left: 0;
   margin-right: 0;
   overflow-y: auto;
-  max-height: calc(100vh - 420px);
-  min-height: 250px; /* Set consistent minimum height */
-  height: auto; /* Allow height to adjust but with min-height set */
+  max-height: calc(100vh - 470px); /* Restore reasonable max-height */
+  height: auto; /* Allow height to adjust but with max-height set */
   color: white;
   margin-bottom: 20px;
   transition: background-color 0.15s ease;
@@ -1171,7 +1179,7 @@ input, textarea {
   text-align: center;
   margin-top: 0;
   margin-bottom: 15px;
-  font-size: 1.1rem;
+  font-size: 1.1rem !important; /* Re-added !important */
   text-transform: uppercase;
   letter-spacing: 1px;
   font-family: 'Lacquer', cursive;
@@ -1181,7 +1189,7 @@ input, textarea {
   text-align: center;
   font-weight: bold;
   margin-bottom: 10px;
-  font-size: 1.1rem; /* Same size as the title */
+  font-size: 1.0rem !important; /* Re-added !important */
   color: #ffdd00;
   letter-spacing: 0.5px;
 }
@@ -1189,7 +1197,7 @@ input, textarea {
 .fact-content {
   text-align: justify;
   margin-bottom: 10px;
-  font-size: 0.9rem;
+  font-size: 0.85rem !important; /* Re-added !important */
   line-height: 1.4;
   letter-spacing: 0.5px;
   max-height: 100px;
@@ -3001,7 +3009,7 @@ input, textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 10px auto 20px;
+  margin: 5px auto 10px; /* Reduced margins */
   width: 100%;
   max-width: 300px;
 }
@@ -3013,7 +3021,7 @@ input, textarea {
   max-height: 300px;
   width: auto;
   height: auto;
-  margin: 10px auto;
+  margin: 5px auto; /* Reduced margins */
   border: 2px solid #0ff;
   border-radius: 4px;
 }
@@ -3023,7 +3031,7 @@ input, textarea {
   color: #0ff;
   border: 2px solid #0ff;
   border-radius: 4px;
-  padding: 10px 0;
+  padding: 8px 0; /* Reduced padding */
   font-family: 'Lacquer', cursive;
   margin-top: 5px;
   cursor: pointer;
@@ -3033,8 +3041,8 @@ input, textarea {
   width: 100%;
   max-width: 280px;
   text-align: center;
-  height: 40px;
-  line-height: 20px;
+  height: 35px; /* Reduced height */
+  line-height: 19px; /* Adjusted line-height */
 }
 
 .screenshot-button:hover {
@@ -3045,10 +3053,10 @@ input, textarea {
 .modal-actions {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 8px; /* Reduced gap */
   width: 100%;
   justify-content: center;
-  margin: 5px auto 0;
+  margin: 10px auto 0; /* Increased top margin slightly for balance */
   max-width: 280px;
 }
 
@@ -3057,7 +3065,7 @@ input, textarea {
 }
 
 .share-text {
-  margin: 5px 0 10px;
+  margin: 5px 0 5px; /* Reduced bottom margin */
   text-transform: uppercase;
   font-size: 0.9rem;
   letter-spacing: 1px;
@@ -3069,8 +3077,8 @@ input, textarea {
   flex: 1;
   min-width: 120px;
   max-width: none;
-  height: 40px;
-  line-height: 20px;
+  height: 35px; /* Reduced height */
+  line-height: 19px; /* Adjusted line-height */
 }
 
 /* Wallet info styling for mobile */
@@ -3235,6 +3243,44 @@ input, textarea {
   .mobile-btn:active {
     background: rgba(0, 255, 255, 0.2);
     transform: scale(0.95);
+  }
+}
+
+/* ... existing code ... */
+
+/* Super Seed Message (cuando se completa un Tetris) */
+.super-seed-message {
+  position: fixed;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  font-weight: bold;
+  color: #00bfff; /* Azul brillante */
+  text-shadow: 
+    0 0 10px #00bfff,
+    0 0 20px #00bfff,
+    0 0 30px #00bfff,
+    0 0 40px #0088ff,
+    0 0 50px #0088ff;
+  animation: pulseTetris 0.5s infinite alternate;
+  z-index: 1000;
+  font-family: 'Press Start 2P', cursive, sans-serif;
+  letter-spacing: 2px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+@keyframes pulseTetris {
+  from {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
   }
 }
 

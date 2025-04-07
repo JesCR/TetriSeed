@@ -114,17 +114,17 @@ const SuperSeedFacts = ({ isMobile }) => {
       ref={factsContainerRef}
       className={`facts-container ${isFlashing ? 'flash-effect' : ''}`}
       style={{ 
-        minHeight: isMobile ? '90px' : '250px',
-        padding: isMobile ? '4px' : '10px'
+        minHeight: isMobile ? '90px' : '160px',
+        padding: isMobile ? '4px' : '5px 10px'
       }}
     >
       <h3 style={{ 
-        marginBottom: isMobile ? '2px' : '10px',
+        marginBottom: isMobile ? '2px' : '5px',
         fontSize: isMobile ? '0.8rem' : 'inherit'
       }}>SuperSeed Facts</h3>
       <div>
         <p className="fact-title" style={{ 
-          marginBottom: isMobile ? '2px' : '6px',
+          marginBottom: isMobile ? '2px' : '3px',
           fontSize: isMobile ? '0.7rem' : 'inherit'
         }}>{formattedFact.title}</p>
         <p className="fact-content" style={{ 

@@ -258,18 +258,130 @@ export const getMetaMaskDownloadLink = () => {
   return 'https://metamask.io/download/';
 };
 
-// Request account access
+// Try alternative way to connect to MetaMask if the standard one fails
+export const connectWalletAlternative = async () => {
+  try {
+    // Check if window.ethereum exists
+    if (typeof window.ethereum === 'undefined') {
+      throw new Error('MetaMask is not installed');
+    }
+    
+    // Try to get provider directly
+    let provider;
+    if (window.ethereum) {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+    } else {
+      throw new Error('No Ethereum provider available');
+    }
+    
+    // Request provider's signer (this often triggers the MetaMask popup)
+    const signer = provider.getSigner();
+    
+    // Get the address which requires connection
+    const address = await signer.getAddress();
+    
+    if (!address) {
+      throw new Error('Could not get address from provider');
+    }
+    
+    return { success: true, account: address };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Simple direct connection attempt
+export const simpleConnectWallet = async () => {
+  try {
+    // First check if we have ethereum object
+    if (typeof window.ethereum === 'undefined') {
+      return { success: false, error: 'MetaMask not detected' };
+    }
+    
+    // Try the most direct approach possible
+    let accounts = [];
+    
+    // Approach 1: Use enable() (older method but still works on some setups)
+    try {
+      if (typeof window.ethereum.enable === 'function') {
+        accounts = await window.ethereum.enable();
+      }
+    } catch (enableError) {
+      // Ignore enable error, proceed to next method
+    }
+    
+    // If enable didn't work, try eth_requestAccounts directly
+    if (!accounts || accounts.length === 0) {
+      try {
+        accounts = await new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => reject(new Error("Connection timeout")), 3000);
+          window.ethereum.request({ method: 'eth_requestAccounts', params: [] })
+            .then(result => { clearTimeout(timeoutId); resolve(result); })
+            .catch(error => { clearTimeout(timeoutId); reject(error); });
+        });
+      } catch (requestError) {
+         // Ignore request error, proceed to next method
+      }
+    }
+    
+    // If we still don't have accounts, try one last method: eth_accounts
+    if (!accounts || accounts.length === 0) {
+      try {
+        accounts = await window.ethereum.request({ method: 'eth_accounts', params: [] });
+      } catch (accountsError) {
+        // Ignore accounts error
+      }
+    }
+    
+    // Check if we got any accounts
+    if (accounts && accounts.length > 0) {
+      return { success: true, account: accounts[0] };
+    }
+    
+    // If we get here, all methods failed
+    return { 
+      success: false, 
+      error: 'Could not connect to MetaMask. Please check if MetaMask is unlocked and try again.'
+    };
+    
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error.message || 'Unknown error connecting to wallet' 
+    };
+  }
+};
+
+// Modify the main connectWallet function to use the simple connection method
 export const connectWallet = async () => {
   try {
+    // Check basic MetaMask installation first
     if (!isMetaMaskInstalled()) {
       throw new Error('MetaMask is not installed');
     }
     
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    return { success: true, account: accounts[0] };
+    // First try the simple direct method
+    const simpleResult = await simpleConnectWallet();
+    if (simpleResult.success) return simpleResult;
+    
+    // Try the alternative method next
+    const alternativeResult = await connectWalletAlternative();
+    if (alternativeResult.success) return alternativeResult;
+    
+    // If all methods failed, return the error from the simple method
+    return simpleResult;
+    
   } catch (error) {
-    console.error('Error connecting to MetaMask:', error);
-    return { success: false, error: error.message };
+    // Provide more helpful error messages
+    let errorMessage = error.message || 'An error occurred connecting to MetaMask';
+    if (errorMessage.includes('User rejected') || errorMessage.includes('User denied')) {
+      errorMessage = 'Connection rejected. Please approve the MetaMask connection request.';
+    } else if (error.code === -32002) {
+      errorMessage = 'MetaMask connection request already pending. Please open MetaMask extension.';
+    } else if (errorMessage.includes('timed out')) {
+      errorMessage = 'Connection timed out. Please try again or restart your browser.';
+    }
+    return { success: false, error: errorMessage };
   }
 };
 

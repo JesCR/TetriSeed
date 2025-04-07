@@ -55,7 +55,7 @@ const Tetris = () => {
   // Initialize player and stage
   const [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino] = usePlayer();
   const [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage] = useStage(player, resetPlayer);
-  const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
+  const [score, setScore, rows, setRows, level, setLevel, tetrisCleared, setTetrisCleared] = useGameStatus(rowsCleared);
   const [scoreInfo, setScoreInfo] = useState({ score: 0, rank: null });
 
   const tetrisRef = useRef(null);
@@ -96,6 +96,9 @@ const Tetris = () => {
   // Add ref to track keyboard down key interval
   const keyDownIntervalRef = useRef(null);
   const isKeyDownPressedRef = useRef(false);
+
+  // Agregamos estado para mostrar el mensaje de SuperSeed!
+  const [showSuperSeedMessage, setShowSuperSeedMessage] = useState(false);
 
   // Submit score to the leaderboard - no dependencies to avoid circular references
   const submitScore = useCallback(async (scoreValue) => {
@@ -458,6 +461,8 @@ const Tetris = () => {
     setScore(0);
     setRows(0);
     setLevel(1); // Start at level 1 instead of 0
+    setShowSuperSeedMessage(false); // Asegurarse de que el mensaje no se muestre al iniciar
+    setTetrisCleared(false); // Resetear el estado de Tetris completado
     
     // Show initial interest rate message for level 1
     showInterestRateMessage(1);
@@ -970,6 +975,21 @@ const Tetris = () => {
     }
   };
 
+  // Añadir un efecto para mostrar el mensaje de SuperSeed! cuando se hace un Tetris
+  useEffect(() => {
+    if (tetrisCleared) {
+      // Mostrar el mensaje SuperSeed!
+      setShowSuperSeedMessage(true);
+      
+      // Ocultar el mensaje después de 2 segundos
+      setTimeout(() => {
+        setShowSuperSeedMessage(false);
+        // Resetear el estado para futuros Tetris
+        setTetrisCleared(false);
+      }, 2000);
+    }
+  }, [tetrisCleared, setTetrisCleared]);
+
   return (
     <div 
       ref={tetrisRef}
@@ -1102,6 +1122,11 @@ const Tetris = () => {
           </div>
           
           <div className="game-content">
+            {/* Mensaje de SuperSeed! que aparece cuando se hace un Tetris */}
+            {showSuperSeedMessage && (
+              <div className="super-seed-message">SuperSeed!</div>
+            )}
+            
             {/* Conditional rendering based on mobile or desktop */}
             {isMobile ? (
               // Mobile layout with SuperSeed Facts on top
@@ -1134,18 +1159,20 @@ const Tetris = () => {
                         <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                       </div>
                     ) : (
-                      <div className="game-info-displays">
-                        <Display text={`Score: ${score}`} />
-                        <Display text={isMobile ? `Rows: ${rows}` : `Rows Cleared: ${rows}`} />
-                        <Display text={`Level: ${level}`} />
+                      <>
+                        <div className="game-info-displays">
+                          <Display text={`Score: ${score}`} />
+                          <Display text={`Rows: ${rows}`} />
+                          <Display text={`Level: ${level}`} />
+                        </div>
                         
-                        {/* Only show start button at game initialization */}
+                        {/* Only show start button at game initialization - moved outside game-info-displays */}
                         {!dropTime && !gameOver && (
                           <div className="start-container">
                             <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                           </div>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
                   
@@ -1219,18 +1246,20 @@ const Tetris = () => {
                         <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                       </div>
                     ) : (
-                      <div className="game-info-displays">
-                        <Display text={`Score: ${score}`} />
-                        <Display text={`Rows Cleared: ${rows}`} />
-                        <Display text={`Level: ${level}`} />
-                        
-                        {/* Only show start button at game initialization */}
+                      <>
+                        <div className="game-info-displays">
+                          <Display text={`Score: ${score}`} />
+                          <Display text={`Rows: ${rows}`} />
+                          <Display text={`Level: ${level}`} />
+                        </div>
+
+                        {/* Only show start button at game initialization - moved outside game-info-displays */}
                         {!dropTime && !gameOver && (
                           <div className="start-container">
                             <StartButton callback={handleStartButtonClick} isCompetitive={isCompetitiveMode} />
                           </div>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
                 </div>

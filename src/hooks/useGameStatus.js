@@ -4,18 +4,21 @@ export const useGameStatus = rowsCleared => {
   const [score, setScore] = useState(0);
   const [rows, setRows] = useState(0);
   const [level, setLevel] = useState(1);
+  const [tetrisCleared, setTetrisCleared] = useState(false);
 
-  // Scoring constants - add points per line + linePoints for multiple lines at once
-  const POINTS_PER_LINE = 10;
-  const linePoints = [40, 100, 300, 1200]; // Bonus for multiple lines
+  // Scoring constants - original Tetris scoring system
+  const linePoints = [0, 40, 100, 300, 1200]; // Puntuación por líneas: 0, 1, 2, 3, 4 líneas
 
   const calcScore = useCallback(() => {
     // Check if we have rows cleared
     if (rowsCleared > 0) {
-      // Add score based on number of cleared rows
-      setScore(prev => prev + (rowsCleared * POINTS_PER_LINE));
+      // Actualizar el estado de tetris completado
+      setTetrisCleared(rowsCleared === 4);
+      
+      // Aplicar puntuación original del Tetris, multiplicada por el nivel actual
+      setScore(prev => prev + (linePoints[rowsCleared] * level));
     }
-  }, [rowsCleared, POINTS_PER_LINE]);
+  }, [rowsCleared, linePoints, level]);
 
   useEffect(() => {
     calcScore();
@@ -35,5 +38,5 @@ export const useGameStatus = rowsCleared => {
     }
   }, [level, rows]);
 
-  return [score, setScore, rows, setRows, level, setLevel];
+  return [score, setScore, rows, setRows, level, setLevel, tetrisCleared, setTetrisCleared];
 }; 
