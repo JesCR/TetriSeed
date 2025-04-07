@@ -195,37 +195,6 @@ const Tetris = () => {
     drop();
   }, [drop]);
   
-  // Listen for overlap events and force game over
-  useEffect(() => {
-    // Function to handle game over due to overlapping pieces
-    const handleGameOverOverlap = () => {
-      console.log('GAME OVER EVENT RECEIVED: Pieces overlapped');
-      setGameOver(true);
-      setDropTime(null);
-      // Select a random game over message
-      const randomIndex = Math.floor(Math.random() * gameOverMessages.length);
-      setGameOverMessage(gameOverMessages[randomIndex]);
-      
-      // Update scoreInfo with current score before submission
-      setScoreInfo(prevInfo => ({
-        ...prevInfo,
-        score: score
-      }));
-      
-      if (playerName) {
-        submitScore(score);
-      }
-    };
-    
-    // Add event listener
-    document.addEventListener('tetris_game_over_overlap', handleGameOverOverlap);
-    
-    // Clean up
-    return () => {
-      document.removeEventListener('tetris_game_over_overlap', handleGameOverOverlap);
-    };
-  }, [gameOverMessages, playerName, score, submitScore, setGameOver, setDropTime, setGameOverMessage, setScoreInfo]);
-
   // Initialize audio when component mounts
   useEffect(() => {
     // Initialize music
@@ -662,6 +631,7 @@ const Tetris = () => {
         // This is the critical check that ensures the game ends when pieces overlap
         let hasOverlap = false;
         if (player && player.tetromino && stage) {
+          console.log(`Overlap Check: Player Y=${player.pos.y}`); // Log player position
           for (let y = 0; y < player.tetromino.length; y++) {
             for (let x = 0; x < player.tetromino[y].length; x++) {
               if (player.tetromino[y][x] !== 0) {
@@ -672,11 +642,16 @@ const Tetris = () => {
                     targetX >= 0 && targetX < stage[0].length) {
                   // If current cell in the player's tetromino is not empty AND
                   // the corresponding cell in the stage is merged, we have an overlap
+                  // Log the stage cell we are checking
+                  // console.log(`Checking stage[${targetY}][${targetX}]: Status=${stage[targetY][targetX][1]}`); // Verbose: uncomment if needed
                   if (stage[targetY][targetX][1] === 'merged') {
-                    console.log(`GAME OVER: Overlap detected at [${targetX},${targetY}]`);
+                    console.error(`GAME OVER: Overlap detected at [${targetX},${targetY}] with merged cell`); // Make it an error log
                     hasOverlap = true;
                     break;
                   }
+                } else {
+                  // Log if checking outside bounds (shouldn't happen for y=0 check)
+                  console.warn(`Overlap Check: Target [${targetX},${targetY}] is out of bounds`);
                 }
               }
             }
@@ -686,7 +661,7 @@ const Tetris = () => {
         
         // Set game over if overlap is detected
         if (hasOverlap) {
-          console.log('GAME OVER: Pieces are overlapping');
+          console.error('GAME OVER: Setting gameOver = true due to overlap.'); // Make it an error log
           setGameOver(true);
           setDropTime(null);
           // Select a random game over message
@@ -712,15 +687,25 @@ const Tetris = () => {
           // No collision, move down
           updatePlayerPos({ x: 0, y: 1, collided: false });
         } else {
-          // We have a collision - handle it
-          console.log('GAME LOOP: Setting immediate collision');
-          // Immediately update with collided=true for all pieces
-          updatePlayerPos({ x: 0, y: 0, collided: true });
-          
-          // Run overlap check again on the next tick to catch game over condition
-          setTimeout(() => {
-            // This will be checked on the next tick
-          }, 0);
+          // Collision occurred! Check if it's Game Over (collision at the top).
+          if (player.pos.y < 1) {
+            console.error('GAME OVER: Collision detected at the top of the stage.');
+            setGameOver(true);
+            setDropTime(null);
+            // Select a random game over message
+            const randomIndex = Math.floor(Math.random() * gameOverMessages.length);
+            setGameOverMessage(gameOverMessages[randomIndex]);
+            // Update scoreInfo before potential submission
+            setScoreInfo(prevInfo => ({ ...prevInfo, score: score }));
+            if (playerName) {
+              submitScore(score);
+            }
+            // No need to call updatePlayerPos here, game is over.
+          } else {
+            // Normal collision (not game over), merge the piece into the stage.
+            console.log('GAME LOOP: Collision detected, merging piece.');
+            updatePlayerPos({ x: 0, y: 0, collided: true });
+          }
         }
       }
     };
