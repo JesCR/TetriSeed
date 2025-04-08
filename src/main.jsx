@@ -2,6 +2,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
+import { isolateMetaMaskAtStartup } from './utils/web3Utils';
+
+// Immediately isolate MetaMask provider at the app startup
+// before any other wallet interactions happen
+try {
+  isolateMetaMaskAtStartup();
+} catch (error) {
+  console.error('Error during MetaMask isolation at startup:', error);
+}
 
 // iOS keyboard detection and handling
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 

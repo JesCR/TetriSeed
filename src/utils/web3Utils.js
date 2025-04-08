@@ -3,6 +3,71 @@ import { ethers } from 'ethers';
 import { getApiUrl } from './apiConfig';
 import { enterGame } from './contractUtils';
 
+// Explicitly isolate MetaMask provider at startup
+export const isolateMetaMaskAtStartup = () => {
+  // Save original Ethereum object state
+  const originalEthereum = window.ethereum;
+  const originalProviders = window.ethereum?.providers;
+  
+  try {
+    // Find MetaMask provider using same pattern as our standard function
+    let mmProvider = null;
+    
+    // First check for providers array
+    if (window.ethereum?.providers) {
+      mmProvider = window.ethereum.providers.find(p => p.isMetaMask);
+      if (mmProvider) {
+        console.log('Startup: Found MetaMask in providers array');
+      }
+    }
+    
+    // If not found in providers array, check if window.ethereum is MetaMask
+    if (!mmProvider && window.ethereum?.isMetaMask) {
+      mmProvider = window.ethereum;
+      console.log('Startup: window.ethereum is MetaMask');
+    }
+    
+    if (!mmProvider) {
+      console.warn('Startup: MetaMask provider not detected');
+      return false;
+    }
+    
+    // Override window.ethereum to be specifically the MetaMask provider
+    console.log('Startup: Isolating MetaMask provider');
+    
+    // Clone the provider to avoid reference issues
+    const providerClone = Object.create(Object.getPrototypeOf(mmProvider));
+    Object.assign(providerClone, mmProvider);
+    
+    // Don't try to modify the providers property - just use the provider as is
+    window.ethereum = providerClone;
+    
+    console.log('Startup: MetaMask successfully isolated');
+    
+    // Keep MetaMask isolated for a few seconds to ensure initial
+    // operations complete with the isolated provider
+    setTimeout(() => {
+      if (originalEthereum === window.ethereum) return; // No change needed
+      
+      console.log('Startup: Restoring original Ethereum configuration');
+      window.ethereum = originalEthereum;
+      
+      // We don't need to restore providers as it's part of the original object
+    }, 5000);
+    
+    return true;
+  } catch (error) {
+    console.error('Error isolating MetaMask at startup:', error);
+    
+    // Restore original state in case of error
+    if (originalEthereum !== window.ethereum) {
+      window.ethereum = originalEthereum;
+    }
+    
+    return false;
+  }
+};
+
 // Network configuration - Add Sepolia testnet and mainnet configurations
 const NETWORK_CONFIG = {
   mainnet: {
@@ -47,29 +112,56 @@ export const getCurrentNetwork = () => {
 // Get the active SuperSeed network configuration
 export const SUPERSEED_NETWORK = getCurrentNetwork();
 
-// Check if MetaMask is installed
-export const isMetaMaskInstalled = () => {
-  // Check for MetaMask in browser
-  const isMetaMaskInBrowser = typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
-  
-  // Check if we're on mobile
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  
-  // If on mobile, we can deep link to the MetaMask app
-  if (isMobile && !isMetaMaskInBrowser) {
-    // Try to detect if MetaMask app is installed by checking if ethereum provider is injected
-    // This doesn't always work on first page load, as the provider might not be injected yet
-    return typeof window.ethereum !== 'undefined';
+// Helper function to find the specific MetaMask provider instance
+const findMetaMaskProvider = () => {
+  // Check for multiple providers (EIP-1193 compliant wallets)
+  if (window.ethereum?.providers) {
+    // Find MetaMask's provider among multiple injected providers
+    // This is the most reliable way to get MetaMask when multiple wallets are installed
+    const mmProvider = window.ethereum.providers.find(p => p.isMetaMask);
+    if (mmProvider) {
+      console.log('Found MetaMask provider in providers array');
+      return mmProvider;
+    }
   }
   
-  return isMetaMaskInBrowser;
+  // Fallback to window.ethereum if it's MetaMask (single provider scenario)
+  if (window.ethereum && window.ethereum.isMetaMask) {
+    console.log('Using window.ethereum as MetaMask provider (single provider)');
+    return window.ethereum;
+  }
+  
+  console.warn("MetaMask provider not found - neither in providers array nor as window.ethereum");
+  return null;
+};
+
+// Get the specific MetaMask provider (exported for potential direct use)
+export const getMetaMaskProvider = () => {
+  return findMetaMaskProvider();
+};
+
+// Check if MetaMask is installed (using the finder function)
+export const isMetaMaskInstalled = () => {
+  const provider = findMetaMaskProvider();
+  
+  // Handle mobile detection separately
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+     // On mobile, the provider might be injected directly or via the array.
+     // Assume if *any* ethereum provider exists, it's usable (MetaMask app browser)
+     return !!provider || typeof window.ethereum !== 'undefined';
+  }
+
+  return !!provider; // On desktop, rely solely on finding the specific MM provider object
 };
 
 // Listener for account changes - call this when the app initializes
 export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = null) => {
-  if (typeof window.ethereum !== 'undefined') {
+  const provider = getMetaMaskProvider();
+  // Ensure METAMASK provider exists before setting up listeners
+  if (provider) {
     // Handle account changes
-    window.ethereum.on('accountsChanged', (accounts) => {
+    provider.on('accountsChanged', (accounts) => {
       console.log('MetaMask accounts changed:', accounts);
       if (accounts.length === 0) {
         // User has disconnected their wallet or logged out of MetaMask
@@ -83,14 +175,14 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
     });
 
     // Handle chain changes
-    window.ethereum.on('chainChanged', (chainId) => {
+    provider.on('chainChanged', (chainId) => {
       console.log('MetaMask chain changed:', chainId);
       // Reload the page to avoid any state inconsistencies
       window.location.reload();
     });
 
     // Handle disconnect
-    window.ethereum.on('disconnect', (error) => {
+    provider.on('disconnect', (error) => {
       console.log('MetaMask disconnected (disconnect event):', error);
       if (onDisconnect && typeof onDisconnect === 'function') {
         onDisconnect();
@@ -98,16 +190,17 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
     });
 
     // Handle connection
-    window.ethereum.on('connect', (connectInfo) => {
+    provider.on('connect', (connectInfo) => {
       console.log('MetaMask connected:', connectInfo);
     });
 
     // Set up a periodic connection check every 5 seconds
     const connectionCheckInterval = setInterval(async () => {
       try {
-        // Check if ethereum object still exists
-        if (typeof window.ethereum === 'undefined') {
-          console.log('Ethereum object no longer available');
+        // Get the provider again in case it changed
+        const currentProvider = getMetaMaskProvider();
+        if (!currentProvider) {
+          console.log('MetaMask provider no longer available');
           if (onDisconnect && typeof onDisconnect === 'function') {
             onDisconnect();
           }
@@ -115,8 +208,8 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
           return;
         }
 
-        // Try to get accounts - this will fail if disconnected
-        const accounts = await window.ethereum.request({ 
+        // Try to get accounts using the specific provider
+        const accounts = await currentProvider.request({ 
           method: 'eth_accounts',
           params: []
         });
@@ -145,7 +238,7 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
       if (document.visibilityState === 'visible') {
         console.log('Tab became visible, checking wallet connection');
         try {
-          const accounts = await window.ethereum.request({ 
+          const accounts = await currentProvider.request({ 
             method: 'eth_accounts',
             params: []
           });
@@ -166,7 +259,15 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
     return () => {
       clearInterval(connectionCheckInterval);
       document.removeEventListener('visibilitychange', () => {});
-      if (window.ethereum) {
+      // Try removing listeners from the specific provider if it still exists
+      const currentProvider = getMetaMaskProvider();
+      if (currentProvider && typeof currentProvider.removeAllListeners === 'function') {
+        currentProvider.removeAllListeners('accountsChanged');
+        currentProvider.removeAllListeners('chainChanged');
+        currentProvider.removeAllListeners('disconnect');
+        currentProvider.removeAllListeners('connect');
+      } else if (window.ethereum && typeof window.ethereum.removeAllListeners === 'function') {
+        // Fallback attempt on window.ethereum if specific provider gone/unsupported
         window.ethereum.removeAllListeners('accountsChanged');
         window.ethereum.removeAllListeners('chainChanged');
         window.ethereum.removeAllListeners('disconnect');
@@ -175,19 +276,20 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
     };
   }
   
-  // If window.ethereum doesn't exist, return a no-op cleanup function
+  // If no MetaMask provider found, return a no-op cleanup function
   return () => {};
 };
 
 // Get wallet balance (ETH)
 export const getWalletBalance = async (address) => {
   try {
-    if (!isMetaMaskInstalled() || !address) {
-      return { success: false, error: 'No wallet connected' };
+    const provider = getMetaMaskProvider();
+    if (!provider || !address) {
+      return { success: false, error: 'MetaMask provider not found or no address' };
     }
     
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const balance = await provider.getBalance(address);
+    const ethersProvider = new ethers.providers.Web3Provider(provider); // Use specific provider
+    const balance = await ethersProvider.getBalance(address);
     const ethBalance = ethers.utils.formatEther(balance);
     
     return { success: true, balance: ethBalance };
@@ -200,11 +302,12 @@ export const getWalletBalance = async (address) => {
 // Get USDC token balance
 export const getUSDCBalance = async (address) => {
   try {
-    if (!isMetaMaskInstalled() || !address) {
-      return { success: false, error: 'No wallet connected' };
+    const provider = getMetaMaskProvider();
+    if (!provider || !address) {
+      return { success: false, error: 'MetaMask provider not found or no address' };
     }
     
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const ethersProvider = new ethers.providers.Web3Provider(provider); // Use specific provider
     const networkType = DEFAULT_NETWORK;
     const usdcAddress = USDC_CONTRACTS[networkType];
     
@@ -226,7 +329,7 @@ export const getUSDCBalance = async (address) => {
       }
     ];
     
-    const tokenContract = new ethers.Contract(usdcAddress, minABI, provider);
+    const tokenContract = new ethers.Contract(usdcAddress, minABI, ethersProvider);
     const decimals = await tokenContract.decimals();
     const balance = await tokenContract.balanceOf(address);
     const usdcBalance = ethers.utils.formatUnits(balance, decimals);
@@ -259,82 +362,42 @@ export const getMetaMaskDownloadLink = () => {
   return 'https://metamask.io/download/';
 };
 
-// Try alternative way to connect to MetaMask if the standard one fails
-export const connectWalletAlternative = async () => {
-  try {
-    // Check if window.ethereum exists
-    if (typeof window.ethereum === 'undefined') {
-      throw new Error('MetaMask is not installed');
-    }
-    
-    // Try to get provider directly
-    let provider;
-    if (window.ethereum) {
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-    } else {
-      throw new Error('No Ethereum provider available');
-    }
-    
-    // Request provider's signer (this often triggers the MetaMask popup)
-    const signer = provider.getSigner();
-    
-    // Get the address which requires connection
-    const address = await signer.getAddress();
-    
-    if (!address) {
-      throw new Error('Could not get address from provider');
-    }
-    
-    return { success: true, account: address };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-};
-
 // Simple direct connection attempt
 export const simpleConnectWallet = async () => {
   try {
-    // First check if we have ethereum object
-    if (typeof window.ethereum === 'undefined') {
-      return { success: false, error: 'MetaMask not detected' };
+    // First check if we have the specific MetaMask provider object
+    const provider = getMetaMaskProvider();
+    if (!provider) {
+      return { success: false, error: 'MetaMask provider not detected' };
     }
     
-    // Try the most direct approach possible
+    console.log('Using explicit MetaMask provider for connection attempt');
+    
+    // Try the most direct approach possible using the specific provider
     let accounts = [];
     
-    // Approach 1: Use enable() (older method but still works on some setups)
+    // Direct eth_requestAccounts call - most reliable method
     try {
-      if (typeof window.ethereum.enable === 'function') {
-        accounts = await window.ethereum.enable();
-      }
-    } catch (enableError) {
-      // Ignore enable error, proceed to next method
-    }
-    
-    // If enable didn't work, try eth_requestAccounts directly
-    if (!accounts || accounts.length === 0) {
+      accounts = await provider.request({ 
+        method: 'eth_requestAccounts', 
+        params: [] 
+      });
+      console.log('Successfully connected using eth_requestAccounts');
+    } catch (requestError) {
+      console.error('Error in eth_requestAccounts:', requestError);
+      
+      // Fallback to enable() if eth_requestAccounts fails
       try {
-        accounts = await new Promise((resolve, reject) => {
-          const timeoutId = setTimeout(() => reject(new Error("Connection timeout")), 3000);
-          window.ethereum.request({ method: 'eth_requestAccounts', params: [] })
-            .then(result => { clearTimeout(timeoutId); resolve(result); })
-            .catch(error => { clearTimeout(timeoutId); reject(error); });
-        });
-      } catch (requestError) {
-         // Ignore request error, proceed to next method
+        if (typeof provider.enable === 'function') {
+          accounts = await provider.enable();
+          console.log('Successfully connected using enable()');
+        }
+      } catch (enableError) {
+        console.error('Error in enable():', enableError);
       }
     }
     
-    // If we still don't have accounts, try one last method: eth_accounts
-    if (!accounts || accounts.length === 0) {
-      try {
-        accounts = await window.ethereum.request({ method: 'eth_accounts', params: [] });
-      } catch (accountsError) {
-        // Ignore accounts error
-      }
-    }
-    
-    // Check if we got any accounts
+    // Check if we got any accounts from the specific provider
     if (accounts && accounts.length > 0) {
       return { success: true, account: accounts[0] };
     }
@@ -346,6 +409,7 @@ export const simpleConnectWallet = async () => {
     };
     
   } catch (error) {
+    console.error('Unexpected error in simpleConnectWallet:', error);
     return { 
       success: false, 
       error: error.message || 'Unknown error connecting to wallet' 
@@ -353,24 +417,108 @@ export const simpleConnectWallet = async () => {
   }
 };
 
-// Modify the main connectWallet function to use the simple connection method
+// Try alternative way to connect to MetaMask if the standard one fails
+export const connectWalletAlternative = async () => {
+  try {
+    const provider = getMetaMaskProvider();
+    // Check if MetaMask provider exists
+    if (!provider) {
+      throw new Error('MetaMask provider not found');
+    }
+    
+    console.log('Using alternative connection method with explicit MetaMask provider');
+    
+    // Try to get provider directly using the specific provider instance
+    const ethersProvider = new ethers.providers.Web3Provider(provider);
+    
+    // Try requesting accounts first
+    try {
+      await provider.request({ method: 'eth_requestAccounts' });
+    } catch (requestError) {
+      console.warn('eth_requestAccounts failed in alternative method:', requestError.message);
+    }
+    
+    // Request provider's signer (this often triggers the MetaMask popup)
+    const signer = ethersProvider.getSigner();
+    
+    // Get the address which requires connection
+    const address = await signer.getAddress();
+    
+    if (!address) {
+      throw new Error('Could not get address from provider');
+    }
+    
+    return { success: true, account: address };
+  } catch (error) {
+    console.error('Error in connectWalletAlternative:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Helper function to force MetaMask to be the selected provider
+// This temporarily isolates the MetaMask provider during connection
+const forceMetaMaskProviderSelection = async (operation) => {
+  const originalEthereum = window.ethereum;
+  const originalProviders = window.ethereum?.providers;
+
+  try {
+    // Stronger verification to ensure MetaMask provider is uniquely selected
+    const mmProvider = window.ethereum?.providers?.find(p => p.isMetaMask) 
+                       || (window.ethereum?.isMetaMask ? window.ethereum : null);
+
+    if (!mmProvider) {
+      throw new Error('MetaMask provider not found');
+    }
+
+    console.log('Force-isolating MetaMask provider for connection.');
+
+    // Use the provider directly without attempting to modify its properties
+    window.ethereum = mmProvider;
+    
+    // Don't try to delete properties that might be read-only
+    // if (window.ethereum.providers) {
+    //   delete window.ethereum.providers;
+    // }
+
+    // Slightly increased delay to ensure isolation takes effect fully
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Execute your operation explicitly on isolated MetaMask provider
+    const result = await operation();
+
+    return result;
+  } finally {
+    console.log('Restoring original Ethereum configuration.');
+    
+    if (window.ethereum !== originalEthereum) {
+      window.ethereum = originalEthereum;
+    }
+    
+    // We don't need to restore providers manually - it comes with the original object
+  }
+};
+
+// Modified connectWallet function to use provider isolation
 export const connectWallet = async () => {
   try {
     // Check basic MetaMask installation first
     if (!isMetaMaskInstalled()) {
-      throw new Error('MetaMask is not installed');
+      throw new Error('MetaMask is not installed or provider not found');
     }
     
-    // First try the simple direct method
-    const simpleResult = await simpleConnectWallet();
-    if (simpleResult.success) return simpleResult;
-    
-    // Try the alternative method next
-    const alternativeResult = await connectWalletAlternative();
-    if (alternativeResult.success) return alternativeResult;
-    
-    // If all methods failed, return the error from the simple method
-    return simpleResult;
+    // Use the force provider selection function to isolate MetaMask during connection
+    return await forceMetaMaskProviderSelection(async () => {
+      // First try the simple direct method
+      const simpleResult = await simpleConnectWallet();
+      if (simpleResult.success) return simpleResult;
+      
+      // Try the alternative method next
+      const alternativeResult = await connectWalletAlternative();
+      if (alternativeResult.success) return alternativeResult;
+      
+      // If all methods failed, return the error from the simple method
+      return simpleResult;
+    });
     
   } catch (error) {
     // Provide more helpful error messages
@@ -389,13 +537,38 @@ export const connectWallet = async () => {
 // Disconnect wallet - Improved implementation
 export const disconnectWallet = async () => {
   try {
-    // Use newer MetaMask method to disconnect all connected sites
-    if (window.ethereum && window.ethereum.request) {
-      await window.ethereum.request({
-        method: "wallet_revokePermissions",
-        params: [{ eth_accounts: {} }]
-      });
-      console.log('Successfully revoked site permissions from MetaMask');
+    // Use newer MetaMask method to disconnect - attempt on the specific provider first
+    const provider = getMetaMaskProvider();
+    let revoked = false;
+    if (provider && provider.request) {
+      try {
+         await provider.request({
+           method: "wallet_revokePermissions",
+           params: [{ eth_accounts: {} }]
+         });
+         console.log('Successfully revoked site permissions from specific MetaMask provider');
+         revoked = true;
+      } catch (revokeError) {
+         console.warn('Could not revoke permissions on specific provider:', revokeError.message);
+      }
+    }
+    
+    // Fallback or additional attempt on window.ethereum if the specific one failed or didn't exist
+    if (!revoked && window.ethereum && window.ethereum.request && window.ethereum !== provider) {
+       try {
+         await window.ethereum.request({
+           method: "wallet_revokePermissions",
+           params: [{ eth_accounts: {} }]
+         });
+         console.log('Successfully revoked site permissions from window.ethereum');
+         revoked = true;
+       } catch (fallbackError) {
+         console.warn('Could not revoke permissions on window.ethereum:', fallbackError.message);
+       }
+    }
+
+    if (!revoked) {
+      console.warn('Could not execute wallet_revokePermissions on any provider.');
     }
     
     // Additionally, we emit a custom event to notify our app
@@ -411,11 +584,12 @@ export const disconnectWallet = async () => {
 // Check if SuperSeed network is added to MetaMask
 export const isSuperSeedNetworkAdded = async () => {
   try {
-    if (!isMetaMaskInstalled()) {
+    const provider = getMetaMaskProvider();
+    if (!provider) {
       return false;
     }
     
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const chainId = await provider.request({ method: 'eth_chainId' }); // Use specific provider
     return chainId.toLowerCase() === SUPERSEED_NETWORK.chainId.toLowerCase();
   } catch (error) {
     console.error('Error checking network:', error);
@@ -426,14 +600,15 @@ export const isSuperSeedNetworkAdded = async () => {
 // Add SuperSeed network to MetaMask
 export const addSuperSeedNetwork = async () => {
   try {
-    if (!isMetaMaskInstalled()) {
-      throw new Error('MetaMask is not installed');
+    const provider = getMetaMaskProvider();
+    if (!provider) {
+      throw new Error('MetaMask provider not found');
     }
     
     const networkName = SUPERSEED_NETWORK.chainName;
     console.log(`Adding ${networkName} with config:`, SUPERSEED_NETWORK);
     
-    await window.ethereum.request({
+    await provider.request({ // Use specific provider
       method: 'wallet_addEthereumChain',
       params: [SUPERSEED_NETWORK]
     });
@@ -457,8 +632,9 @@ export const addSuperSeedNetwork = async () => {
 // Switch to SuperSeed network
 export const switchToSuperSeedNetwork = async () => {
   try {
-    if (!isMetaMaskInstalled()) {
-      throw new Error('MetaMask is not installed');
+    const provider = getMetaMaskProvider();
+    if (!provider) {
+      throw new Error('MetaMask provider not found');
     }
     
     const networkName = SUPERSEED_NETWORK.chainName;
@@ -476,7 +652,7 @@ export const switchToSuperSeedNetwork = async () => {
     }
     
     console.log(`Switching to ${networkName}...`);
-    await window.ethereum.request({
+    await provider.request({ // Use specific provider
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: SUPERSEED_NETWORK.chainId }]
     });
@@ -523,11 +699,16 @@ export const mockPayCompetitiveFee = async (account) => {
 // Check initial wallet connection status
 export const checkInitialWalletConnection = async () => {
   try {
-    if (!isMetaMaskInstalled()) {
+    // Get the specific MetaMask provider
+    const provider = getMetaMaskProvider();
+    if (!provider) {
+      // isMetaMaskInstalled already handles the check, but double-check here
+      console.log('Initial check: MetaMask provider not found.');
       return { connected: false, address: null };
     }
     
-    const accounts = await window.ethereum.request({ 
+    // Request accounts using the specific provider
+    const accounts = await provider.request({ 
       method: 'eth_accounts',
       params: []
     });
@@ -543,4 +724,4 @@ export const checkInitialWalletConnection = async () => {
     console.error('Error checking initial wallet connection:', error);
     return { connected: false, address: null };
   }
-}; 
+};

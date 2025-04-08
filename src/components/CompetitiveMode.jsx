@@ -36,6 +36,9 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
   // Check if wallet is already connected using our improved function
   useEffect(() => {
     const checkConnection = async () => {
+      // Add a short delay after MetaMask isolation before checking connection
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       const { connected, address } = await checkInitialWalletConnection();
       if (connected && address) {
         setWalletConnected(true);
@@ -275,8 +278,6 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
         return (
           <div className="competitive-modal-content metamask-modal">
             <h3>MetaMask Required</h3>
-            <p className="metamask-info">You need to install MetaMask to enter competitive mode.</p>
-            <p className="metamask-info">MetaMask is a secure crypto wallet for blockchain interactions.</p>
             <div className="competitive-modal-buttons">
               <a
                 href={getMetaMaskDownloadLink()}
@@ -284,7 +285,7 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
                 rel="noopener noreferrer"
                 className="modal-button primary-button"
               >
-                Install MetaMask
+                Install
               </a>
               <button className="modal-button secondary-button" onClick={handleCloseModal}>
                 Cancel

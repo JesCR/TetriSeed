@@ -202,6 +202,9 @@ const Tetris = () => {
     
     // Check if wallet is already connected
     const checkWalletConnection = async () => {
+      // Add a short delay after MetaMask isolation before checking connection
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       const { connected, address } = await checkInitialWalletConnection();
       console.log('Initial wallet check in Tetris:', { connected, address });
       if (connected && address) {
