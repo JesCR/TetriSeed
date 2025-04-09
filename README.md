@@ -5,7 +5,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JesCR/TetriSeed/refs/heads/main/src/assets/images/logo_text.png" alt="TetriSeed Logo" width="600"/>
+  <img src="public/images/screenshot_final.png" alt="TetriSeed Logo" width="600"/>
 </p>
 
 A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing rows and climb the leaderboard!
