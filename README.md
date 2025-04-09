@@ -10,6 +10,13 @@
 
 A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing rows and climb the leaderboard!
 
+## README FILES OF THE PROJECT:
+- [Detailed Game Documentation - this file](./src/README.md)
+- [Server Documentation](./server/README.md)
+- [Smart Contracts Documentation](./contracts/README.md)
+- [Admin Dashboard Documentation](./dashboard/README.md)
+
+
 ## 🧞‍♂️ Prompts used:
 - [GitHub backup](https://github.com/JesCR/TetriSeed/tree/main/.specstory/history)
 - [MVP](https://share.specstory.com/stories/8adc6ede-fd57-448b-81e6-c633aea82180)
@@ -21,6 +28,9 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 - [Adjust tetris falling speed](https://share.specstory.com/stories/6cba4295-9580-4a79-a6fb-fc0b9d5c8e90)
 - [Implement Next Piece Display](https://share.specstory.com/stories/87c27cfb-b86d-40c3-89f9-7325b7e8e241)
 - [UI/UX, fast drop, footer, bugs fixing](https://share.specstory.com/stories/194ce98e-832f-49bf-92fb-db1f32a0a5a7)
+- [Row clearing effects, bugs and UI/UX improvements](https://share.specstory.com/stories/b41432de-cb0d-43e3-a581-ddf353f577d5)
+- [Smart Contract deploy and new Admin Dashboard](https://share.specstory.com/stories/fd237738-3fdc-4726-bd66-ee9be853c6da)
+
 
 ## 📋 Table of Contents
 
@@ -49,9 +59,6 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 
 [Play TetriSeed Online](https://tetriseed.xyz) - Experience the game live!
 
-<p align="center">
-  <img src="src/assets/images/screenshot.png" alt="TetriSeed Screenshot" width="500"/>
-</p>
 
 ## 📖 Overview
 
