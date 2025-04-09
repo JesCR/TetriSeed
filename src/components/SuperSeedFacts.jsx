@@ -12,39 +12,39 @@ const FACTS = [
   
   "🧱 Designed On-Chain\nOur lending system isn't just an app—it's built into the Layer 2 itself. This architecture delivers more power, better security, and truly unstoppable DeFi solutions.",
   
-  "🌱 DeFi That Gives Back\nEvery protocol fee—from sequencers, interest, and bridges—is recycled to repay users' loans. Unlike traditional systems, Superseed returns value instead of extracting it.",
+  "🌱 DeFi That Gives Back\nEvery protocol fee—from sequencers, interest, and bridges. Is recycled to repay users' loans. Superseed returns value instead of extracting it.",
   
-  "🪙 Stablecoin With Purpose\nThe Superseed stablecoin isn't just stable—it's designed to be continuously burned to repay community debt, creating a sustainable value engine for the ecosystem.",
+  "🪙 Stablecoin With Purpose\nSuperseed stablecoin isn't just stable. It's designed to be continuously burned to repay community debt, a Ecosystem value catalyst.",
   
-  "🤝 Not a User, a Partner.\nOn Superseed, ecosystem growth directly benefits individual participants. As the chain expands, your potential upside grows proportionally with the network.",
+  "🤝 Not a User, a Partner.\nOn Superseed, ecosystem growth directly benefits individual participants. As the chain expands, your potential upside grows proportionally.",
   
-  "🔓 100% Unlocked\nNo venture capital lockups here. Our Supersale tokens are fully unlocked from day one, giving complete freedom and control to community members from the start.",
+  "🔓 100% Unlocked\nNo venture capital lockups here. Our tokens are fully unlocked from day one, giving complete freedom and control to community members from the start.",
   
-  "🚫 No Liquidations\nPartners like MarginZero bring non-liquidatable perpetuals to Superseed. Experience leverage trading without the typical liquidation risks that plague traditional platforms.",
+  "🚫 No Liquidations\nPartners like MarginZero bring non-liquidatable perpetuals to Superseed. Experience leverage trading without the typical liquidation risks!",
   
-  "🧠 DeFi for Smart LPs\nOur partner Jones delivers institutional-grade yield strategies accessible with just one click. Enjoy sophisticated, passive gains without complex setup or management.",
+  "🧠 DeFi for Smart LPs\nOur partner Jones delivers institutional-grade yield strategies accessible with just one click. Enjoy passive gains without complex setup or management.",
   
-  "🛠️ Supercollateral is Super\nBorrow with exceptional efficiency, get loans automatically paid off, and unlock special benefits for holding governance tokens. A complete reimagining of collateral.",
+  "🛠️ Supercollateral is Super\nBorrow with exceptional efficiency, get loans automatically paid off, and unlock special benefits for holding governance tokens. Reimagining collateral.",
   
-  "🌉 Live on the Superchain\nWe're integrated with Optimism's Superchain ecosystem, providing enhanced security, shared liquidity pools, and a collaborative network that grows stronger together.",
+  "🌉 Live on the Superchain\nWe're integrated with Optimism's Superchain, providing enhanced security, shared liquidity. A collaborative network that grows stronger together.",
   
   "🧬 A New Financial Primitive\nSupercollateral isn't just a feature—it's a foundational building block for the future of DeFi. Use it to borrow, build upon it, or create innovative new applications.",
   
   "🥇 No More DeFi Gatekeeping\nForget low float, high FDV token launches. Superseed prioritizes fair distribution, early access opportunities, and transparent tokenomics for all participants.",
   
-  "📈 Options, Perps & LPDfi\nThanks to partners like Stryke, MarginZero, and Orange, Superseed offers a comprehensive suite of cutting-edge financial products for sophisticated DeFi users.",
+  "📈 Options, Perps & LPDfi\nThanks to partners like Stryke, MarginZero, and Orange, Superseed offers a comprehensive suite of cutting-edge financial products for DeFi users.",
   
   "🤯 Oracle Game-Changer\nChronicle delivers ultra-secure, gas-efficient oracles to the Superseed ecosystem. Experience transparent, verifiable pricing that fulfills DeFi's original promise.",
   
-  "🧩 Composable From Day 1\nWith integration partners like Socket and Dolomite, assets flow seamlessly across multiple chains. True interoperability meets continuous innovation in our ecosystem.",
+  "🧩 Composable From Day 1\nWith integration partners like Socket and Dolomite, assets flow seamlessly across multiple chains. True interoperability meets continuous innovation.",
   
   "🚀 Mainnet Launch Milestone\nSuperSeed Mainnet launched March 31st as part of the Superchain, leveraging the OP Stack to provide Ethereum L2 scalability with enhanced performance.",
   
   "🤝 Launch Partners Ecosystem\nOur initial DeFi ecosystem includes Velodrome, BulletX, MarginZero, Jones, OrangeFi, Stryke, SeedFi, Bebop, Dolomite and more trusted protocol partners.",
   
-  "🗺️ Roadmap Sequence\nFollowing our successful Mainnet launch, SuperSeed will release Genesis Passport NFTs, launch the Seeds rewards program, and conclude with a Token Generation Event.",
+  "🗺️ Roadmap Sequence\nFollowing our successful Mainnet launch, SuperSeed will release Genesis Passport NFTs, launch Seeds Rewards Program, and conclude with the TGE.",
   
-  "🔮 Upcoming Features\nOur development roadmap includes Proof-of-Repayment mechanisms, Supercollateral implementation, and the SuperCDP—all designed to transform debt into opportunity.",
+  "🔮 Upcoming Features\nOur development roadmap includes Proof-of-Repayment mechanisms, Supercollateral implementation, and the SuperCDP. Debt = opportunity.",
   
   "🎫 Genesis Passport NFTs\nOn April 2nd, 2025, we'll launch 1,148 Genesis Passport NFTs offering unique benefits exclusively available to participants in our initial Supersale event.",
   
@@ -52,7 +52,7 @@ const FACTS = [
   
   "🧰 Ecosystem Resources\nSuperSeed provides comprehensive documentation, tools, block explorers and integration guides. Find everything you need at superseed.xyz/ecosystem.",
   
-  "🔗 Superchain Benefits\nAs a core member of the Superchain ecosystem, SuperSeed leverages shared security infrastructure and seamless interoperability between compatible networks."
+  "🔗 Superchain Benefits\nAs a core member of the Superchain, SuperSeed leverages shared security infrastructure and interoperability between compatible chains."
 ];
 
 const SuperSeedFacts = ({ isMobile }) => {
@@ -102,7 +102,7 @@ const SuperSeedFacts = ({ isMobile }) => {
         }, 150); // Pause between first and second flash
       }, 150); // Duration of first flash
       
-    }, 10000); // Update every 10 seconds
+    }, 6000); // Update every 6 seconds
     
     return () => clearInterval(intervalId);
   }, [getRandomFact]);
