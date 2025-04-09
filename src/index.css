@@ -79,7 +79,7 @@ input, textarea {
   touch-action: none; /* Prevent all default touch actions */
   height: 100vh;
   overflow: hidden; /* Prevent scrolling within the wrapper */
-  position: absolute; /* Change from fixed to absolute to allow scrolling */
+  position: relative; /* Change from fixed to absolute to allow scrolling */
   left: 0;
   top: 0;
   right: 0;

@@ -16,7 +16,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;;
   flex-direction: column;
 }
 
@@ -46,7 +46,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;;
 }
 
 /* Fix blue outline when focused */
