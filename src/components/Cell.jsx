@@ -1,13 +1,15 @@
 import { memo } from 'react';
 import { TETROMINOS } from '../utils/tetrisUtils';
+// Import the logo SVG
+import logoSvg from '../assets/images/logo_og.svg';
 
 const Cell = ({ type, cellState }) => {
   // Determine which Tetromino type to use for styling
   const tetrominoType = typeof type === 'string' && type !== '0' ? type : 0;
   const color = TETROMINOS[tetrominoType].color;
   
-  // Display a money bag emoji for all non-empty cells
-  const content = type === 0 ? '' : '💰';
+  // Instead of emoji, use an image element for non-empty cells
+  const content = type === 0 ? '' : <img src={logoSvg} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
   
   // Determine if this cell is in a clearing row
   const isClearing = cellState === 'clearing';

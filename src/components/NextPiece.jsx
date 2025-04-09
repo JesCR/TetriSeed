@@ -1,14 +1,16 @@
 import React from 'react';
 import { TETROMINOS } from '../utils/tetrisUtils';
+// Import the logo SVG
+import logoSvg from '../assets/images/logo_og.svg';
 
-// Special cell component for the next piece preview with the 💰 symbol
+// Special cell component for the next piece preview with clean cells
 const NextPieceCell = ({ type }) => {
   // Determine which Tetromino type to use for styling
   const tetrominoType = typeof type === 'string' && type !== '0' ? type : 0;
   const color = TETROMINOS[tetrominoType].color;
   
-  // Display money bag emoji for non-empty cells
-  const content = type === 0 ? '' : '💰';
+  // Empty content for all cells
+  const content = '';
   
   return (
     <div
