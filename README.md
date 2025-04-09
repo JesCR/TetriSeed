@@ -5,16 +5,16 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
 
 <p align="center">
-  <img src="src/assets/images/logo_text.png" alt="TetriSeed Logo" width="600"/>
+  <img src="https://raw.githubusercontent.com/JesCR/TetriSeed/refs/heads/main/src/assets/images/logo_text.png" alt="TetriSeed Logo" width="600"/>
 </p>
 
 A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing rows and climb the leaderboard!
 
 ## README FILES OF THE PROJECT:
-- [Detailed Game Documentation - this file](./src/README.md)
+- [Detailed Game Documentation - this file](https://github.com/JesCR/TetriSeed/blob/main/README.md)
 - [Server Documentation](./server/README.md)
-- [Smart Contracts Documentation](./contracts/README.md)
-- [Admin Dashboard Documentation](./dashboard/README.md)
+- [Smart Contracts Documentation](https://github.com/JesCR/TetriSeed/blob/main/contracts/README.md)
+- [Admin Dashboard Documentation](https://github.com/JesCR/TetriSeed/blob/main/dashboard/README.md)
 
 
 ## 🧞‍♂️ Prompts used:

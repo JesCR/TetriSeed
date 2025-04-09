@@ -2,7 +2,7 @@
 
 Admin dashboard for managing the TetriSeed Game smart contract deployed at `0xd9b4190777287eAD1473A5EE44aA2a6aAE3b7b42` on the SuperSeed Sepolia testnet.
 
-![TetriSeed Admin Dashboard](https://github.com/your-repo/screenshots/dashboard.png)
+![TetriSeed Admin Dashboard](https://raw.githubusercontent.com/JesCR/TetriSeed/refs/heads/main/src/assets/images/logo_text.png)
 
 ## Table of Contents
 

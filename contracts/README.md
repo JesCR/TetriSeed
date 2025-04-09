@@ -1,6 +1,6 @@
 # TetriSeed Game Smart Contracts
 
-![TetriSeed Game](https://github.com/your-repo/screenshots/tetriseed-logo.png)
+![TetriSeed Game](https://raw.githubusercontent.com/JesCR/TetriSeed/refs/heads/main/src/assets/images/logo_text.png)
 
 This repository contains the smart contracts for the TetriSeed competitive game mode, which handle entry fees, prize pools, and reward distribution for the TetriSeed game.
 
