@@ -22,7 +22,7 @@ const Stage = ({ stage, message, showMessage, interestMessage, showInterestMessa
       >
         {stage.map((row, y) => 
           row.map((cell, x) => (
-            <Cell key={`${y}-${x}`} type={cell[0]} />
+            <Cell key={`${y}-${x}`} type={cell[0]} cellState={cell[1]} />
           ))
         )}
       </div>

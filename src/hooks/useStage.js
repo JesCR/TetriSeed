@@ -10,6 +10,8 @@ export const useStage = (player, resetPlayer) => {
   const [showMessage, setShowMessage] = useState(false);
   const [interestMessage, setInterestMessage] = useState('');
   const [showInterestMessage, setShowInterestMessage] = useState(false);
+  // Add state to track which rows are being cleared
+  const [clearingRows, setClearingRows] = useState([]);
 
   useEffect(() => {
     setRowsCleared(0);
@@ -17,37 +19,98 @@ export const useStage = (player, resetPlayer) => {
     const sweepRows = newStage => {
       // Count the number of full rows
       let rowsCount = 0;
+      let fullRows = [];
       
-      const sweptRows = newStage.reduce((ack, row) => {
+      // First identify which rows are full
+      newStage.forEach((row, idx) => {
         // If we don't find a 0 it means that the row is full and should be cleared
         if (row.findIndex(cell => cell[0] === 0) === -1) {
+          fullRows.push(idx);
           rowsCount += 1;
-          
-          // Add blank row at the top
-          ack.unshift(new Array(newStage[0].length).fill([0, 'clear']));
-          return ack;
         }
-        ack.push(row);
-        return ack;
-      }, []);
+      });
       
-      // Only show message and update rowsCleared if we actually cleared rows
+      // Only process if we actually have rows to clear
       if (rowsCount > 0) {
-        // Update the rowsCleared state once with the total count
-        setRowsCleared(rowsCount);
+        // Mark cells in full rows as 'clearing' for animation
+        const stageWithClearingRows = newStage.map((row, rowIdx) => {
+          if (fullRows.includes(rowIdx)) {
+            // Mark this row's cells for animation
+            // Use special 'tetris-clearing' class for 4 lines cleared
+            const animationClass = rowsCount === 4 ? 'tetris-clearing' : 'clearing';
+            return row.map(cell => [cell[0], animationClass]);
+          }
+          return [...row];
+        });
         
-        // Show debt message in the middle of the screen when rows are cleared
-        // Use a random message from DEBT_MESSAGES
-        setMessage(getRandomMessage());
-        setShowMessage(true);
+        // Update the clearingRows state to trigger animations
+        setClearingRows(fullRows);
         
-        // Hide the message after 1.5 seconds
+        // Update the stage with clearing animation
+        setStage(stageWithClearingRows);
+        
+        // For Tetris (4 lines), show a special full-screen effect
+        if (rowsCount === 4) {
+          // Create a div for the tetris flash effect
+          const tetrisEffect = document.createElement('div');
+          tetrisEffect.className = 'super-tetris-effect';
+          
+          // Add it to the stage container
+          const stageContainer = document.querySelector('.stage-container');
+          if (stageContainer) {
+            stageContainer.appendChild(tetrisEffect);
+            
+            // Remove it after animation completes
+            setTimeout(() => {
+              if (tetrisEffect.parentNode) {
+                tetrisEffect.parentNode.removeChild(tetrisEffect);
+              }
+            }, 800); // Match the animation duration
+          }
+        }
+        
+        // Set a timeout to actually clear the rows after the animation plays
         setTimeout(() => {
-          setShowMessage(false);
-        }, 1500);
+          // Update the rowsCleared state for score calculation
+          setRowsCleared(rowsCount);
+          
+          // Show debt message in the middle of the screen when rows are cleared
+          setMessage(getRandomMessage());
+          setShowMessage(true);
+          
+          // Reset clearing rows state
+          setClearingRows([]);
+          
+          // Now actually remove the rows and add new ones at the top
+          const sweptRows = newStage.reduce((ack, row, idx) => {
+            if (fullRows.includes(idx)) {
+              // Skip this row (it will be removed)
+              return ack;
+            }
+            ack.push(row);
+            return ack;
+          }, []);
+          
+          // Add blank rows at the top
+          for (let i = 0; i < rowsCount; i++) {
+            sweptRows.unshift(new Array(newStage[0].length).fill([0, 'clear']));
+          }
+          
+          // Update stage with the swept rows
+          setStage(sweptRows);
+          
+          // Hide the message after 1.5 seconds
+          setTimeout(() => {
+            setShowMessage(false);
+          }, 1500);
+        }, rowsCount === 4 ? 600 : 400); // Longer delay for Tetris to match the enhanced animation
+        
+        // Return the current stage with clearing animation
+        return newStage;
       }
       
-      return sweptRows;
+      // No rows to clear, return the stage as is
+      return newStage;
     };
 
     const updateStage = prevStage => {
@@ -83,17 +146,20 @@ export const useStage = (player, resetPlayer) => {
       // Then check if we got some score if collided
       if (player.collided) {
         resetPlayer();
-        const sweepedStage = sweepRows(newStage);
-        return sweepedStage;
+        return sweepRows(newStage);
       }
       
       return newStage;
     };
 
-    setStage(prev => updateStage(prev));
+    // Only update the stage if we don't have clearing rows
+    if (clearingRows.length === 0) {
+      setStage(prev => updateStage(prev));
+    }
   }, [
     player,
     resetPlayer,
+    clearingRows.length
   ]);
 
   // Function to trigger interest rate change message
@@ -116,5 +182,5 @@ export const useStage = (player, resetPlayer) => {
     }, 2500);
   };
 
-  return [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage];
+  return [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage, clearingRows];
 }; 

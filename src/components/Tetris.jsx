@@ -54,7 +54,7 @@ const Tetris = () => {
 
   // Initialize player and stage
   const [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino] = usePlayer();
-  const [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage] = useStage(player, resetPlayer);
+  const [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage, clearingRows] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel, tetrisCleared, setTetrisCleared] = useGameStatus(rowsCleared);
   const [scoreInfo, setScoreInfo] = useState({ score: 0, rank: null });
 
@@ -70,6 +70,7 @@ const Tetris = () => {
   // Add competitive mode and wallet address
   const [isCompetitiveMode, setIsCompetitiveMode] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
+  const [walletBalance, setWalletBalance] = useState('0'); // Add state for wallet balance
 
   // Extra state for showing the competitive rules modal
   const [showModal, setShowModal] = useState(false);
@@ -918,7 +919,41 @@ const Tetris = () => {
     setIsCompetitiveMode(status);
     setWalletAddress(address);
     console.log(`Competitive mode ${status ? 'activated' : 'deactivated'} with address: ${address}`);
+    
+    // Fetch wallet balance when address changes
+    if (address) {
+      fetchWalletBalance(address);
+    } else {
+      setWalletBalance('0');
+    }
   };
+
+  // Add function to fetch wallet balance
+  const fetchWalletBalance = async (address) => {
+    if (!address) return;
+    
+    try {
+      const { getWalletBalance } = await import('../utils/web3Utils');
+      const ethResult = await getWalletBalance(address);
+      if (ethResult.success) {
+        setWalletBalance(parseFloat(ethResult.balance).toFixed(4));
+      } else {
+        setWalletBalance('0');
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+      setWalletBalance('0');
+    }
+  };
+
+  // Fetch wallet balance when wallet address changes
+  useEffect(() => {
+    if (walletAddress) {
+      fetchWalletBalance(walletAddress);
+    } else {
+      setWalletBalance('0');
+    }
+  }, [walletAddress]);
 
   // Handle close of the competitive rules modal
   const handleCompetitiveRulesClose = () => {
@@ -1073,18 +1108,32 @@ const Tetris = () => {
               {error && <p className="error-message">{error}</p>}
               
               <div className="competitive-modal-buttons">
-                <button 
-                  className="modal-button" 
-                  onClick={handleCompetitiveRulesConfirm}
-                  disabled={isLoading}
-                >
-                  {isCompetitiveMode 
-                    ? (isLoading 
-                      ? 'Processing Payment...' 
-                      : <span>Pay <span className="crypto-amount">0.0001 ETH</span> & Start Game</span>
-                      ) 
-                    : 'Start Game'}
-                </button>
+                {isCompetitiveMode && parseFloat(walletBalance) === 0 ? (
+                  <button 
+                    className="modal-button" 
+                    onClick={() => window.open('https://docs.superseed.xyz/integrations/faucets', '_blank')}
+                  >
+                    Get some ETH first!
+                  </button>
+                ) : (
+                  <button 
+                    className="modal-button" 
+                    onClick={handleCompetitiveRulesConfirm}
+                    disabled={isLoading}
+                  >
+                    {isCompetitiveMode 
+                      ? (isLoading 
+                        ? 'Processing Payment...' 
+                        : <span>Pay <span className="crypto-amount">0.0001 ETH</span> & Start Game</span>
+                        ) 
+                      : 'Start Game'}
+                  </button>
+                )}
+                {isCompetitiveMode && parseFloat(walletBalance) === 0 && (
+                  <div className="balance-warning">
+                    Your wallet balance is 0 ETH. You need testnet ETH to play competitive mode.
+                  </div>
+                )}
                 <button className="modal-button secondary" onClick={handleCompetitiveRulesClose}>
                   Cancel
                 </button>
@@ -1118,11 +1167,6 @@ const Tetris = () => {
           </div>
           
           <div className="game-content">
-            {/* Mensaje de SuperSeed! que aparece cuando se hace un Tetris */}
-            {showSuperSeedMessage && (
-              <div className="super-seed-message">SuperSeed!</div>
-            )}
-            
             {/* Conditional rendering based on mobile or desktop */}
             {isMobile ? (
               // Mobile layout with SuperSeed Facts on top
@@ -1147,6 +1191,12 @@ const Tetris = () => {
                       showInterestMessage={showInterestMessage}
                     />
                   </div>
+                  
+                  {/* Mensaje de SuperSeed! que aparece cuando se hace un Tetris - now at bottom of game area */}
+                  {showSuperSeedMessage && (
+                    <div className="super-seed-message">SuperSeed!</div>
+                  )}
+                  
                   <div className="game-info">
                     {gameOver ? (
                       <div className="game-over-container">
@@ -1234,6 +1284,12 @@ const Tetris = () => {
                       showInterestMessage={showInterestMessage}
                     />
                   </div>
+                  
+                  {/* Mensaje de SuperSeed! que aparece cuando se hace un Tetris - now at bottom of game area */}
+                  {showSuperSeedMessage && (
+                    <div className="super-seed-message">SuperSeed!</div>
+                  )}
+                  
                   <div className="game-info">
                     {gameOver ? (
                       <div className="game-over-container">

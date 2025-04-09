@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { TETROMINOS } from '../utils/tetrisUtils';
 
-const Cell = ({ type }) => {
+const Cell = ({ type, cellState }) => {
   // Determine which Tetromino type to use for styling
   const tetrominoType = typeof type === 'string' && type !== '0' ? type : 0;
   const color = TETROMINOS[tetrominoType].color;
@@ -9,18 +9,34 @@ const Cell = ({ type }) => {
   // Display a money bag emoji for all non-empty cells
   const content = type === 0 ? '' : '💰';
   
+  // Determine if this cell is in a clearing row
+  const isClearing = cellState === 'clearing';
+  const isTetrisClearing = cellState === 'tetris-clearing';
+  
+  // Apply different animation and effects based on the clearing type
+  const animationStyle = isClearing 
+    ? 'explode-cell 0.4s forwards' 
+    : isTetrisClearing 
+      ? 'tetris-explode-cell 0.6s forwards' 
+      : 'none';
+  
+  const cellClassName = `cell ${
+    isClearing ? 'clearing' : isTetrisClearing ? 'tetris-clearing' : ''
+  }`;
+  
   return (
     <div
       style={{
         width: 'auto',
-        background: `rgba(${color}, 0.8)`,
+        background: `rgba(${color}, ${isClearing || isTetrisClearing ? '1' : '0.8'})`,
         border: type === 0 ? '1px solid #333' : '4px solid',
         borderBottomColor: `rgba(${color}, 0.1)`,
         borderRightColor: `rgba(${color}, 1)`,
         borderTopColor: `rgba(${color}, 1)`,
         borderLeftColor: `rgba(${color}, 0.3)`,
+        animation: animationStyle
       }}
-      className="cell"
+      className={cellClassName}
     >
       {content}
     </div>

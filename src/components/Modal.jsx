@@ -8,6 +8,7 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [isCapturing, setIsCapturing] = useState(false);
+  const nameInputRef = useRef(null);
   
   // Check if the device is mobile
   useEffect(() => {
@@ -70,14 +71,12 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   };
 
   const handleSubmit = () => {
-    if (type === 'nameInput' && (!name.trim() || name.length < 2)) {
+    // Get name directly from the input ref for submission
+    const inputName = nameInputRef.current ? nameInputRef.current.value : '';
+    
+    if (type === 'nameInput' && (!inputName.trim() || inputName.length < 2)) {
       setError('Please enter a valid name (2-5 characters)');
       return;
-    }
-    
-    // Actively blur any active element (hide keyboard on mobile)
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
     }
     
     // First, force scroll to top immediately
@@ -111,7 +110,12 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
       window.scrollTo({top: 0, behavior: 'auto'});
       
       // Submit the name
-      onSubmit(name);
+      onSubmit(inputName);
+      
+      // Reset input
+      if (nameInputRef.current) {
+        nameInputRef.current.value = '';
+      }
       setName('');
       setError('');
       
@@ -126,15 +130,19 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   };
   
   const handleNameChange = (e) => {
-    // Limit name to 5 characters
-    const input = e.target.value;
-    if (input.length <= 5) {
-      setName(input);
-      // Clear error if present and name is valid
-      if (error && input.trim().length >= 2) {
-        setError('');
-      }
+    console.log('Input value:', e.target.value);
+    setName(e.target.value);
+    
+    // Clear error if present and name is valid
+    if (error && e.target.value.trim().length >= 2) {
+      setError('');
     }
+  };
+  
+  // Handle key events to prevent propagation
+  const handleKeyEvent = (e) => {
+    // Stop propagation to prevent game controls from interfering
+    e.stopPropagation();
   };
   
   // Prevent zooming when input receives focus
@@ -147,8 +155,28 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
         e.target.style.fontSize = '';
       }
     }, 100);
+    
+    // Create a global event handler to capture all keyboard events during input focus
+    const captureKeyEvents = (event) => {
+      // If input is focused, prevent default for game controls
+      if (document.activeElement === nameInputRef.current) {
+        event.stopPropagation();
+      }
+    };
+    
+    // Add global event listeners
+    window.addEventListener('keydown', captureKeyEvents, true);
+    window.addEventListener('keyup', captureKeyEvents, true);
+    window.addEventListener('keypress', captureKeyEvents, true);
+    
+    // Remove listeners when input blurs
+    nameInputRef.current.addEventListener('blur', () => {
+      window.removeEventListener('keydown', captureKeyEvents, true);
+      window.removeEventListener('keyup', captureKeyEvents, true);
+      window.removeEventListener('keypress', captureKeyEvents, true);
+    }, { once: true });
   };
-
+  
   // Handle score object or plain number
   const getScoreValue = () => {
     if (score === null || score === undefined) return 0;
@@ -209,15 +237,19 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
               type="text"
               value={name}
               onChange={handleNameChange}
-              onFocus={handleInputFocus}
               placeholder="Your Name (5 chars max)"
               className="name-input"
               maxLength={5}
               autoFocus
-              inputMode="text"
-              pattern="[A-Za-z0-9]+"
+              ref={nameInputRef}
+              onFocus={handleInputFocus}
+              onKeyDown={handleKeyEvent}
+              onKeyUp={handleKeyEvent}
+              onKeyPress={handleKeyEvent}
+              style={{ marginBottom: '10px' }}
             />
             {error && <p className="error-message">{error}</p>}
+            
             {isMobile && (
               <div className="mobile-notice">
                 <p>Play on desktop for best experience</p>

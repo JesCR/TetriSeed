@@ -25,13 +25,21 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 ## 📋 Table of Contents
 
 - [Demo](#-demo)
-- [Features](#-features)
-- [Prerequisites](#-prerequisites)
+- [Overview](#-overview)
+- [Components](#-components)
+  - [Game Frontend](#game-frontend)
+  - [Server](#server)
+  - [Smart Contracts](#smart-contracts)
+  - [Admin Dashboard](#admin-dashboard)
 - [Installation](#-installation)
-- [Running the Game](#-running-the-game)
+  - [Game Setup](#game-setup)
+  - [Server Setup](#server-setup)
+  - [Contracts Deployment](#contracts-deployment)
+  - [Dashboard Setup](#dashboard-setup)
 - [Game Controls](#-game-controls)
-- [Project Structure](#-project-structure)
+- [Competitive Mode](#-competitive-mode)
 - [Technologies](#-technologies)
+- [Architecture](#-architecture)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -39,98 +47,184 @@ A Tetris game with a SuperSeed DeFi protocol theme. Clear your debt by clearing 
 
 ## 🎮 Demo
 
-[Play TetriSeed Online](#) - [v1 here](http://163.172.111.148:5173/)
+[Play TetriSeed Online](https://tetriseed.xyz) - Experience the game live!
 
 <p align="center">
-  <img src="prompts/screenshots/screenshot.png" alt="TetriSeed Screenshot" width="500"/>
+  <img src="src/assets/images/screenshot.png" alt="TetriSeed Screenshot" width="500"/>
 </p>
 
-## ✨ Features
+## 📖 Overview
 
-- **Classic Tetris Gameplay** with a financial twist
-- **Debt-themed mechanics**: Clear rows to reduce your debt
-- **Increasing interest rates** as you level up
-- **Two Game Modes**: Casual and Competitive
-- **MetaMask Wallet Integration** for competitive gameplay
-- **Seasonal Competitions** with weekly prize pools
-- **Prize Distribution System** for top players
-- **Global Leaderboard** to compete with other players
-- **Mobile touch support** for playing on the go
-- **SuperSeed Facts** displaying information about the SuperSeed protocol
+TetriSeed is a blockchain-integrated Tetris game with a SuperSeed DeFi protocol theme. The project consists of four main components:
 
-## 🔍 Prerequisites
+1. **Game Frontend**: The main Tetris game with casual and competitive modes
+2. **Backend Server**: Manages leaderboards, scores, and player data
+3. **Smart Contracts**: Handles competitive mode entry fees and prize distribution
+4. **Admin Dashboard**: Contract management interface for administrative operations
 
-Before you begin, ensure you have the following installed on your system:
+This project showcases the integration of traditional gaming with blockchain technology, allowing players to compete for real rewards in a seasonal competition system.
 
-- [Node.js](https://nodejs.org/) (version 18.x or higher)
-- [npm](https://www.npmjs.com/) (usually comes with Node.js)
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
+## 🧩 Components
+
+### Game Frontend
+
+The game frontend is built with React and Vite, offering two gameplay modes:
+
+- **Casual Mode**: Free-to-play mode without blockchain integration
+- **Competitive Mode**: Blockchain-integrated mode requiring entry fees and offering prizes
+
+[Detailed Game Documentation](./src/README.md)
+
+### Server
+
+The server component handles:
+- Score tracking and leaderboard management
+- User authentication
+- Season management
+- Data persistence
+
+[Server Documentation](./server/README.md)
+
+### Smart Contracts
+
+The smart contracts handle the financial aspects of the competitive mode:
+
+- Entry fee collection in ETH
+- Prize pool management
+- Automated season transitions
+- Prize distribution to top players
+
+[Smart Contracts Documentation](./contracts/README.md)
+
+### Admin Dashboard
+
+The admin dashboard provides contract owners with:
+
+- Contract monitoring (entry fees, prize pools, etc.)
+- Administrative functions (update fees, distribute prizes)
+- Season management
+- Security controls
+
+[Admin Dashboard Documentation](./dashboard/README.md)
 
 ## 💻 Installation
 
-Follow these steps to get your development environment running:
+### Prerequisites
 
-### 1. Clone the repository
+- [Node.js](https://nodejs.org/) (v14.0.0 or higher)
+- [npm](https://www.npmjs.com/) (v6.0.0 or higher)
+- [Git](https://git-scm.com/)
+- [MetaMask](https://metamask.io/) wallet (for competitive mode and contract deployment)
+- Access to the SuperSeed network (for competitive mode)
 
-```bash
-git clone https://github.com/JesCR/TetriSeed.git
-cd TetriSeed
-```
+### Game Setup
 
-### 2. Install dependencies
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/JesCR/SuperSeedSuperGame.git
+   cd SuperSeedSuperGame
+   ```
 
-The project is split into client-side and server-side code, both requiring their own dependencies.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-```bash
-# Install all dependencies (client and server)
-npm install
-```
+3. **Configure environment variables**:
+   Create a `.env` file in the project root:
+   ```
+   VITE_SERVER_URL=http://localhost:3000
+   VITE_CONTRACT_ADDRESS=0xd9b4190777287eAD1473A5EE44aA2a6aAE3b7b42
+   ```
 
-## 🚀 Running the Game
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
 
-TetriSeed consists of both a client (frontend) and server (backend) component. You need to run both to have a fully functioning game with leaderboard functionality.
+   The game will be available at `http://localhost:5173`
 
-### Development Mode
+### Server Setup
 
-#### Start the server (backend)
+1. **Navigate to the server directory**:
+   ```bash
+   cd server
+   ```
 
-```bash
-# Navigate to the server directory
-cd server
+2. **Install server dependencies**:
+   ```bash
+   npm install
+   ```
 
-# Start the server
-node index.js
-```
+3. **Configure server environment**:
+   Create a `.env` file in the server directory:
+   ```
+   PORT=3000
+   DB_PATH=./data
+   ALLOWED_ORIGINS=http://localhost:5173,https://tetriseed.xyz
+   ```
 
-You should see output indicating the server is running, typically on port 3000.
+4. **Start the server**:
+   ```bash
+   node index.js
+   ```
 
-#### Start the client (frontend)
+   The server will run on port 3000 by default.
 
-Open a new terminal window/tab and run:
+### Contracts Deployment
 
-```bash
-# In the project root directory
-npm start
-```
+1. **Navigate to the contracts directory**:
+   ```bash
+   cd contracts
+   ```
 
-This will start the development server, typically on port 5173. The game should automatically open in your default web browser.
+2. **Install smart contract dependencies**:
+   ```bash
+   npm install
+   ```
 
-### Production Mode
+3. **Configure deployment parameters**:
+   Create a `.env` file:
+   ```
+   PRIVATE_KEY=your_wallet_private_key_here
+   ```
 
-To build the client for production:
+4. **Compile the contracts**:
+   ```bash
+   npx hardhat compile
+   ```
 
-```bash
-npm run build
-```
+5. **Deploy to the SuperSeed Sepolia testnet**:
+   ```bash
+   npx hardhat run scripts/deploy-eth.js --network superseedSepolia
+   ```
 
-This creates an optimized production build in the `dist` directory.
+   After deployment, note the contract address for frontend integration.
 
-To serve the production build:
+### Dashboard Setup
 
-```bash
-# After building
-npm run serve
-```
+1. **Navigate to the dashboard directory**:
+   ```bash
+   cd dashboard
+   ```
+
+2. **Install dashboard dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure the dashboard**:
+   Create a `.env` file:
+   ```
+   REACT_APP_CONTRACT_ADDRESS=0xd9b4190777287eAD1473A5EE44aA2a6aAE3b7b42
+   ```
+
+4. **Start the dashboard**:
+   ```bash
+   npm start
+   ```
+
+   The dashboard will be available at `http://localhost:3000`
 
 ## 🎮 Game Controls
 
@@ -139,6 +233,7 @@ npm run serve
 - **Left Arrow / A**: Move tetromino left
 - **Right Arrow / D**: Move tetromino right
 - **Down Arrow / S**: Move tetromino down (soft drop)
+- **Space**: Hard drop (instant placement)
 - **Up Arrow / W**: Rotate tetromino clockwise
 
 ### Touch Controls (Mobile)
@@ -148,185 +243,207 @@ npm run serve
 - **Swipe Down**: Soft drop tetromino
 - **Swipe Up / Tap**: Rotate tetromino
 
-### Game Modes
-
-- **Casual Mode**: Play freely without any wallet connection
-- **Competitive Mode**: Connect your MetaMask wallet to enter competitive mode, pay 1 $SUPR per game, and compete for weekly prizes
-
 ## 🏆 Competitive Mode
 
-TetriSeed features a competitive mode where players can compete for real rewards:
+TetriSeed's competitive mode offers a blockchain-integrated gaming experience:
 
-- Players pay 1 $SUPR token per game to enter competitive mode
-- All entry fees are collected in a smart contract prize pool
-- Each season lasts one week (Monday to Sunday)
-- At the end of each season, prizes are distributed to the top 5 players:
-  - 1st place: 50% of the prize pool
-  - 2nd place: 30% of the prize pool
-  - 3rd place: 10% of the prize pool
-  - 4th place: 5% of the prize pool
-  - 5th place: 5% of the prize pool
-- After each season, the leaderboard is reset for a new competition
+### How It Works
 
-## 📁 Project Structure
+1. **Connect Wallet**: Use MetaMask to connect to SuperSeed Sepolia network
+2. **Pay Entry Fee**: Entry costs 0.0001 ETH per game
+3. **Play & Compete**: Your highest score is recorded on the leaderboard
+4. **Seasonal Rewards**: At the end of each week (season), prizes are distributed
 
-```
-TetriSeed/
-├── public/                  # Static files
-│   └── data/                # Data files for the game
-│       ├── leaderboard.csv  # Casual mode leaderboard data
-│       ├── competitive.csv  # Competitive mode leaderboard data
-│       └── seasons.json     # Season history data
-├── server/                  # Server-side code
-│   └── index.js             # Express server implementation
-├── src/                     # Client-side source code
-│   ├── assets/              # Images and other assets
-│   ├── components/          # React components
-│   │   ├── CompetitiveMode.jsx  # Wallet connection and competitive mode
-│   │   ├── SeasonInfo.jsx       # Current season information
-│   │   ├── SeasonHistory.jsx    # Past seasons history
-│   │   └── ...              # Other components
-│   ├── hooks/               # Custom React hooks
-│   ├── utils/               # Utility functions
-│   │   ├── web3Utils.js     # MetaMask and blockchain utilities
-│   │   └── ...              # Other utilities
-│   ├── App.jsx              # Main App component
-│   ├── index.css            # Global styles
-│   └── main.jsx             # Entry point
-├── .gitignore               # Git ignore file
-├── package.json             # Project dependencies
-├── README.md                # This file
-└── vite.config.js           # Vite configuration
-```
+### Prize Distribution
+
+- **1st Place**: 50% of the prize pool
+- **2nd Place**: 30% of the prize pool
+- **3rd Place**: 10% of the prize pool
+- **4th Place**: 5% of the prize pool
+- **5th Place**: 5% of the prize pool
+
+### Season Schedule
+
+- Each season runs from Monday 00:00 UTC to Sunday 23:59 UTC
+- After each season ends, prizes are distributed and a new season begins
+- Season history is viewable in the game interface
 
 ## 🔧 Technologies
 
-TetriSeed is built with modern web technologies:
+### Frontend
+- **React 18**: UI library
+- **Vite**: Build tool and development server
+- **Ethers.js**: Ethereum wallet integration
+- **Web3Modal**: Wallet connection
+- **SCSS**: Styling
 
-- [React](https://reactjs.org/) - Frontend framework
-- [Vite](https://vitejs.dev/) - Build tool and development server
-- [Node.js](https://nodejs.org/) - JavaScript runtime
-- [Express](https://expressjs.com/) - Web server framework
-- [MetaMask](https://metamask.io/) - Wallet connection for Ethereum blockchain
-- [Ethers.js](https://docs.ethers.org/) - Ethereum wallet interaction library
-- [csv-parser](https://github.com/mafintosh/csv-parser) - CSV parsing library
+### Backend
+- **Node.js**: Runtime environment
+- **Express**: Web server framework
+- **CSV Storage**: Lightweight data persistence
+- **Socket.io**: Real-time updates
+
+### Smart Contracts
+- **Solidity**: Contract programming language
+- **Hardhat**: Development environment
+- **OpenZeppelin**: Contract security libraries
+- **Ethers.js**: Contract interaction
+
+### Admin Dashboard
+- **React**: UI library
+- **Ethers.js**: Blockchain interaction
+- **Web3Modal**: Wallet authentication
+
+## 🏗 Architecture
+
+The TetriSeed architecture consists of:
+
+```
+SuperSeedSuperGame/
+├── src/                     # Game frontend code
+│   ├── assets/              # Images, sounds, and other static files
+│   ├── components/          # React components
+│   ├── hooks/               # Custom React hooks
+│   └── utils/               # Utility functions including Web3 integration
+├── server/                  # Backend server
+│   ├── index.js             # Main server file
+│   ├── routes/              # API routes
+│   └── data/                # Data storage
+├── contracts/               # Smart contracts
+│   ├── contracts/           # Solidity contract files
+│   ├── scripts/             # Deployment scripts
+│   └── test/                # Contract tests
+└── dashboard/               # Admin dashboard
+    ├── src/                 # Dashboard source code
+    └── public/              # Static assets
+```
+
+### Data Flow
+
+1. **Game Initialization**:
+   - Frontend loads assets and connects to server
+   - If competitive mode, connects to wallet and smart contract
+
+2. **Gameplay**:
+   - Game state managed client-side
+   - Scores submitted to server via API
+   - Competitive play verified through blockchain
+
+3. **Season End**:
+   - Contract owner uses admin dashboard
+   - Smart contract distributes prizes
+   - Leaderboard resets for new season
 
 ## ❓ Troubleshooting
 
-### Common Issues and Solutions
+### Common Game Issues
 
-#### Port already in use
+#### Game Not Loading
+- Check browser console for errors
+- Ensure all dependencies are installed
+- Try clearing cache and reloading
 
-If you see an error like `Error: listen EADDRINUSE: address already in use :::3000`:
+#### Wallet Connection Problems
+- Verify MetaMask is installed and unlocked
+- Check you're on the SuperSeed Sepolia network (Chain ID: 53302)
+- If the network is missing, add it manually:
+  - Network Name: SuperSeed Sepolia
+  - RPC URL: https://sepolia.superseed.xyz
+  - Chain ID: 53302
+  - Currency Symbol: ETH
 
-```bash
-# Kill the process using the port (on Unix/Mac)
-pkill -f "node.*server"
+#### Leaderboard Not Updating
+- Ensure the server is running
+- Check server logs for API errors
+- Verify network connectivity
 
-# Or for Windows
-netstat -ano | findstr :3000
-taskkill /PID <PID> /F
-```
+### Contract Issues
 
-#### Leaderboard not loading
+#### Failed Transactions
+- Ensure you have enough ETH for gas
+- Check transaction parameters
+- Verify you have the correct permissions (for admin functions)
 
-Make sure:
-1. The server is running
-2. The `public/data` directory exists and is writable
-3. Check for errors in the browser console or server logs
+#### Prize Distribution Errors
+- Ensure all winner addresses are valid
+- Check prize pool has sufficient funds
+- Verify season has ended
 
-#### MetaMask Connection Issues
+### Server Issues
 
-If you're having trouble connecting your MetaMask wallet:
+#### Server Won't Start
+- Check for port conflicts
+- Ensure all dependencies are installed
+- Verify node version (`node -v`) is 14.0.0 or higher
 
-1. Ensure MetaMask is installed and unlocked
-2. Make sure you're on a supported network (SuperSeed network)
-3. If the network is not available, the game will prompt you to add it
-4. Check for console errors related to wallet connection
-5. Try refreshing the page and reconnecting
+#### Data Persistence Problems
+- Check file permissions in the data directory
+- Ensure CSV files are not corrupted
+- Backup data before any server modifications
 
-#### Competitive Mode Not Working
+## 🤝 Contributing
 
-If competitive mode isn't working:
-
-1. Ensure your MetaMask wallet is properly connected
-2. Make sure you have sufficient $SUPR tokens for game entry
-3. Check the network connection to the SuperSeed blockchain
-4. See browser console for more detailed error messages
-
-## 🎯 Contributing
-
-Contributions are welcome! If you'd like to contribute to TetriSeed, please follow these steps:
+We welcome contributions to the TetriSeed project:
 
 1. Fork the repository
-2. Create a new branch for your feature or bug fix
-3. Make your changes and commit them
-4. Push your changes to your fork
-5. Open a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 ## 📄 License
 
-TetriSeed is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
-
-## 🔗 Related Projects
-
-- [SuperSeed DeFi Protocol](https://superseed.xyz/) - The DeFi protocol that inspired this game
-- [Optimism Superchain](https://www.optimism.io/) - The Layer 2 solution where SuperSeed operates
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
 ## 🚀 Deployment
 
-### Deploying to Netlify
+### Game Deployment
 
-TetriSeed can be easily deployed to Netlify for free hosting:
+To build the game for production:
 
-1. Build the production version:
-   ```bash
-   npm run build
-   ```
+```bash
+npm run build
+```
 
-2. Deploy using one of these methods:
+This creates a `dist` directory with optimized files ready for deployment to any static hosting service.
 
-   **Method 1: Direct upload** (Quick testing)
-   - Go to [Netlify's dashboard](https://app.netlify.com/)
-   - Sign up or log in
-   - Drag and drop the `dist` folder to the upload area
-   - Netlify will deploy your site and provide a URL
+### Server Deployment
 
-   **Method 2: Connect to Git repository** (Continuous deployment)
-   - Create a new site in Netlify
-   - Connect your GitHub repository
-   - Set build command to `npm run build`
-   - Set publish directory to `dist`
-   - Deploy the site
+For production server deployment:
 
-### Setting Up the Backend Server
+```bash
+cd server
+npm install --production
+NODE_ENV=production node index.js
+```
 
-For the leaderboard functionality to work, you'll need to deploy the server component:
+Consider using a process manager like PM2:
 
-1. Deploy the server to a platform like [Render](https://render.com/), [Railway](https://railway.app/), or [Heroku](https://www.heroku.com/).
+```bash
+npm install -g pm2
+pm2 start index.js --name tetriseed-server
+```
 
-2. Update the server URL in the API configuration:
-   - Open `src/utils/apiConfig.js`
-   - Replace the placeholder URL with your actual deployed server URL:
-     ```javascript
-     const API_URL = {
-       development: '', // Empty for development (uses proxy)
-       production: 'https://your-actual-server-url.com' // ← Update this
-     };
-     ```
+### Contract Verification
 
-3. Rebuild and redeploy the frontend after updating the API URL.
+After deployment, verify your contract on block explorers:
 
-### Testing Deployed API Endpoints
+```bash
+npx hardhat verify --network superseedSepolia 0xd9b4190777287eAD1473A5EE44aA2a6aAE3b7b42
+```
 
-After deployment, you can test that your API endpoints are working:
+### Dashboard Deployment
 
-1. Visit your deployed frontend URL
-2. Open the browser's developer tools (F12)
-3. Check the Network tab when the game loads
-4. Verify that requests to `/api/leaderboard` and `/api/competitive-leaderboard` are successfully connecting to your server
+Build the dashboard for production:
 
-If there are issues with CORS, ensure your server is properly configured to accept requests from your Netlify domain.
+```bash
+cd dashboard
+npm run build
+```
+
+The resulting `build` directory can be deployed to any static hosting service.
 
 ---
 
