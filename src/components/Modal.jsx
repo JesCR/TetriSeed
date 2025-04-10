@@ -195,6 +195,13 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
     return null;
   };
 
+  const isCompetitive = () => {
+    if (score && typeof score === 'object') {
+      return score.competitive === true;
+    }
+    return false;
+  };
+
   const tweetText = getRank() 
     ? `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! Ranked #${getRank()} on the leaderboard! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt Check it out: tetriseed.xyz` 
     : `I just scored ${getScoreValue()} in TetriSeed: Clear your Debt! @SuperseedXYZ is the best DeFi protocol for loans! #SuperSeed #ClearYourDebt Check it out: tetriseed.xyz`;
@@ -274,9 +281,9 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
               <p>You've made it to rank #{getRank()} on the competitive leaderboard!</p>
             ) : getRank() ? (
               <p>Your current rank: #{getRank()} on the competitive leaderboard</p>
-            ) : (
+            ) : !isCompetitive() ? (
               <p className="competitive-notice">Only competitive scores are tracked.<br/>Play in competitive mode to join the leaderboard!</p>
-            )}
+            ) : null}
             
             {screenshotUrl && (
               <div className="screenshot-container">
