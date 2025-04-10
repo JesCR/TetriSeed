@@ -83,7 +83,10 @@
   color: #00ffff;
   font-size: 1rem;
   text-align: center;
-  width: 70%;
+  width: 80%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
   outline: none;
   transition: all 0.3s ease;
   margin-bottom: 20px;

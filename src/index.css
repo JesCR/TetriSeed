@@ -608,19 +608,6 @@ input, textarea {
   margin-bottom: 10px; /* Reduced margin-bottom from 20px */
 }
 
-.name-input {
-  width: 100%;
-  padding: 15px;
-  margin: 15px 0;
-  background: #000;
-  border: 2px solid #0ff;
-  border-radius: 5px;
-  color: #fff;
-  font-family: 'Winky Sans', sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
-}
-
 .modal-button {
   padding: 10px 0;
   margin-top: 0;
