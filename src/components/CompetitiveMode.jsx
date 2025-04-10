@@ -76,6 +76,62 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
       }
     );
     
+    // Handle network changes without showing modal
+    const handleNetworkChange = async (event) => {
+      console.log('Network changed event received:', event.detail);
+      
+      // Don't show any modals during network changes
+      const oldModalState = showModal;
+      if (showModal) {
+        setShowModal(false);
+      }
+      
+      // Check if wallet is still connected after network change
+      try {
+        const { connected, address } = await checkInitialWalletConnection();
+        if (connected && address) {
+          // Wallet is still connected, just update the state
+          setWalletConnected(true);
+          setWalletAddress(address);
+          
+          // If not on SuperSeed network, try to switch back
+          if (!event.detail.isSuperSeedNetwork) {
+            console.log('Network changed to non-SuperSeed network, attempting to switch back');
+            try {
+              const networkResult = await switchToSuperSeedNetwork();
+              if (!networkResult.success) {
+                setError('Please switch to SuperSeed network for best experience');
+              } else {
+                setError(''); // Clear any error messages
+              }
+            } catch (switchErr) {
+              console.error('Error switching to SuperSeed network:', switchErr);
+              setError('Please switch to SuperSeed network for best experience');
+            }
+          } else {
+            // Clear any network-related error messages
+            setError('');
+          }
+        } else {
+          // Wallet got disconnected during network change
+          setWalletConnected(false);
+          setWalletAddress('');
+          
+          // If in competitive mode, deactivate it
+          if (isActive && onActivation) {
+            onActivation(false, '');
+          }
+          
+          // Don't show modal here
+        }
+      } catch (err) {
+        console.error('Error checking connection after network change:', err);
+      }
+    };
+    
+    // Add listener for network changes
+    window.addEventListener('network_changed', handleNetworkChange);
+    
     // Also perform periodic checks to ensure UI stays in sync
     const connectionCheckInterval = setInterval(async () => {
       if (!isMetaMaskInstalled() || !window.ethereum) {
@@ -117,6 +173,7 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
         cleanupWalletListeners();
       }
       clearInterval(connectionCheckInterval);
+      window.removeEventListener('network_changed', handleNetworkChange);
     };
   }, [isActive, onActivation, walletConnected]);
   
@@ -222,10 +279,20 @@ const CompetitiveMode = ({ onActivation, isActive = false }) => {
           detail: { address: result.account }
         }));
         
-        // After connecting wallet, verify network
-        const networkResult = await switchToSuperSeedNetwork();
-        if (!networkResult.success) {
-          setError(networkResult.error || 'Failed to switch to SuperSeed network');
+        // Automatically switch to SuperSeed network after connecting
+        try {
+          console.log('Attempting to switch to SuperSeed network');
+          const networkResult = await switchToSuperSeedNetwork();
+          if (!networkResult.success) {
+            console.log('Network switch failed:', networkResult.error);
+            setError('Please switch to SuperSeed network for best experience');
+          } else {
+            console.log('Successfully switched to SuperSeed network');
+            setError(''); // Clear any error messages
+          }
+        } catch (networkErr) {
+          console.error('Error switching to SuperSeed network:', networkErr);
+          setError('Please switch to SuperSeed network for best experience');
         }
       } else {
         console.log('Failed to connect wallet:', result.error);

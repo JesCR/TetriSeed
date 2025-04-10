@@ -177,8 +177,15 @@ export const setupWalletListeners = (onAccountsChanged = null, onDisconnect = nu
     // Handle chain changes
     provider.on('chainChanged', (chainId) => {
       console.log('MetaMask chain changed:', chainId);
-      // Reload the page to avoid any state inconsistencies
-      window.location.reload();
+      
+      // Don't reload the page and don't try to switch networks automatically
+      // Just dispatch an event so components can react appropriately
+      window.dispatchEvent(new CustomEvent('network_changed', {
+        detail: { 
+          chainId,
+          isSuperSeedNetwork: chainId.toLowerCase() === SUPERSEED_NETWORK.chainId.toLowerCase()
+        }
+      }));
     });
 
     // Handle disconnect
@@ -651,12 +658,23 @@ export const switchToSuperSeedNetwork = async () => {
       console.log(`${networkName} added successfully`);
     }
     
-    console.log(`Switching to ${networkName}...`);
-    await provider.request({ // Use specific provider
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: SUPERSEED_NETWORK.chainId }]
-    });
-    console.log(`Successfully switched to ${networkName}`);
+    // Check current chain ID before attempting to switch
+    const currentChainId = await provider.request({ method: 'eth_chainId' });
+    const isSuperSeedChain = currentChainId.toLowerCase() === SUPERSEED_NETWORK.chainId.toLowerCase();
+    
+    // Only switch if we're not already on the SuperSeed network
+    if (!isSuperSeedChain) {
+      console.log(`Switching to ${networkName}...`);
+      await provider.request({ // Use specific provider
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: SUPERSEED_NETWORK.chainId }]
+      });
+      console.log(`Successfully switched to ${networkName}`);
+      
+      // Don't dispatch any events here - chainChanged will handle notifying components
+    } else {
+      console.log(`Already on ${networkName}, no need to switch`);
+    }
     
     return { success: true };
   } catch (error) {
