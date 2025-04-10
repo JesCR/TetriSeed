@@ -278,7 +278,7 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent, isCompet
                 <p>Use only portrait mode on mobile</p>
               </div>
             )}
-            <button onClick={handleSubmit} className="modal-button">&nbsp;Start Playing&nbsp;</button>
+            <button onClick={handleSubmit} className="modal-button">&nbsp;&nbsp;&nbsp;Start Playing&nbsp;&nbsp;&nbsp;</button>
             
             <LogoCarousel />
           </>
