@@ -3004,8 +3004,8 @@ input, textarea {
 .game-screenshot {
   display: block;
   object-fit: contain;
-  max-width: 300px;
-  max-height: 300px;
+  max-width: 230px; /* Reduced by 20% from 300px */
+  max-height: 230px; /* Reduced by 20% from 300px */
   width: auto;
   height: auto;
   margin: 5px auto; /* Reduced margins */
@@ -3018,18 +3018,18 @@ input, textarea {
   color: #0ff;
   border: 2px solid #0ff;
   border-radius: 4px;
-  padding: 8px 0; /* Reduced padding */
+  padding: 4px 0; /* Reduced padding from 8px */
   font-family: 'Winky Sans', sans-serif;
   margin-top: 5px;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-  font-size: 0.9rem;
-  width: 100%;
-  max-width: 280px;
+  font-size: 0.83rem; /* Reduced from 0.9rem */
+  width: 90%; /* Reduced from 100% */
+  max-width: 230px; /* Reduced from 280px */
   text-align: center;
-  height: 35px; /* Reduced height */
-  line-height: 19px; /* Adjusted line-height */
+  height: 24px; /* Reduced from 35px */
+  line-height: 12px; /* Adjusted from 19px */
 }
 
 .screenshot-button:hover {

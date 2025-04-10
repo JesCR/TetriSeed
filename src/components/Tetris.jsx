@@ -56,7 +56,7 @@ const Tetris = () => {
   const [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino] = usePlayer();
   const [stage, setStage, rowsCleared, message, showMessage, interestMessage, showInterestMessage, showInterestRateMessage, clearingRows] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel, tetrisCleared, setTetrisCleared] = useGameStatus(rowsCleared);
-  const [scoreInfo, setScoreInfo] = useState({ score: 0, rank: null });
+  const [scoreInfo, setScoreInfo] = useState({ score: 0, rank: null, competitive: false });
 
   const tetrisRef = useRef(null);
 
@@ -329,9 +329,13 @@ const Tetris = () => {
   // Make scoreInfo state track the actual score during the game
   useEffect(() => {
     if (score !== undefined && score !== null) {
-      setScoreInfo(prev => ({ ...prev, score }));
+      setScoreInfo(prev => ({ 
+        ...prev, 
+        score,
+        competitive: isCompetitiveMode  // Always keep competitive flag in sync
+      }));
     }
-  }, [score]);
+  }, [score, isCompetitiveMode]);
 
   // Now define handlers that use the above functions
   const handleTouchStart = useCallback((e) => {
@@ -920,6 +924,12 @@ const Tetris = () => {
     setWalletAddress(address);
     console.log(`Competitive mode ${status ? 'activated' : 'deactivated'} with address: ${address}`);
     
+    // Update the competitive flag in scoreInfo
+    setScoreInfo(prevInfo => ({
+      ...prevInfo,
+      competitive: status
+    }));
+    
     // Fetch wallet balance when address changes
     if (address) {
       fetchWalletBalance(address);
@@ -1043,6 +1053,7 @@ const Tetris = () => {
           type="top10" 
           score={scoreInfo} 
           onClose={handleTop10Close} 
+          isCompetitiveMode={isCompetitiveMode}
         />
 
         <Modal

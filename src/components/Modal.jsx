@@ -4,7 +4,7 @@ import logoText from '../assets/images/logo_text.png';
 import './Modal.css';
 import LogoCarousel from './LogoCarousel';
 
-const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
+const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent, isCompetitiveMode }) => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isMobile, setIsMobile] = useState(false);
@@ -196,9 +196,21 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   };
 
   const isCompetitive = () => {
-    if (score && typeof score === 'object') {
-      return score.competitive === true;
+    // For debugging
+    console.log("Score object:", score);
+    console.log("isCompetitiveMode prop:", isCompetitiveMode);
+    
+    // First, check the explicit prop passed from parent
+    if (isCompetitiveMode === true) {
+      return true;
     }
+    
+    // Fallback to checking the score object
+    if (score && typeof score === 'object') {
+      if (score.competitive === true) return true;
+      if (score.rank) return true;
+    }
+    
     return false;
   };
 
@@ -283,7 +295,9 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
               <p>Your current rank: #{getRank()} on the competitive leaderboard</p>
             ) : !isCompetitive() ? (
               <p className="competitive-notice">Only competitive scores are tracked.<br/>Play in competitive mode to join the leaderboard!</p>
-            ) : null}
+            ) : (
+              <p>Thanks for playing in competitive mode!</p>
+            )}
             
             {screenshotUrl && (
               <div className="screenshot-container">
