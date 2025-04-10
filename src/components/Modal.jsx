@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import logoText from '../assets/images/logo_text.png';
+import './Modal.css';
+import LogoCarousel from './LogoCarousel';
 
 const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
   const [name, setName] = useState('');
@@ -221,10 +223,11 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
 
   return (
     <div className="modal-overlay">
-      <div className={`modal-content ${type === 'custom' ? 
-        (customContent && customContent.props && customContent.props.className && 
-         customContent.props.className.includes('mobile-warning-modal') ? 
-         'custom-modal mobile-modal' : 'custom-modal') : ''}`}>
+      <div 
+        className={`modal-content ${type === 'custom' ? 
+          (customContent?.props?.className?.includes('mobile-warning-modal') ? 
+           'custom-modal mobile-modal' : 'custom-modal') : ''}`}
+      >
         {type !== 'custom' && (
           <img src={logoText} alt="SuperSeed Logo" className="modal-logo" />
         )}
@@ -232,7 +235,7 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
         {type === 'nameInput' && (
           <>
             <h2>Welcome to TetriSeed!</h2>
-            <p>Please enter your name to start playing:</p>
+            <p className="input-prompt">Please enter your name to start playing:</p>
             <input
               type="text"
               value={name}
@@ -257,6 +260,8 @@ const Modal = ({ isOpen, type, score, onClose, onSubmit, customContent }) => {
               </div>
             )}
             <button onClick={handleSubmit} className="modal-button">&nbsp;Start Playing&nbsp;</button>
+            
+            <LogoCarousel />
           </>
         )}
         

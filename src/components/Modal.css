@@ -1,0 +1,240 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: linear-gradient(to bottom, #000000, #1a1a1a);
+  border-radius: 10px;
+  padding: 30px 30px 5px;
+  max-width: 90%;
+  width: 500px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid #00ffff;
+  box-shadow: 0 0 10px #00ffff, 0 0 20px rgba(0, 210, 255, 0.5);
+  position: relative;
+  max-height: 90vh;
+  overflow: hidden;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../assets/images/background.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.075;
+  z-index: -1;
+}
+
+.modal-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+.modal-logo {
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+
+.modal-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.modal-content p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Style for the specific prompt text */
+.input-prompt {
+  color: #00ffff; /* Changed text color to modal border blue */
+}
+
+.name-input {
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: 1px solid rgb(250, 250, 250);
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #00ffff;
+  font-size: 1rem;
+  text-align: center;
+  width: 70%;
+  outline: none;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.name-input:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.modal-button {
+  background: linear-gradient(135deg, #39FF14, #00d2ff);
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  margin-top: 5px;
+  box-shadow: 0 2px 10px rgba(0, 220, 200, 0.4);
+}
+
+.modal-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 220, 200, 0.6);
+  background: linear-gradient(135deg, #49ff24, #10e2ff);
+}
+
+.modal-button:active {
+  transform: translateY(1px);
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  margin-bottom: 15px;
+}
+
+.mobile-notice {
+  background-color: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 5px;
+  padding: 10px;
+  margin: 15px 0;
+  font-size: 0.85rem;
+}
+
+.mobile-notice p {
+  margin: 5px 0;
+  font-size: 0.85rem;
+  color: #ffa500;
+}
+
+.score-value {
+  font-weight: bold;
+  font-size: 1.3em;
+  color: #4caf50;
+}
+
+.tweet-button {
+  display: inline-block;
+  background: #1da1f2;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  text-decoration: none;
+  margin-right: 10px;
+  transition: background 0.3s ease;
+}
+
+.tweet-button:hover {
+  background: #0d8bd9;
+}
+
+.screenshot-container {
+  margin: 15px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.game-screenshot {
+  max-width: 100%;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+.screenshot-button {
+  background: #6c757d;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.screenshot-button:hover {
+  background: #5a6268;
+}
+
+.share-text {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #aaaaaa;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.competitive-notice {
+  font-size: 0.9rem;
+  color: #ffa500;
+  margin: 10px 0;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 20px;
+    width: 90%;
+  }
+  
+  .modal-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .modal-logo {
+    max-width: 150px;
+  }
+  
+  .name-input {
+    width: 90%;
+  }
+}
+
+/* Custom modal styles */
+.custom-modal {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.mobile-modal {
+  padding: 15px;
+} 
