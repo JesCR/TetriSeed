@@ -44,7 +44,7 @@ const FACTS = [
   
   "🗺️ Roadmap Sequence\nFollowing our successful Mainnet launch, SuperSeed will release Genesis Passport NFTs, launch Seeds Rewards Program, and conclude with the TGE.",
   
-  "🔮 Upcoming Features\nOur development roadmap includes Proof-of-Repayment mechanisms, Supercollateral implementation, and the SuperCDP. Debt = opportunity.",
+  "🔮 Upcoming Features\nOur development roadmap includes Proof-of-Repayment, Supercollateral, and SuperCDP. Debt = opportunity.",
   
   "🎫 Genesis Passport NFTs\nOn April 2nd, 2025, we'll launch 1,148 Genesis Passport NFTs offering unique benefits exclusively available to participants in our initial Supersale event.",
   
